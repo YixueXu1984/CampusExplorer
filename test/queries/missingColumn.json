@@ -1,0 +1,28 @@
+{
+    "title": "Invalid Query with Order Column Missing",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "GT": {
+                        "courses_avg": 95
+                    }
+                },
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+
+    "isQueryValid": false,
+    "result": "todo"
+}

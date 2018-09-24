@@ -1,0 +1,8 @@
+{
+    "title": "Query format is wrong",
+    "query": {
+        "whatup": "haha"
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

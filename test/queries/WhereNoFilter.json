@@ -1,0 +1,217 @@
+{
+    "title": "Where No Filter test",
+    "query": {
+        "WHERE": {
+
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses3_dept",
+                "courses3_avg"
+            ],
+            "ORDER": "courses3_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result": [
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 72.83,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 28,
+            "courses3_fail": 1,
+            "courses3_audit": 0,
+            "courses3_uuid": "52007"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 72.83,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 28,
+            "courses3_fail": 1,
+            "courses3_audit": 0,
+            "courses3_uuid": "52008"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 74.06,
+            "courses3_instructor": "de volder, kris",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 32,
+            "courses3_fail": 0,
+            "courses3_audit": 0,
+            "courses3_uuid": "46697"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 74.06,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 32,
+            "courses3_fail": 0,
+            "courses3_audit": 0,
+            "courses3_uuid": "46698"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 74.58,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 46,
+            "courses3_fail": 4,
+            "courses3_audit": 0,
+            "courses3_uuid": "61126"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 74.58,
+            "courses3_instructor": "wolfman, steven",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 46,
+            "courses3_fail": 4,
+            "courses3_audit": 0,
+            "courses3_uuid": "61125"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 75,
+            "courses3_instructor": "hutchinson, norman",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 32,
+            "courses3_fail": 1,
+            "courses3_audit": 0,
+            "courses3_uuid": "90542"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 75,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 32,
+            "courses3_fail": 1,
+            "courses3_audit": 0,
+            "courses3_uuid": "90543"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 77.41,
+            "courses3_instructor": "wolfman, steven",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 36,
+            "courses3_fail": 3,
+            "courses3_audit": 0,
+            "courses3_uuid": "72362"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 77.41,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 36,
+            "courses3_fail": 3,
+            "courses3_audit": 0,
+            "courses3_uuid": "72363"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 78.24,
+            "courses3_instructor": "eiselt, kurt",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 73,
+            "courses3_fail": 2,
+            "courses3_audit": 1,
+            "courses3_uuid": "83434"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 78.24,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 73,
+            "courses3_fail": 2,
+            "courses3_audit": 1,
+            "courses3_uuid": "83435"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 78.56,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 64,
+            "courses3_fail": 9,
+            "courses3_audit": 0,
+            "courses3_uuid": "49896"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 78.56,
+            "courses3_instructor": "wolfman, steven",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 64,
+            "courses3_fail": 9,
+            "courses3_audit": 0,
+            "courses3_uuid": "49895"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 80.15,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 75,
+            "courses3_fail": 4,
+            "courses3_audit": 0,
+            "courses3_uuid": "1297"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 80.15,
+            "courses3_instructor": "wolfman, steven",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 75,
+            "courses3_fail": 4,
+            "courses3_audit": 0,
+            "courses3_uuid": "1296"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 84.39,
+            "courses3_instructor": "dunfield, joshua",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 105,
+            "courses3_fail": 2,
+            "courses3_audit": 0,
+            "courses3_uuid": "62388"
+        },
+        {
+            "courses3_dept": "cpsc",
+            "courses3_id": "311",
+            "courses3_avg": 84.39,
+            "courses3_instructor": "",
+            "courses3_title": "programmng langs",
+            "courses3_pass": 105,
+            "courses3_fail": 2,
+            "courses3_audit": 0,
+            "courses3_uuid": "62389"
+        }
+    ]
+}
+

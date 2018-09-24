@@ -1,0 +1,19 @@
+{
+    "title": "empty GT value",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "": 99
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

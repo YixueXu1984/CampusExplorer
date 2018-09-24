@@ -1,0 +1,85 @@
+{
+    "title": "courses_fail == 50",
+    "query": {
+        "WHERE": {
+            "EQ":{
+                "courses_fail": 50
+            }
+
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg",
+                "courses_fail",
+                "courses_audit"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+
+    "result": [
+        {
+            "courses_dept": "chem",
+            "courses_avg": 59.83,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "chem",
+            "courses_avg": 61.54,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "math",
+            "courses_avg": 65,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "math",
+            "courses_avg": 66.48,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "busi",
+            "courses_avg": 66.86,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "math",
+            "courses_avg": 67.83,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "bioc",
+            "courses_avg": 68.09,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "math",
+            "courses_avg": 68.65,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "bioc",
+            "courses_avg": 68.69,
+            "courses_fail": 50,
+            "courses_audit": 0
+        },
+        {
+            "courses_dept": "japn",
+            "courses_avg": 70.66,
+            "courses_fail": 50,
+            "courses_audit": 5
+        }
+    ]
+
+}

@@ -1,0 +1,21 @@
+{
+    "title": "Column no keys",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 97
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+
+            ]
+
+        }
+    },
+    "isQueryValid": false,
+    "result": "Invalid Query Format"
+
+
+
+}

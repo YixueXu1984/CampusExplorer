@@ -1,0 +1,22 @@
+{
+    "title": "SELECT dept, id, avg, WHERE dept is abcd(invalid)",
+    "query": {
+        "WHERE": {
+
+            "IS": {
+                "courses_dept": "abcd"
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+
+    },
+    "isQueryValid": false,
+    "result": []
+}

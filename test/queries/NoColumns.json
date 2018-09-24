@@ -1,0 +1,14 @@
+{
+    "title": "Missing Columns",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 97
+            }
+        },
+        "OPTIONS": {
+        }
+    },
+    "isQueryValid": false,
+    "result": "Invalid Query Format"
+}

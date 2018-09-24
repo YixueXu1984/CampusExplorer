@@ -1,0 +1,33 @@
+{
+    "title": "missing EBNF columns",
+    "query": {
+        "WHERE": {
+            "OR": [
+                {
+                    "AND":[
+                        {
+                            "GT": {
+                                "courses_avg":90
+                            }
+                        },
+                        {
+                            "IS": {
+                                "courses_dept":"cpsc"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "EQ": {
+                        "courses_avg":95
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}
