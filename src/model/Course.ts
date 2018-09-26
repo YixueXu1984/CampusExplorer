@@ -1,0 +1,3 @@
+interface ICourse {
+    sections: ICourseSection[];
+}

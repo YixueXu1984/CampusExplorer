@@ -1,6 +1,7 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
+import AddDataSet from "./AddDataSet";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -14,7 +15,17 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-        return Promise.reject("Not implemented.");
+        let addDataSet: AddDataSet = new AddDataSet();
+
+        addDataSet.addDataset(id, content, kind)
+            .then(function (result) {
+                return Promise.resolve(result);
+            })
+            .catch(function (err) {
+                return Promise.reject(err);
+            });
+
+        return Promise.reject("Not finished implementaiton");
     }
 
     public removeDataset(id: string): Promise<string> {
