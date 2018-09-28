@@ -15,7 +15,7 @@ export default class ListDataSets {
         // 5. Return fullfilled promises with all the data
         let datasets: InsightDataset[];
         let dataset: InsightDataset;
-        const path = ".../data/";g
+        const path = ".../data/";
         const fs   = require("fs");
         let files = fs.readdirSync(path);
 
