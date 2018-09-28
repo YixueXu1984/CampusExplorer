@@ -54,7 +54,6 @@ export default class AddDataSet {
     }
 
     private parseJson(sections: string): ICourse {
-        // Log.trace(sections);
 
         let sectionsHolder: { result: any[] };
         sectionsHolder = {
@@ -63,7 +62,7 @@ export default class AddDataSet {
         try {
             sectionsHolder = JSON.parse(sections);
         } catch (err) {
-            // Log.error(err);
+            // Log.error(err); //skip sections with invalid jsons
         }
         let course: ICourse = {
             sections: []
@@ -105,6 +104,7 @@ export default class AddDataSet {
             let promisearr: Array<Promise<ICourse>> = [];
             let dataSet: IDataSet = {
                 id: "",
+                numRows: 0,
                 kind: InsightDatasetKind.Courses,
                 courses: []
             };
@@ -114,17 +114,19 @@ export default class AddDataSet {
 
             Promise.all(promisearr)
                 .then((coursesModel) => {
+                    let numRows: number = 0;
                     for (let courseModel of coursesModel) {
                         if (courseModel.sections.length > 0) {
+                            numRows = numRows + courseModel.sections.length;
                             dataSet.courses.push(courseModel); // Only add a course if it has at least one section in it
                         }
                     }
-                    Log.trace(String(dataSet.courses.length));
                     if (dataSet.courses.length === 0) { // This dataSet has no courses in it, or no valid sections
                         throw new Error("Invalid dataset, no valid sections");
                     } else {
                         dataSet.id = id;
                         dataSet.kind = kind;
+                        dataSet.numRows = numRows;
                         resolve(dataSet);
                     }
                 })
