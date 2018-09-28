@@ -1,7 +1,5 @@
 import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import Log from "../Util";
-import * as JSZip from "jszip";
-import {JSZipObject} from "jszip";
 
 export default class ListDataSets {
 
@@ -17,7 +15,7 @@ export default class ListDataSets {
         // 5. Return fullfilled promises with all the data
         let datasets: InsightDataset[];
         let dataset: InsightDataset;
-        const path = "./src/datasets";
+        const path = ".../data/";g
         const fs   = require("fs");
         let files = fs.readdirSync(path);
 
@@ -39,17 +37,24 @@ export default class ListDataSets {
 
     public getId(text: string): string {
         let arr = text.split(";");
-        arr[1].trim();
-        return text.substring(arr[1].indexOf("id"));
+        arr[0].trim();
+        return text.substring(arr[0].indexOf("id:"));
     }
 
     public getType(text: string): InsightDatasetKind {
-        // todo
-        return null;
+        let arr = text.split(";");
+        arr[1].trim();
+        let textType = text.substring(arr[1].indexOf("kind:"));
+        if (textType === "courses") {
+            return InsightDatasetKind.Courses;
+        } else if (textType === "rooms") {
+            return InsightDatasetKind.Rooms;
+        }
     }
 
     public getNumRows(text: string): number {
-        // todo
-        return -1;
+        let arr = text.split(";");
+        arr[2].trim();
+        return parseInt(text.substring(arr[2].indexOf("numRows:")), 10);
     }
 }
