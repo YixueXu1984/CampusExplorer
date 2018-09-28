@@ -2,24 +2,26 @@ import {InsightDatasetKind} from "./IInsightFacade";
 import Log from "../Util";
 import * as JSZip from "jszip";
 import {JSZipObject} from "jszip";
-
+import {IDataSet} from "../model/DataSet";
+import * as fs from "fs";
 export default class AddDataSet {
+    private dataDir = ".../data/";
 
     constructor() {
         Log.trace("Add Data Set");
     }
 
-    private readEachJsonFile(file: JSZipObject): Promise<string> {
+    private readEachJsonFile(course: JSZipObject): Promise<ICourse> {
         return new Promise((resolve, reject) => {
-            file.async("text")
-                .then((json) => {
-                    return this.parseJson(json);
+            course.async("text")
+                .then((sections) => {
+                    return this.parseJson(sections);
                 })
-                .then((course) => {
-                    Log.trace("comeback tmrw");
+                .then((courseModel) => {
+                    resolve(courseModel);
                 })
                 .catch((err) => {
-                   reject(err);
+                    reject(err);
                 });
         });
     }
@@ -51,56 +53,80 @@ export default class AddDataSet {
         }
     }
 
-    private parseJson(json: string): Promise<ICourse> {
-        return new Promise((resolve, reject) => {
-            let courseHolder = JSON.parse(json);
-            let course: ICourse = {
-                sections: []
+    private parseJson(sections: string): ICourse {
+        // Log.trace(sections);
+
+        let sectionsHolder: { result: any[] };
+        sectionsHolder = {
+            result: []
+        };
+        try {
+            sectionsHolder = JSON.parse(sections);
+        } catch (err) {
+            // Log.error(err);
+        }
+        let course: ICourse = {
+            sections: []
+        };
+        for (let section of sectionsHolder.result) {
+            let mSection: ICourseSection = {
+                title: "",
+                uuid: "",
+                instructor: "",
+                audit: 0,
+                year: 0,
+                id: "",
+                pass: 0,
+                fail: 0,
+                dept: "",
+                avg: 0
             };
-            for (let section of courseHolder.result) {
-                let mSection: ICourseSection = {
-                    title: "",
-                    uuid: "",
-                    instructor: "",
-                    audit: 0,
-                    year: 0,
-                    id: "",
-                    pass: 0,
-                    fail: 0,
-                    dept: "",
-                    avg: 0
-                };
-                if (this.checkValidSection(section)) {
-                    mSection.title = String(section.Title);
-                    mSection.uuid = String(section.id);
-                    mSection.instructor = String(section.Professor);
-                    mSection.audit = Number(section.Audit);
-                    mSection.year = Number(section.Year);
-                    mSection.id = String(section.Course);
-                    mSection.pass = Number(section.Pass);
-                    mSection.fail = Number(section.Fail);
-                    mSection.dept = String(section.Subject);
-                    mSection.avg = Number(section.Avg);
-                } else {
-                    continue; // if missing required fields we skip it
-                }
-                course.sections.push(mSection);
+            if (this.checkValidSection(section)) {
+                mSection.title = String(section.Title);
+                mSection.uuid = String(section.id);
+                mSection.instructor = String(section.Professor);
+                mSection.audit = Number(section.Audit);
+                mSection.year = Number(section.Year);
+                mSection.id = String(section.Course);
+                mSection.pass = Number(section.Pass);
+                mSection.fail = Number(section.Fail);
+                mSection.dept = String(section.Subject);
+                mSection.avg = Number(section.Avg);
+            } else {
+                continue; // if missing required fields we skip this section
             }
-            resolve(course);
-        });
+            course.sections.push(mSection);
+        }
+        return course;
     }
 
-    private iterateThroughFiles(result: JSZip): Promise<string[]> {
+    private iterateThroughFiles(courses: JSZip, id: string, kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            let successParsing: boolean = true;
-            let promisearr: Array<Promise<string>> = [];
-            result.forEach((relativePath, file) => {
-                promisearr.push(this.readEachJsonFile(file));
+            let promisearr: Array<Promise<ICourse>> = [];
+            let dataSet: IDataSet = {
+                id: "",
+                kind: InsightDatasetKind.Courses,
+                courses: []
+            };
+            courses.folder("courses").forEach((relativePath, course) => {
+                promisearr.push(this.readEachJsonFile(course));
             });
 
             Promise.all(promisearr)
-                .then((success) => {
-                    resolve(success);
+                .then((coursesModel) => {
+                    for (let courseModel of coursesModel) {
+                        if (courseModel.sections.length > 0) {
+                            dataSet.courses.push(courseModel); // Only add a course if it has at least one section in it
+                        }
+                    }
+                    Log.trace(String(dataSet.courses.length));
+                    if (dataSet.courses.length === 0) { // This dataSet has no courses in it, or no valid sections
+                        throw new Error("Invalid dataset, no valid sections");
+                    } else {
+                        dataSet.id = id;
+                        dataSet.kind = kind;
+                        resolve(dataSet);
+                    }
                 })
                 .catch((err) => {
                     reject(err);
@@ -109,7 +135,23 @@ export default class AddDataSet {
         });
     }
 
-    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string> {
+    private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
+        return new Promise((resolve, reject) => {
+            if (!fs.existsSync(__dirname + "/../data")) {
+                fs.mkdirSync(__dirname + "/../data");
+            }
+            fs.writeFile(__dirname + "/../data/" + dataSet.id, JSON.stringify(dataSet), (err) => {
+                if (err) {
+                   return reject(err);
+                }
+                return resolve(dataSet);
+
+            });
+        });
+
+    }
+
+    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
             if (id === null || id === undefined) {
                 reject("invalid id");
@@ -121,14 +163,18 @@ export default class AddDataSet {
 
             let zip = new JSZip();
             zip.loadAsync(content, {base64: true})
-                .then((result) => {
-                    return this.iterateThroughFiles(result);
+                .then((courses) => {
+                    return this.iterateThroughFiles(courses, id, kind);
                 })
-                .then((parsingSuccess) => {
-                    return Promise.resolve(parsingSuccess);
+                .then((dataSet) => {
+                    // cache dataSet here
+                    return this.cacheDataSet(dataSet);
                 })
-                .catch(function (err) {
-                    return Promise.reject(err);
+                .then((dataSet) => {
+                    resolve(dataSet);
+                })
+                .catch((err) => {
+                    reject(err);
                 });
         });
 

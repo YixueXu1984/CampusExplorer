@@ -17,12 +17,14 @@ export default class InsightFacade implements IInsightFacade {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         let addDataSet: AddDataSet = new AddDataSet();
 
+        // TODO: check if dataSet's id is already in memory
         addDataSet.addDataset(id, content, kind)
             .then(function (result) {
-                return Promise.resolve(result);
+                // TODO: implement this
+                // return Promise.resolve(result);
             })
             .catch(function (err) {
-                return Promise.reject(err);
+                return Promise.reject(new InsightError(err));
             });
 
         return Promise.reject("Not finished implementaiton");
