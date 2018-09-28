@@ -510,6 +510,19 @@ describe("InsightFacade Add/Remove Dataset", function () {
          }
      });
 
+    it ("Should successfully remove dataset from memory and disk", async () => {
+        const id: string = "courses3";
+        let response: string;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(insightFacade.dataSets.length === 0);
+        }
+    });
+
     it("Should throw error for removing using null file name", async () => {
          const id: string = null;
          let response: string;
