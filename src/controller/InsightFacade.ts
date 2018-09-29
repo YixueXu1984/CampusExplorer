@@ -1,8 +1,6 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
-
-import ListDatasets from "./ListDatasets";
 import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
 
@@ -54,16 +52,18 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
-        let listDataSets: ListDatasets = new ListDatasets();
+        let results: InsightDataset[];
+        this.dataSets.forEach((currDataSet) => {
+           results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
+        });
+        return Promise.resolve(results);
+    }
 
-        listDataSets.listDatasets()
-            .then(function (result) {
-                return Promise.resolve(result);
-            })
-            .catch(function (err) {
-                return Promise.reject(err);
-            });
-
-        return Promise.reject("Not finished implementaiton");
+    public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
+        let dataset: InsightDataset;
+        dataset.id      = name;
+        dataset.kind    = type;
+        dataset.numRows = num;
+        return dataset;
     }
 }
