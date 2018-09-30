@@ -4,6 +4,8 @@ import * as JSZip from "jszip";
 import {JSZipObject} from "jszip";
 import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
+import {ICourse} from "../model/Course";
+import {ICourseSection} from "../model/CourseSection";
 export default class AddDataSet {
     private dataDir = ".../data/";
 
@@ -142,7 +144,7 @@ export default class AddDataSet {
             if (!fs.existsSync(__dirname + "/../data")) {
                 fs.mkdirSync(__dirname + "/../data");
             }
-            fs.writeFile(__dirname + "/../data/" + dataSet.id, JSON.stringify(dataSet), (err) => {
+            fs.writeFile(__dirname + "/../data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
                 if (err) {
                    return reject(err);
                 }

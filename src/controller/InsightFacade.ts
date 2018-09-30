@@ -5,7 +5,7 @@ import {InsightError, NotFoundError} from "./IInsightFacade";
 import ListDatasets from "./ListDatasets";
 import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
-
+import PerformQuery from "./PerformQuery";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -49,7 +49,22 @@ export default class InsightFacade implements IInsightFacade {
         return Promise.reject("Not implemented.");
     }
 
-    public performQuery(query: any): Promise <any[]> {
+    public performQuery(query: any): Promise<any[]> {
+        let performQuery = new PerformQuery();
+        performQuery.performQuery({
+            WHERE: {
+                GT: {
+                    courses_avg: 97
+                }
+            },
+            OPTIONS: {
+                COLUMNS: [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                ORDER: "courses_avg"
+            }}, this.dataSets
+        );
         return Promise.reject("Not implemented.");
     }
 
