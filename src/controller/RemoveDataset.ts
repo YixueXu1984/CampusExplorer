@@ -16,9 +16,9 @@ export default class RemoveDataset {
     public removeDataset(id: string, dataSets: IDataSet[]): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             if (id === null || id === undefined ) {
-                reject(InsightError);
+                reject(new InsightError("null/ undefined Id"));
             } else if (!this.existDataset(id, dataSets)) {
-                reject(NotFoundError);
+                reject(new NotFoundError("removing a dataset that DNE"));
             } else  {
                 let dataset: any;
                 let index: number;
