@@ -4,7 +4,6 @@ import {InsightDataset, InsightDatasetKind, InsightError, NotFoundError} from ".
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
-import {error, log} from "util";
 
 // This should match the JSON schema described in test/query.schema.json
 // except 'filename' which is injIeected when the file is read.
@@ -92,7 +91,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
-    it("Should add a valid dataset", async () => {
+    it("Should add a valid dataset: courses", async () => {
         const id: string = "courses";
         let response: string[];
 
@@ -104,15 +103,23 @@ describe("InsightFacade Add/Remove Dataset", function () {
             expect(response).to.deep.equal([id]);
         }
     });
+
     it("Should have a dataset of courses after add, test listDatasets()", async function () {
-        const id: string = "courses";
-        let response: InsightDataset[];
+        const name: string = "courses";
+        let expectedDataset: InsightDataset = {
+            id: name,
+            kind: InsightDatasetKind.Courses,
+            numRows: 0
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
         try {
             response = await insightFacade.listDatasets();
         } catch (err) {
             response = err;
         } finally {
-            expect([response][0]).to.deep.equal(id);
+            expect(response).to.deep.equal(expected);
         }
     });
 
@@ -466,6 +473,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         let response: string;
 
         try {
+            insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
             response = await insightFacade.removeDataset(id);
         } catch (err) {
             response = err;
