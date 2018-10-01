@@ -514,9 +514,6 @@ describe("InsightFacade Add/Remove Dataset", function () {
         const id: string = "courses3";
         let response: string;
 
-        expect(insightFacade.dataSets.length === 1);
-        expect(insightFacade.dataSets[0].id === "courses3");
-
         try {
             response = await insightFacade.removeDataset(id);
         } catch (err) {

@@ -15,22 +15,22 @@ export default class RemoveDataset {
 
     public removeDataset(id: string, dataSets: IDataSet[]): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            if (id === null || id === "" || id === undefined ) {
+            if (id === null || id === undefined ) {
                 reject(InsightError);
             } else if (!this.existDataset(id, dataSets)) {
                 reject(NotFoundError);
-            } else {
+            } else  {
                 let dataset: any;
                 let index: number;
                 for (index = 0; index < dataSets.length; index++) {
-                    if (dataset.id === id) {
+                    if (dataSets[index].id === id) {
+                        fs.unlink(__dirname + "/../data/" + id + ".json", (err) => {
+                            if (err) { throw err; }
+                            // Log.trace("removed dataset: " + id);
+                        });
                         dataSets.splice(index);
                     }
                 }
-                fs.unlink(__dirname + "/../data/" + id, (err) => {
-                    if (err) { throw err; }
-                    Log.trace("removed dataset: " + id);
-                });
                 resolve(id);
                 }
         });
@@ -38,13 +38,13 @@ export default class RemoveDataset {
     }
     public existDataset(id: string, datasets: IDataSet[]): boolean {
 
-        let i: any;
+        let i: number;
         let bool: boolean;
-        for (i in datasets) {
-            if (id === i.id) {
+        bool = false;
+        for (i = 0; i < datasets.length; i++) {
+            if (id === datasets[i].id) {
                 bool =  true;
-                break;
-            } else { bool = false; }
+            }
         }
         return bool;
     }
