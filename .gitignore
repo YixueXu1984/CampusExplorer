@@ -1,6 +1,7 @@
 # See https://www.jetbrains.com/help/idea/managing-projects-under-version-control.html
 **/.idea/workspace.xml
 **/.idea/tasks.xml
+**/.idea/runConfigurations/test.xml
 
 node_modules/
 coverage/
