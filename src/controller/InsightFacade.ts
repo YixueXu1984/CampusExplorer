@@ -3,7 +3,8 @@ import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFaca
 import {InsightError, NotFoundError} from "./IInsightFacade";
 import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
-
+import {equal} from "assert";
+import RemoveDataset from "./RemoveDataset";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -33,7 +34,7 @@ export default class InsightFacade implements IInsightFacade {
                 .then((dataSet) => {
                     this.dataSets.push(dataSet);
                     this.dataSets.forEach((currDataSet) => {
-                       dataSetsId.push(currDataSet.id);
+                        dataSetsId.push(currDataSet.id);
                     });
                     resolve(dataSetsId);
                 })
@@ -44,10 +45,12 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public removeDataset(id: string): Promise<string> {
-        return Promise.reject("Not implemented.");
+        let removeDataSet = new RemoveDataset();
+        return removeDataSet.removeDataset(id, this.dataSets);
+        // return Promise.reject("Not implemented.");
     }
 
-    public performQuery(query: any): Promise <any[]> {
+    public performQuery(query: any): Promise<any[]> {
         return Promise.reject("Not implemented.");
     }
 
@@ -66,4 +69,5 @@ export default class InsightFacade implements IInsightFacade {
         dataset.numRows = num;
         return dataset;
     }
+
 }

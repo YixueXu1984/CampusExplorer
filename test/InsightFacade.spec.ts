@@ -459,12 +459,12 @@ describe("InsightFacade Add/Remove Dataset", function () {
     //     }
     // });
     //
-    // // Test removeDataset() & listDatasets()
-    // it("Should remove the existing specificCourses dataset", async () => {
-    //     const id: string = "specificCourses";
-    //     let response: string;
-    //
-    //     try {
+     // Test removeDataset() & listDatasets()
+     // it("Should remove the existing specificCourses dataset", async () => {
+     //    const id: string = "specificCourses";
+     //    let response: string;
+//
+     //    try {
     //         response = await insightFacade.removeDataset(id);
     //     } catch (err) {
     //         response = err;
@@ -472,69 +472,83 @@ describe("InsightFacade Add/Remove Dataset", function () {
     //         expect(response).to.deep.equal([id]);
     //     }
     // });
-    //
-    // it("Should have no dataset after removeDataSet()", async function () {
+
+     // it("Should have no dataset after removeDataSet()", async function () {
     //     let response: InsightDataset[];
     //     try {
     //         response = await insightFacade.listDatasets();
     //     } catch (err) {
     //         response = err;
-    //     } finally {
+    //    } finally {
     //         expect(response).to.deep.equal([]);
     //     }
     // });
     //
-    // it("Should throw error for delete non-existing dataset", async () => {
-    //     const id: string = "courses";
-    //     let response: string;
-    //
-    //     try {
-    //         response = await insightFacade.removeDataset(id);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal(NotFoundError);
-    //     }
-    // });
-    //
-    // it("Should throw error for removing dataset with invalid path", async () => {
-    //     const id: string = "invalidPath";
-    //     let response: string;
-    //
-    //     try {
-    //         response = await insightFacade.removeDataset(id);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal(NotFoundError);
-    //     }
-    // });
-    //
-    // it("Should throw error for removing using null file name", async () => {
-    //     const id: string = null;
-    //     let response: string;
-    //
-    //     try {
-    //         response = await insightFacade.removeDataset(id);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).equal(InsightError);
-    //     }
-    // });
-    //
-    // it("Should throw error for removing using undefined file name", async () => {
-    //     const id: string = undefined;
-    //     let response: string;
-    //
-    //     try {
-    //         response = await insightFacade.removeDataset(id);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).equal(InsightError);
-    //     }
-    // });
+    it("Should throw error for delete non-existing dataset", async () => {
+         const id: string = "courses";
+         let response: string;
+
+         try {
+             response = await insightFacade.removeDataset(id);
+         } catch (err) {
+             response = err;
+         } finally {
+             expect(response).to.deep.equal(NotFoundError);
+         }
+     });
+
+    it("Should throw error for removing dataset with invalid path", async () => {
+         const id: string = "invalidPath";
+         let response: string;
+
+         try {
+             response = await insightFacade.removeDataset(id);
+         } catch (err) {
+             response = err;
+         } finally {
+             expect(response).to.deep.equal(NotFoundError);
+         }
+     });
+
+    it ("Should successfully remove dataset from memory and disk", async () => {
+        const id: string = "courses3";
+        let response: string;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(insightFacade.dataSets.length === 0);
+            expect(response).equal(id);
+        }
+    });
+
+    it("Should throw error for removing using null file name", async () => {
+         const id: string = null;
+         let response: string;
+
+         try {
+             response = await insightFacade.removeDataset(id);
+         } catch (err) {
+             response = err;
+         } finally {
+             expect(response).equal(InsightError);
+         }
+     });
+
+    it("Should throw error for removing using undefined file name", async () => {
+         const id: string = undefined;
+         let response: string;
+
+         try {
+             response = await insightFacade.removeDataset(id);
+        } catch (err) {
+             response = err;
+         } finally {
+             expect(response).equal(InsightError);
+         }
+     });
 
 });
 

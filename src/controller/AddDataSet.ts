@@ -142,7 +142,7 @@ export default class AddDataSet {
             if (!fs.existsSync(__dirname + "/../data")) {
                 fs.mkdirSync(__dirname + "/../data");
             }
-            fs.writeFile(__dirname + "/../data/" + dataSet.id, JSON.stringify(dataSet), (err) => {
+            fs.writeFile(__dirname + "/../data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
                 if (err) {
                    return reject(err);
                 }
