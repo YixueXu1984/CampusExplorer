@@ -55,7 +55,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
-        let results: InsightDataset[];
+        let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
            results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
