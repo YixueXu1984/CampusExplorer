@@ -58,6 +58,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
 
         try {
             insightFacade = new InsightFacade();
+            insightFacade.dataSets.length = 0;
         } catch (err) {
             Log.error(err);
         } finally {
@@ -78,7 +79,6 @@ describe("InsightFacade Add/Remove Dataset", function () {
     });
 
     // Test addDataset() & listDatasets()
-
     // Basic addDataset(), listDatasets() tests
     it("Should have no dataset before add, test listDatasets()", async function () {
         let response: InsightDataset[];
@@ -107,9 +107,9 @@ describe("InsightFacade Add/Remove Dataset", function () {
     it("Should have a dataset of courses after add, test listDatasets()", async function () {
         const name: string = "courses";
         let expectedDataset: InsightDataset = {
-            id: name,
+            id: "courses",
             kind: InsightDatasetKind.Courses,
-            numRows: 0
+            numRows: 64612
         };
         let expected: InsightDataset[] = [];
         expected.push(expectedDataset);
@@ -136,6 +136,25 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
+    it("Should still have only one dataset of courses after add, test listDatasets()", async function () {
+        const name: string = "courses";
+        let expectedDataset: InsightDataset = {
+            id: name,
+            kind: InsightDatasetKind.Courses,
+            numRows: 64612
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(expected);
+        }
+    });
+
     it("Should remove the courses dataset", async () => {
         const id: string = "courses";
         let response: string;
@@ -156,6 +175,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         } catch (err) {
             response = err;
         } finally {
+            response.forEach((res) => Log.trace("!!!!!!!!!!!!!!!!!!!!!!" + res.id));
             expect(response).to.deep.equal([]);
         }
     });
@@ -175,13 +195,20 @@ describe("InsightFacade Add/Remove Dataset", function () {
 
     it("Should have a dataset of specific courses after add, test listDatasets()", async function () {
         const id: string = "specificCourses";
-        let response: InsightDataset[];
+        let expectedDataset: InsightDataset = {
+            id: "specificCourses",
+            kind: InsightDatasetKind.Courses,
+            numRows: 61
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
         try {
             response = await insightFacade.listDatasets();
         } catch (err) {
             response = err;
         } finally {
-            expect(response).to.deep.equal([id]);
+            expect(response).to.deep.equal(expected);
         }
     });
 
@@ -198,6 +225,17 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
+    it("Should have no dataset after delete, test listDatasets()", async function () {
+        let response: InsightDataset[];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal([]);
+        }
+    });
+
     it("Should add a courses dataset", async () => {
         const id: string = "courses";
         let response: string[];
@@ -210,6 +248,25 @@ describe("InsightFacade Add/Remove Dataset", function () {
             expect(response).to.deep.equal([id]);
         }
     });
+
+    // it("list 3 datasets", async () => {
+    //     const id2: string = "courses2";
+    //     const id3: string = "courses3";
+    //     let expectedResponse: InsightDataset[] = [];
+    //     let courseDataset: InsightDataset = {
+    //         id: "courses",
+    //         kind: InsightDatasetKind.Courses,
+    //         numRows: 64612
+    //     };
+    //     expectedResponse.push(courseDataset);
+    //     try {
+    //         expectedResponse = await insightFacade.listDatasets();
+    //     } catch (err) {
+    //         expectedResponse = err;
+    //     } finally {
+    //         expect().to.deep.equal();
+    //     }
+    // });
 
     it("list 3 datasets", async () => {
         const id2: string = "courses2";
@@ -468,12 +525,10 @@ describe("InsightFacade Add/Remove Dataset", function () {
     });
 
      // Test removeDataset() & listDatasets()
-    it("Should remove the existing specificCourses dataset", async () => {
-        const id: string = "specificCourses";
+    it("Should remove the existing courses dataset", async () => {
+        const id: string = "courses";
         let response: string;
-
         try {
-            insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
             response = await insightFacade.removeDataset(id);
         } catch (err) {
             response = err;
@@ -519,20 +574,6 @@ describe("InsightFacade Add/Remove Dataset", function () {
          }
      });
 
-    it ("Should successfully remove dataset from memory and disk", async () => {
-        const id: string = "courses3";
-        let response: string;
-
-        try {
-            response = await insightFacade.removeDataset(id);
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(insightFacade.dataSets.length === 0);
-            expect(response).equal(id);
-        }
-    });
-
     it("Should throw error for removing using null file name", async () => {
          const id: string = null;
          let response: string;
@@ -558,7 +599,6 @@ describe("InsightFacade Add/Remove Dataset", function () {
              expect(response).to.be.instanceOf(InsightError);
          }
      });
-
 });
 
 // This test suite dynamically generates tests from the JSON files in test/queries.
