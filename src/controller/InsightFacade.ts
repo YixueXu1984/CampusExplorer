@@ -3,6 +3,8 @@ import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "
 import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
+import PerformQuery from "./PerformQuery";
+import LoadDatasets from "./LoadDatasets";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -16,6 +18,9 @@ export default class InsightFacade implements IInsightFacade {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
         // TODO: Implement load datasets
+        // let loadDataset = new LoadDatasets();
+        // loadDataset.loadDatasets(this.dataSets);
+        // TODO:load loadDataset to this.datasets
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -49,6 +54,21 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
+        let performQuery = new PerformQuery();
+        performQuery.performQuery({
+            WHERE: {
+                GT: {
+                    courses_avg: 97
+                }
+            },
+            OPTIONS: {
+                COLUMNS: [
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                ORDER: "courses_avg"
+            }}, this.dataSets
+        );
         return Promise.reject("Not implemented.");
     }
 

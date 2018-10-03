@@ -1,4 +1,4 @@
-interface ICourseSection {
+export interface ICourseSection {
     dept: string;
     id: string;
     avg: number;
@@ -9,4 +9,5 @@ interface ICourseSection {
     audit: number;
     uuid: string;
     year: number;
+    [key: string]: string | number;
 }
