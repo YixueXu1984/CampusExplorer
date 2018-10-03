@@ -6,6 +6,7 @@ import {IDataSet} from "../model/DataSet";
 import {equal} from "assert";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
+import LoadDatasets from "./LoadDatasets";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -19,6 +20,9 @@ export default class InsightFacade implements IInsightFacade {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
         // TODO: Implement load datasets
+        // let loadDataset = new LoadDatasets();
+        // loadDataset.loadDatasets(this.dataSets);
+        // TODO:load loadDataset to this.datasets
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {

@@ -1,10 +1,5 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
-import {error} from "util";
-import * as JSZip from "jszip";
-import {JSZipObject} from "jszip";
-import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
 
@@ -24,7 +19,7 @@ export default class RemoveDataset {
                 let index: number;
                 for (index = 0; index < dataSets.length; index++) {
                     if (dataSets[index].id === id) {
-                        fs.unlink(__dirname + "/../data/" + id + ".json", (err) => {
+                        fs.unlink("data/" + id + ".json", (err) => {
                             if (err) { throw err; }
                             // Log.trace("removed dataset: " + id);
                         });

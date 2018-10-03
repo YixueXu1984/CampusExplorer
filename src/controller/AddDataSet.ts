@@ -141,10 +141,10 @@ export default class AddDataSet {
 
     private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            if (!fs.existsSync(__dirname + "/../data")) {
+            if (!fs.existsSync( __dirname + "/../data")) {
                 fs.mkdirSync(__dirname + "/../data");
             }
-            fs.writeFile(__dirname + "/../data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
+            fs.writeFile("data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
                 if (err) {
                    return reject(err);
                 }
