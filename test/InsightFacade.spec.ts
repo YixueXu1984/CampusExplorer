@@ -73,7 +73,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         Log.test(`After: ${this.test.parent.title}`);
         // reset datasets in memory & cache
         let fs = require("fs-extra");
-        fs.removeSync("./src/data");
+        fs.removeSync("data/");
     });
 
     afterEach(function () {
@@ -167,6 +167,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
             response = err;
         } finally {
             expect(response).to.deep.equal(id);
+            expect(insightFacade.dataSets.length).to.deep.equal(0);
         }
     });
 
@@ -194,61 +195,61 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
-    it("Should have a dataset of specific courses after add, test listDatasets()", async function () {
-        const id: string = "specificCourses";
-        let expectedDataset: InsightDataset = {
-            id: "specificCourses",
-            kind: InsightDatasetKind.Courses,
-            numRows: 61
-        };
-        let expected: InsightDataset[] = [];
-        expected.push(expectedDataset);
-        let response: InsightDataset[] = [];
-        try {
-            response = await insightFacade.listDatasets();
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(response).to.deep.equal(expected);
-        }
-    });
+    // it("Should have a dataset of specific courses after add, test listDatasets()", async function () {
+    //     const id: string = "specificCourses";
+    //     let expectedDataset: InsightDataset = {
+    //         id: "specificCourses",
+    //         kind: InsightDatasetKind.Courses,
+    //         numRows: 61
+    //     };
+    //     let expected: InsightDataset[] = [];
+    //     expected.push(expectedDataset);
+    //     let response: InsightDataset[] = [];
+    //     try {
+    //         response = await insightFacade.listDatasets();
+    //     } catch (err) {
+    //         response = err;
+    //     } finally {
+    //         expect(response).to.deep.equal(expected);
+    //     }
+    // });
 
-    it("Should remove the specific courses dataset", async () => {
-        const id: string = "specificCourses";
-        let response: string;
-
-        try {
-            response = await insightFacade.removeDataset(id);
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(response).to.deep.equal(id);
-        }
-    });
-
-    it("Should have no dataset after delete, test listDatasets()", async function () {
-        let response: InsightDataset[];
-        try {
-            response = await insightFacade.listDatasets();
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(response).to.deep.equal([]);
-        }
-    });
-
-    it("Should add a courses dataset", async () => {
-        const id: string = "courses";
-        let response: string[];
-
-        try {
-            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(response).to.deep.equal([id]);
-        }
-    });
+    // it("Should remove the specific courses dataset", async () => {
+    //     const id: string = "specificCourses";
+    //     let response: string;
+    //
+    //     try {
+    //         response = await insightFacade.removeDataset(id);
+    //     } catch (err) {
+    //         response = err;
+    //     } finally {
+    //         expect(response).to.deep.equal(id);
+    //     }
+    // });
+    //
+    // it("Should have no dataset after delete, test listDatasets()", async function () {
+    //     let response: InsightDataset[];
+    //     try {
+    //         response = await insightFacade.listDatasets();
+    //     } catch (err) {
+    //         response = err;
+    //     } finally {
+    //         expect(response).to.deep.equal([]);
+    //     }
+    // });
+    //
+    // it("Should add a courses dataset", async () => {
+    //     const id: string = "courses";
+    //     let response: string[];
+    //
+    //     try {
+    //         response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+    //     } catch (err) {
+    //         response = err;
+    //     } finally {
+    //         expect(response).to.deep.equal([id]);
+    //     }
+    // });
 
     // it("list 3 datasets", async () => {
     //     const id2: string = "courses2";
