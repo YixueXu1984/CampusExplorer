@@ -9,7 +9,7 @@ export default class PerformQuery {
     public dataSets: IDataSet[];
     public dataSetToQuery: IDataSet;
     private columnsToQuery: string[];
-    private tree: ITree;
+    private root: INode;
 
     constructor() {
         Log.trace("Perform Query");
@@ -21,9 +21,12 @@ export default class PerformQuery {
             courses: []
         };
         this.columnsToQuery = [];
-        this.tree = {
-            levels: 0,
-            nodes: []
+        this.root = {
+            level: 0,
+            filterName: "",
+            key: "",
+            filterValue: "",
+            childNodes: []
         };
     }
 
@@ -42,6 +45,13 @@ export default class PerformQuery {
                 courses: []
             }; // clear dataSetToQuery
             this.columnsToQuery = [];
+            this.root = {
+                level: 0,
+                filterName: "",
+                key: "",
+                filterValue: "",
+                childNodes: []
+            };
 
             try {
                 // this.handleOptions(query.OPTIONS);
@@ -54,47 +64,47 @@ export default class PerformQuery {
     }
 
     private handleBody(body: any) {
-        // parse filter into a tree, pass all course section through this tree
-        this.parseFilters(Object.keys(body), Object.values(body), 0);
-        this.testTreeCreation();
+        // parse filter into a tree, create a root node for WHERE first
+        this.root = this.createNode("WHERE", "", "", 0);
+        this.parseFilters(Object.keys(body), Object.values(body), 1, this.root.childNodes);
+        this.testTreeCreation(this.root);
     }
 
-    private parseFilters(filterNames: string[], filterBody: any[], level: number) {
+    // TODO: ALL THE VALIDATION
+    private parseFilters(filterNames: string[], filterBody: any[], level: number, nodes: INode[]) {
         let i = 0;
         for (let filterName of filterNames) {
             if (this.isMcomp(filterName)) {
                 // validate key, validate filterValue
                 let key = Object.keys(filterBody[i]);
                 let filterValue = Object.values(filterBody[i]);
-                if (level > this.tree.levels) {
-                    this.tree.levels = level;
-                }
-                this.tree.nodes.push(this.createNode(filterName, key[0], filterValue[0], level));
+                nodes.push(this.createNode(filterName, key[0], filterValue[0], level));
             } else if (this.isScomp(filterName)) {
                 // validate key, validate filterValue
                 let key = Object.keys(filterBody[i]);
                 let filterValue = Object.values(filterBody[i]);
-                if (level > this.tree.levels) {
-                    this.tree.levels = level;
-                }
-                this.tree.nodes.push(this.createNode(filterName, key[0], filterValue[0], level));
+                nodes.push(this.createNode(filterName, key[0], filterValue[0], level));
             } else if (this.isAnd(filterName)) {
                 // validate and recurse
-                this.tree.nodes.push(this.createNode(filterName, "", "", level));
+
+                let newNode = this.createNode(filterName, "", "", level);
+                nodes.push(newNode);
                 for (let filters of filterBody[i]) {
-                    this.parseFilters(Object.keys(filters), Object.values(filters), level + 1);
+                    this.parseFilters(Object.keys(filters), Object.values(filters), level + 1, newNode.childNodes);
                 }
             } else if (this.isOr(filterName)) {
                 // validate and recurse
-                this.tree.nodes.push(this.createNode(filterName, "", "", level));
+                let newNode = this.createNode(filterName, "", "", level);
+                nodes.push(newNode);
                 for (let filters of filterBody[i]) {
-                    this.parseFilters(Object.keys(filters), Object.values(filters), level + 1);
+                    this.parseFilters(Object.keys(filters), Object.values(filters), level + 1, newNode.childNodes);
                 }
             } else if (this.isNeg(filterName)) {
                 // validate and recurse
-                this.tree.nodes.push(this.createNode(filterName, "", "", level));
+                let newNode = this.createNode(filterName, "", "", level);
+                nodes.push(newNode);
                 let filter = filterBody[i];
-                this.parseFilters(Object.keys(filter), Object.values(filter), level + 1);
+                this.parseFilters(Object.keys(filter), Object.values(filter), level + 1, newNode.childNodes);
 
             } else {
                 throw new Error("Invalid filter name");
@@ -109,15 +119,15 @@ export default class PerformQuery {
             filterName,
             key,
             filterValue,
+            childNodes: []
         };
         return node;
     }
 
-    private testTreeCreation() {
-        Log.trace("Tree depth: " + String(this.tree.levels));
-        Log.trace("Tree size: " + String(this.tree.nodes.length));
-        for (let node of this.tree.nodes) {
-            Log.trace("Level: " + node.level + " name: " + node.filterName);
+    private testTreeCreation(node: INode) {
+        Log.trace(node.filterName + " " + String(node.level) + " " + node.key +  " " + String(node.filterValue));
+        for (let childnode of node.childNodes) {
+            this.testTreeCreation(childnode);
         }
     }
 
