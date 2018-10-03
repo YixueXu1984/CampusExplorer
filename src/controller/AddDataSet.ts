@@ -4,7 +4,6 @@ import * as JSZip from "jszip";
 import {JSZipObject} from "jszip";
 import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
-import {ICourse} from "../model/Course";
 import {ICourseSection} from "../model/CourseSection";
 export default class AddDataSet {
     private dataDir = ".../data/";
@@ -13,7 +12,7 @@ export default class AddDataSet {
         Log.trace("Add Data Set");
     }
 
-    private readEachJsonFile(course: JSZipObject): Promise<ICourse> {
+    private readEachJsonFile(course: JSZipObject): Promise<ICourseSection[]> {
         return new Promise((resolve, reject) => {
             course.async("text")
                 .then((sections) => {
@@ -55,7 +54,7 @@ export default class AddDataSet {
         }
     }
 
-    private parseJson(sections: string): ICourse {
+    private parseJson(sections: string): ICourseSection[] {
 
         let sectionsHolder: { result: any[] };
         sectionsHolder = {
@@ -66,9 +65,7 @@ export default class AddDataSet {
         } catch (err) {
             // Log.error(err); //skip sections with invalid jsons
         }
-        let course: ICourse = {
-            sections: []
-        };
+        let courseSections: ICourseSection[] = [];
         for (let section of sectionsHolder.result) {
             let mSection: ICourseSection = {
                 title: "",
@@ -96,14 +93,14 @@ export default class AddDataSet {
             } else {
                 continue; // if missing required fields we skip this section
             }
-            course.sections.push(mSection);
+            courseSections.push(mSection);
         }
-        return course;
+        return courseSections;
     }
 
     private iterateThroughFiles(courses: JSZip, id: string, kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            let promisearr: Array<Promise<ICourse>> = [];
+            let promisearr: Array<Promise<ICourseSection[]>> = [];
             let dataSet: IDataSet = {
                 id: "",
                 numRows: 0,
@@ -115,12 +112,13 @@ export default class AddDataSet {
             });
 
             Promise.all(promisearr)
-                .then((coursesModel) => {
+                .then((courseSections) => {
                     let numRows: number = 0;
-                    for (let courseModel of coursesModel) {
-                        if (courseModel.sections.length > 0) {
-                            numRows = numRows + courseModel.sections.length;
-                            dataSet.courses.push(courseModel); // Only add a course if it has at least one section in it
+                    for (let courseSection of courseSections) {
+                        if (courseSections.length > 0) {
+                            numRows = numRows + courseSections.length;
+                            dataSet.courses = dataSet.courses.concat(courseSection);
+                            // Only add a course if it has at least one section in it
                         }
                     }
                     if (dataSet.courses.length === 0) { // This dataSet has no courses in it, or no valid sections

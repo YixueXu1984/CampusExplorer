@@ -54,18 +54,38 @@ export default class InsightFacade implements IInsightFacade {
     public performQuery(query: any): Promise<any[]> {
         let performQuery = new PerformQuery();
         performQuery.performQuery({
-            WHERE: {
-                GT: {
-                    courses_avg: 97
+                WHERE: {
+                    OR: [
+                        {
+                            AND: [
+                                {
+                                    GT: {
+                                        courses_avg: 90
+                                    }
+                                },
+                                {
+                                    IS: {
+                                        courses_dept: "adhe"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            EQ: {
+                                courses_avg: 95
+                            }
+                        }
+                    ]
+                },
+                OPTIONS: {
+                    COLUMNS: [
+                        "courses_dept",
+                        "courses_id",
+                        "courses_avg"
+                    ],
+                    ORDER: "courses_avg"
                 }
-            },
-            OPTIONS: {
-                COLUMNS: [
-                    "courses_dept",
-                    "courses_avg"
-                ],
-                ORDER: "courses_avg"
-            }}, this.dataSets
+            }, this.dataSets
         );
         return Promise.reject("Not implemented.");
     }
@@ -73,15 +93,15 @@ export default class InsightFacade implements IInsightFacade {
     public listDatasets(): Promise<InsightDataset[]> {
         let results: InsightDataset[];
         this.dataSets.forEach((currDataSet) => {
-           results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
+            results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
         return Promise.resolve(results);
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
         let dataset: InsightDataset;
-        dataset.id      = name;
-        dataset.kind    = type;
+        dataset.id = name;
+        dataset.kind = type;
         dataset.numRows = num;
         return dataset;
     }
