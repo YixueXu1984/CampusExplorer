@@ -84,7 +84,7 @@ export default class PerformQuery {
                 result.push(section);
             }
         });
-        Log.trace(String(this.result.length));
+        Log.trace(String(result.length));
         return result;
 
     }
@@ -103,32 +103,29 @@ export default class PerformQuery {
                 let key = this.validateKey(Object.keys(filterBody[i]), filterName);
                 let filterValue = this.validateInputValue(Object.values(filterBody[i]), filterName);
                 nodes.push(this.createNode(filterName, key, filterValue, level));
-            } else if (this.isAnd(filterName)) {
+            } else if (this.isAnd(filterName) && this.validateLcomp(filterBody[i])) {
                 // validate and recurse
-                this.validateLcomp(filterBody[i]);
                 let newNode = this.createNode(filterName, "", "", level);
                 nodes.push(newNode);
                 for (let filters of filterBody[i]) {
                     this.parseFilters(Object.keys(filters), Object.values(filters), level + 1, newNode.childNodes);
                 }
-            } else if (this.isOr(filterName)) {
+            } else if (this.isOr(filterName) && this.validateLcomp(filterBody[i])) {
                 // validate and recurse
-                this.validateLcomp(filterBody[i]);
                 let newNode = this.createNode(filterName, "", "", level);
                 nodes.push(newNode);
                 for (let filters of filterBody[i]) {
                     this.parseFilters(Object.keys(filters), Object.values(filters), level + 1, newNode.childNodes);
                 }
-            } else if (this.isNeg(filterName)) {
+            } else if (this.isNeg(filterName) && this.validateNeg(filterBody[i])) {
                 // validate and recurse
-                this.validateNeg(filterBody[i]);
                 let newNode = this.createNode(filterName, "", "", level);
                 nodes.push(newNode);
                 let filter = filterBody[i];
                 this.parseFilters(Object.keys(filter), Object.values(filter), level + 1, newNode.childNodes);
 
             } else {
-                throw new Error("Invalid filter name");
+                throw new Error("Invalid filter format");
             }
             i = i + 1;
         }
@@ -192,23 +189,41 @@ export default class PerformQuery {
     }
 
     private executeWHERE(node: INode, section: ICourseSection): boolean {
-        return node.childNodes.every((childNode) => {
+        let allTrue = node.childNodes.every((childNode) => {
             return this.filterCourses(childNode, section);
         });
+
+        return allTrue;
     }
 
     private executeAND(node: INode, section: ICourseSection): boolean {
-        return node.childNodes.every((childNode) => {
-            return this.filterCourses(childNode, section);
-        });
+        // let allTrue = node.childNodes.every((childNode) => {
+        //     return this.filterCourses(childNode, section);
+        // });
+        //
+        // return allTrue;
+        let allTrue: boolean = true;
+        for (let childNode of node.childNodes) {
+                if (!this.filterCourses(childNode, section)) {
+                    allTrue = false;
+                }
+        }
+        return allTrue;
     }
 
     private executeOR(node: INode, section: ICourseSection): boolean {
-        let atLeastOneTrue = node.childNodes.find((childNode) => {
-            return this.filterCourses(childNode, section);
-        });
-
-        return atLeastOneTrue !== undefined;
+        // let atLeastOneTrue = node.childNodes.find((childNode) => {
+        //     return this.filterCourses(childNode, section);
+        // });
+        //
+        // return atLeastOneTrue !== undefined;
+        let atLeastOneTrue: boolean = false;
+        for (let childNode of node.childNodes) {
+            if (this.filterCourses(childNode, section)) {
+                atLeastOneTrue = true;
+            }
+        }
+        return atLeastOneTrue;
     }
 
     private executeNOT(node: INode, section: ICourseSection): boolean {
@@ -305,6 +320,7 @@ export default class PerformQuery {
         if (inputs.length !== 1) {
             throw new Error("multiple input value for a key");
         }
+        input = inputs[0];
         if (this.isMcomp(filterName) && typeof input === "number") {
             return input;
         } else if (this.isScomp(filterName) && typeof  input === "string") {
@@ -314,15 +330,19 @@ export default class PerformQuery {
         }
     }
 
-    private validateLcomp(body: any[]): void {
-        if (body.length < 1) {
-            throw new Error("Invalid # of fiters in And/OR");
+    private validateLcomp(body: any[]): boolean {
+        if (body.length >= 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private validateNeg(body: any[]): void {
-        if (body.length !== 1) {
-            throw new Error("Invalid # of filters in Neg");
+    private validateNeg(body: any[]): boolean {
+        if (body.length === 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
