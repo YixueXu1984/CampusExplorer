@@ -115,8 +115,8 @@ export default class AddDataSet {
                 .then((courseSections) => {
                     let numRows: number = 0;
                     for (let courseSection of courseSections) {
-                        if (courseSections.length > 0) {
-                            numRows = numRows + courseSections.length;
+                        if (courseSection.length > 0) {
+                            numRows = numRows + courseSection.length;
                             dataSet.courses = dataSet.courses.concat(courseSection);
                             // Only add a course if it has at least one section in it
                         }
