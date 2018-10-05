@@ -4,7 +4,6 @@ import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
-import LoadDatasets from "./LoadDatasets";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -17,10 +16,6 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
-        // TODO: Implement load datasets
-        // let loadDataset = new LoadDatasets();
-        // loadDataset.loadDatasets(this.dataSets);
-        // TODO:load loadDataset to this.datasets
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -54,28 +49,22 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let performQuery = new PerformQuery();
-        performQuery.performQuery({
-            WHERE: {
-                GT: {
-                    courses_avg: 97
-                }
-            },
-            OPTIONS: {
-                COLUMNS: [
-                    "courses_dept",
-                    "courses_avg"
-                ],
-                ORDER: "courses_avg"
-            }}, this.dataSets
-        );
-        return Promise.reject("Not implemented.");
+        return new Promise((resolve, reject) => {
+            let performQuery = new PerformQuery();
+            performQuery.performQuery(query, this.dataSets)
+                .then((result) => {
+                    resolve(result);
+                })
+                .catch((err) => {
+                    reject(new InsightError(err));
+                });
+        });
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
         let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
-           results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
+            results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
         return Promise.resolve(results);
     }
@@ -86,10 +75,9 @@ export default class InsightFacade implements IInsightFacade {
           kind: InsightDatasetKind.Courses,
           numRows: 0
         };
-        dataset.id      = name;
-        dataset.kind    = type;
+        dataset.id = name;
+        dataset.kind = type;
         dataset.numRows = num;
         return dataset;
     }
-
 }

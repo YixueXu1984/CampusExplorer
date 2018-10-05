@@ -1,15 +1,16 @@
-import Log from "../Util";
 import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {IDataSet} from "../model/DataSet";
-import {ICourseSection} from "../model/CourseSection";
-import {ICourse} from "../model/Course";
+import Parser from "./Parser";
+import Interpreter from "./Interpreter";
+import InsightFacade from "./InsightFacade";
+import {INode} from "../model/Node";
 
 export default class PerformQuery {
     public dataSets: IDataSet[];
     public dataSetToQuery: IDataSet;
 
     constructor() {
-        Log.trace("Perform Query");
+        // Log.trace("Perform Query");
         this.dataSets = [];
         this.dataSetToQuery = {
             id: "",
@@ -19,24 +20,43 @@ export default class PerformQuery {
         };
     }
 
-    public performQuery(query: any, datasets: IDataSet[]): Promise<any[]> {
+    public performQuery(query: any, dataSets: IDataSet[]): Promise<any[]> {
         return new Promise((resolve, reject) => {
             if (query.WHERE === undefined || query.OPTIONS === undefined) {
-                reject(new InsightError("Missing WHERE or OPTIONS clause"));
+                reject("Missing WHERE or OPTIONS clause");
             }
 
-            this.dataSets = datasets; // update datasets
+            // TODO: Some logic to load dataSet if it hasnt been around already
+            this.dataSets = dataSets; // update datasets
 
             this.dataSetToQuery = {
                 id: "",
                 kind: InsightDatasetKind.Courses,
                 numRows: 0,
                 courses: []
-            }; // clear dataSetToQuery
+            };
 
             try {
-                this.handleBody(query.WHERE);
-                this.handleOptions(query.OPTIONS);
+                let columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
+
+                let promiseArr: Array<Promise<any>> = [this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
+                    this.parseBody(query.WHERE, columnsToQuery),
+                    this.findDataSet(this.dataSetToQuery.id, dataSets)];
+
+                Promise.all(promiseArr)
+                    .then((interpPrep) => {
+                        let order = interpPrep[0];
+                        let root = interpPrep[1];
+                        let dataSet = interpPrep[2];
+                        let result = this.interpretBody(root, dataSet, columnsToQuery);
+                        if (order !== "") {
+                            this.orderResult(result, order);
+                        }
+                        resolve(result);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
             } catch (err) {
                 reject(err);
             }
@@ -44,122 +64,160 @@ export default class PerformQuery {
         });
     }
 
-    private handleBody(body: any) {
-        this.isFilter(Object.entries(body));
-    }
-
-    private handleOptions(options: any) {
-        // TODO: COME BACK FOR THIS
-    }
-
-    // only work with Mcomp right now with a simple case
-    private isFilter(filters: Array<[string, any]>) {
-        filters.forEach((currValue) => {
-            if (this.isMcomp(currValue[0]) && this.validateMcomp(Object.entries(currValue))) {
-                return this.executeMcomp(currValue);
+    private parseBody(body: any, columnsToQuery: string[]): Promise<INode> {
+        return new Promise<INode>((resolve, reject) => {
+            try {
+                let parser = new Parser(this.dataSetToQuery.id);
+                let root = parser.parseFilters(body, columnsToQuery);
+                resolve(root);
+            } catch (err) {
+                reject(err);
             }
         });
     }
 
-    private isLcomp(filter: string): boolean {
-        return filter === "AND" || filter === "OR";
+    private interpretBody(root: INode, dataSet: IDataSet, columnsToQuery: string[]): any[] {
+        let interpreter = new Interpreter();
+        return interpreter.filterCourses(root, dataSet, columnsToQuery);
     }
 
-    private isNeg(filter: string): boolean {
-        return filter === "NOT";
-    }
-
-    private isMcomp(filter: string): boolean {
-        return filter === "LT" || filter === "GT" || filter === "EQ";
-    }
-
-    private isScomp(filter: string): boolean {
-        return filter === "IS";
-    }
-
-    private validateMcomp(keyInputs: Array<[string, any]>): boolean {
-        if (keyInputs.length === 1 && this.validateKey(keyInputs[0][0], keyInputs[0][1])) {
-            return true;
-        } else {
-            throw new Error("more than one key and inputs in Mcomp");
+    private handleColumns(columns: string[]): string[] {
+        let columnsToQuery: string[] = [];
+        if (columns.length < 1) {
+            throw new Error("Need to specify at least one column");
         }
+
+        for (let column of columns) {
+            columnsToQuery.push(this.validateColumn(column));
+        }
+        return columnsToQuery;
     }
 
-    private validateKey(key: string, input: any): boolean {
-        let dataSetId: string = "";
-        let dataSetKey: string = "";
-        let keyArrHolder: string[] = key.split("_");
+    private handleOrder(order: string, columnsToQuery: string[]): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            if (order !== undefined && this.validateOrder(order, columnsToQuery)) {
+                resolve(order);
+            }
+        });
+    }
+
+    private validateColumn(column: string): string {
+        let dataSetId: string;
+        let dataSetKey: string;
+        let keyArrHolder: string[] = column.split("_");
         dataSetId = keyArrHolder[0];
         dataSetKey = keyArrHolder[1];
 
-        if (dataSetId === "" || dataSetKey === "") {
+        if (dataSetId === undefined || dataSetKey === undefined) {
             throw new Error("Invalid key structure");
         }
 
-        return this.isValidKeyInput(dataSetKey, input) && this.isValidId(dataSetId);
-    }
-
-    private isValidKeyInput(key: string, input: any): boolean {
-        if (key === "dept" && typeof input === "string") {
-            return true;
-        } else if (key === "id" && typeof input === "string") {
-            return true;
-        } else if (key === "avg" && typeof input === "number") {
-            return true;
-        } else if (key === "instructor" && typeof input === "string") {
-            return true;
-        } else if (key === "title" && typeof input === "string") {
-            return true;
-        } else if (key === "pass" && typeof input === "number") {
-            return true;
-        } else if (key === "fail" && typeof input === "number") {
-            return true;
-        } else if (key === "audit" && typeof input === "number") {
-            return true;
-        } else if (key === "uuid" && typeof input === "string") {
-            return true;
-        } else if (key === "year" && typeof input === "number") {
-            return true;
-        } else {
-            throw new Error("Invalid input key/type");
+        if (this.dataSetToQuery.id === "") {
+            this.dataSetToQuery.id = dataSetId; // sets the dataSetId to Query
         }
+
+        if (dataSetId !== this.dataSetToQuery.id) {
+            throw new Error("numerous dataset ids present in query");
+        }
+
+        switch (dataSetKey) {
+            case "dept":
+                return dataSetKey;
+            case "id":
+                return dataSetKey;
+            case "instructor":
+                return dataSetKey;
+            case "title":
+                return dataSetKey;
+            case "uuid":
+                return dataSetKey;
+            case "avg":
+                return dataSetKey;
+            case "pass":
+                return dataSetKey;
+            case "fail":
+                return dataSetKey;
+            case "audit":
+                return dataSetKey;
+            case "year":
+                return dataSetKey;
+            default:
+                throw new Error("Invalid key in columns");
+        }
+
     }
 
-    private isValidId(id: string): boolean {
-        this.dataSetToQuery = this.dataSets.find((currValue) => {
-            return currValue.id === id;
+    private validateOrder(order: string, columnsToQuery: string[]): boolean {
+        let dataSetId: string;
+        let dataSetKey: string;
+        let keyArrHolder: string[] = order.split("_");
+        dataSetId = keyArrHolder[0];
+        dataSetKey = keyArrHolder[1];
+
+        if (dataSetId === undefined || dataSetKey === undefined) {
+            throw new Error("Invalid key structure");
+        }
+
+        if (dataSetId !== this.dataSetToQuery.id) {
+            throw new Error("numerous dataset ids present in query");
+        }
+
+        let existInColumns = columnsToQuery.find((currKey) => {
+            return currKey === dataSetKey;
         });
 
-        return this.dataSetToQuery.id !== "";
-    }
-
-    private isInputString(input: string): boolean {
-        return false; // stub
-    }
-
-    private executeMcomp(keyInput: [string, any]) {
-        let key: string = "";
-        let input: number = 0;
-        let queryResult: ICourseSection[] = []; // TODO: Make a return object
-        if (keyInput[0] === "GT") {
-            let keyInputHolder = Object.entries(keyInput[1]);
-            key = keyInputHolder[0][0];
-            input = keyInputHolder[0][1];
-
-            this.dataSetToQuery.courses.forEach((course) => {
-                course.sections.forEach((section) => {
-                    if (section[key] > input) {
-                        // TODO: INCOMPLETE
-                        queryResult.push(section);
-                    }
-                });
-            });
-            return queryResult;
-
-        } else if (keyInput[0] === "LT") {
-            // TODO: COME BACK HERE
-        } else {
-            // TODO: COME BACK HERE
+        if (existInColumns === undefined) {
+            throw new Error("key used in order not present in columns");
         }
+
+        return true;
+    }
+
+    private orderResult(result: any[], orderBy: string) {
+        result.sort((a, b) => {
+            if (a[orderBy] < b[orderBy]) {
+                return -1;
+            } else if (a[orderBy] > b[orderBy]) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    }
+
+    private findDataSet(id: string, dataSets: IDataSet[]): Promise<IDataSet> {
+        return new Promise<IDataSet>((resolve, reject) => {
+            let FoundDataSet = dataSets.find((dataSet) => {
+                return dataSet.id === id;
+            });
+
+            if (FoundDataSet !== undefined) {
+                resolve(FoundDataSet);
+            } else {
+                this.loadDataset(id)
+                    .then((dataSetLoaded) => {
+                        dataSets.push(dataSetLoaded);
+                        resolve(dataSetLoaded);
+                    })
+                    .catch((dataSetNotFound) => {
+                        reject(dataSetNotFound);
+                    });
+            }
+        });
+    }
+
+    private loadDataset(id: string) {
+        return new Promise<IDataSet>((resolve, reject) => {
+            try {
+                const fs = require("fs");
+                let file = fs.readFile("data/" + id + ".json");
+                let dataset = JSON.parse(file);
+                this.dataSets.push(dataset);
+                resolve(dataset);
+            } catch (err) {
+                reject(err);
+            }
+        });
+
     }
 }
