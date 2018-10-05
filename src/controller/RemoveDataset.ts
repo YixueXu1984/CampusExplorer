@@ -15,7 +15,6 @@ export default class RemoveDataset {
             } else if (!this.existDataset(id, dataSets)) {
                 reject(new NotFoundError("removing a dataset that DNE"));
             } else  {
-                let dataset: any;
                 let index: number;
                 for (index = 0; index < dataSets.length; index++) {
                     if (dataSets[index].id === id) {

@@ -6,7 +6,6 @@ import {IDataSet} from "../model/DataSet";
 import {equal} from "assert";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
-import LoadDatasets from "./LoadDatasets";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -19,10 +18,7 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
-        // TODO: Implement load datasets
-        // let loadDataset = new LoadDatasets();
-        // loadDataset.loadDatasets(this.dataSets);
-        // TODO:load loadDataset to this.datasets
+        /// this.loadDatasets(this.dataSets);
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -58,18 +54,19 @@ export default class InsightFacade implements IInsightFacade {
     public performQuery(query: any): Promise<any[]> {
         let performQuery = new PerformQuery();
         performQuery.performQuery({
-            WHERE: {
-                GT: {
-                    courses_avg: 97
+                WHERE: {
+                    GT: {
+                        courses_avg: 97
+                    }
+                },
+                OPTIONS: {
+                    COLUMNS: [
+                        "courses_dept",
+                        "courses_avg"
+                    ],
+                    ORDER: "courses_avg"
                 }
-            },
-            OPTIONS: {
-                COLUMNS: [
-                    "courses_dept",
-                    "courses_avg"
-                ],
-                ORDER: "courses_avg"
-            }}, this.dataSets
+            }, this.dataSets
         );
         return Promise.reject("Not implemented.");
     }
@@ -77,17 +74,27 @@ export default class InsightFacade implements IInsightFacade {
     public listDatasets(): Promise<InsightDataset[]> {
         let results: InsightDataset[];
         this.dataSets.forEach((currDataSet) => {
-           results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
+            results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
         return Promise.resolve(results);
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
         let dataset: InsightDataset;
-        dataset.id      = name;
-        dataset.kind    = type;
+        dataset.id = name;
+        dataset.kind = type;
         dataset.numRows = num;
         return dataset;
     }
 
+    public loadDatasets(id: string, datasets: IDataSet[]) {
+        return new Promise<IDataSet[]>((resolve) => {
+            const fs = require("fs");
+            let file = fs.readFile("data/" + id + ".json");
+            let dataset = JSON.parse(file);
+            datasets.push(dataset);
+            resolve(datasets);
+        });
+
+    }
 }
