@@ -55,7 +55,9 @@ export default class Interpreter {
     }
 
     private executeIS(key: string, filterValue: number | string, section: ICourseSection): boolean {
-        return section[key] === filterValue;
+        let s = filterValue.toString();
+        let bool = this.wildComparison(key, s, section);
+        return (section[key] === s);
     }
 
     private executeWHERE(node: INode, section: ICourseSection): boolean {
@@ -99,5 +101,22 @@ export default class Interpreter {
         });
 
         return result;
+    }
+
+    private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
+        let bool: boolean;
+        let array = Array();
+        let startIndex = 0;
+        array = key.split("*");
+        let i: number;
+        bool = true;
+        for (i = 0 , i < array.length; i++;) {
+            let index = filterValue.indexOf(array[i], startIndex);
+            if (index === -1) {
+                bool = false;
+                break;
+            } else { startIndex = index; }
+        }
+        return bool;
     }
 }

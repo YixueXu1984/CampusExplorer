@@ -79,4 +79,14 @@ export default class InsightFacade implements IInsightFacade {
         return dataset;
     }
 
+    public loadDatasets(id: string, datasets: IDataSet[]) {
+        return new Promise<IDataSet[]>((resolve) => {
+            const fs = require("fs");
+            let file = fs.readFile("data/" + id + ".json");
+            let dataset = JSON.parse(file);
+            datasets.push(dataset);
+            resolve(datasets);
+        });
+
+    }
 }
