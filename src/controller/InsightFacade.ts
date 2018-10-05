@@ -18,7 +18,6 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
-        // TODO: Implement load datasets
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {

@@ -1,7 +1,6 @@
 import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import Log from "../Util";
 import {IDataSet} from "../model/DataSet";
-import {ICourse} from "../model/Course";
 import {ICourseSection} from "../model/CourseSection";
 
 export default class LoadDatasets {
