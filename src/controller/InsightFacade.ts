@@ -1,9 +1,7 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
-import {InsightError, NotFoundError} from "./IInsightFacade";
+import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
-import {equal} from "assert";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
 
@@ -64,7 +62,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
-        let results: InsightDataset[];
+        let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
             results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
@@ -72,7 +70,11 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
-        let dataset: InsightDataset;
+        let dataset: InsightDataset = {
+          id: "",
+          kind: InsightDatasetKind.Courses,
+          numRows: 0
+        };
         dataset.id = name;
         dataset.kind = type;
         dataset.numRows = num;
