@@ -2,6 +2,8 @@ import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {IDataSet} from "../model/DataSet";
 import Parser from "./Parser";
 import Interpreter from "./Interpreter";
+import InsightFacade from "./InsightFacade";
+import {INode} from "../model/Node";
 
 export default class PerformQuery {
     public dataSets: IDataSet[];
@@ -18,14 +20,14 @@ export default class PerformQuery {
         };
     }
 
-    public performQuery(query: any, datasets: IDataSet[]): Promise<any[]> {
+    public performQuery(query: any, dataSets: IDataSet[]): Promise<any[]> {
         return new Promise((resolve, reject) => {
             if (query.WHERE === undefined || query.OPTIONS === undefined) {
                 reject("Missing WHERE or OPTIONS clause");
             }
 
             // TODO: Some logic to load dataSet if it hasnt been around already
-            this.dataSets = datasets; // update datasets
+            this.dataSets = dataSets; // update datasets
 
             this.dataSetToQuery = {
                 id: "",
@@ -35,14 +37,26 @@ export default class PerformQuery {
             };
 
             try {
-                this.dataSetToQuery = this.dataSets[0];
                 let columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
-                let order = this.handleOrder(query.OPTIONS.ORDER, columnsToQuery);
-                let result = this.handleBody(query.WHERE, columnsToQuery);
-                if (order !== "") {
-                    this.orderResult(result, order);
-                }
-                resolve(result);
+
+                let promiseArr: Array<Promise<any>> = [this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
+                    this.parseBody(query.WHERE, columnsToQuery),
+                    this.findDataSet(this.dataSetToQuery.id, dataSets)];
+
+                Promise.all(promiseArr)
+                    .then((interpPrep) => {
+                        let order = interpPrep[0];
+                        let root = interpPrep[1];
+                        let dataSet = interpPrep[2];
+                        let result = this.interpretBody(root, dataSet, columnsToQuery);
+                        if (order !== "") {
+                            this.orderResult(result, order);
+                        }
+                        resolve(result);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
             } catch (err) {
                 reject(err);
             }
@@ -50,11 +64,21 @@ export default class PerformQuery {
         });
     }
 
-    private handleBody(body: any, columnsToQuery: string[]): any[] {
-        let parser = new Parser(this.dataSetToQuery.id);
-        let root = parser.parseFilters(body, columnsToQuery);
+    private parseBody(body: any, columnsToQuery: string[]): Promise<INode> {
+        return new Promise<INode>((resolve, reject) => {
+            try {
+                let parser = new Parser(this.dataSetToQuery.id);
+                let root = parser.parseFilters(body, columnsToQuery);
+                resolve(root);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    private interpretBody(root: INode, dataSet: IDataSet, columnsToQuery: string[]): any[] {
         let interpreter = new Interpreter();
-        return interpreter.filterCourses(root, this.dataSetToQuery, columnsToQuery);
+        return interpreter.filterCourses(root, dataSet, columnsToQuery);
     }
 
     private handleColumns(columns: string[]): string[] {
@@ -69,10 +93,12 @@ export default class PerformQuery {
         return columnsToQuery;
     }
 
-    private handleOrder(order: string, columnsToQuery: string[]): string {
-        if (order !== undefined && this.validateOrder(order, columnsToQuery)) {
-            return order;
-        }
+    private handleOrder(order: string, columnsToQuery: string[]): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            if (order !== undefined && this.validateOrder(order, columnsToQuery)) {
+                resolve(order);
+            }
+        });
     }
 
     private validateColumn(column: string): string {
@@ -84,6 +110,10 @@ export default class PerformQuery {
 
         if (dataSetId === undefined || dataSetKey === undefined) {
             throw new Error("Invalid key structure");
+        }
+
+        if (this.dataSetToQuery.id === "") {
+            this.dataSetToQuery.id = dataSetId; // sets the dataSetId to Query
         }
 
         if (dataSetId !== this.dataSetToQuery.id) {
@@ -153,5 +183,41 @@ export default class PerformQuery {
                 return 0;
             }
         });
+    }
+
+    private findDataSet(id: string, dataSets: IDataSet[]): Promise<IDataSet> {
+        return new Promise<IDataSet>((resolve, reject) => {
+            let FoundDataSet = dataSets.find((dataSet) => {
+                return dataSet.id === id;
+            });
+
+            if (FoundDataSet !== undefined) {
+                resolve(FoundDataSet);
+            } else {
+                this.loadDataset(id)
+                    .then((dataSetLoaded) => {
+                        dataSets.push(dataSetLoaded);
+                        resolve(dataSetLoaded);
+                    })
+                    .catch((dataSetNotFound) => {
+                        reject(dataSetNotFound);
+                    });
+            }
+        });
+    }
+
+    private loadDataset(id: string) {
+        return new Promise<IDataSet>((resolve, reject) => {
+            try {
+                const fs = require("fs");
+                let file = fs.readFile("data/" + id + ".json");
+                let dataset = JSON.parse(file);
+                this.dataSets.push(dataset);
+                resolve(dataset);
+            } catch (err) {
+                reject(err);
+            }
+        });
+
     }
 }
