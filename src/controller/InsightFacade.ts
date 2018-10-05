@@ -1,9 +1,7 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
-import {InsightError, NotFoundError} from "./IInsightFacade";
+import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import AddDataSet from "./AddDataSet";
 import {IDataSet} from "../model/DataSet";
-import {equal} from "assert";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
 
@@ -18,7 +16,6 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
-        /// this.loadDatasets(this.dataSets);
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -52,46 +49,20 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let performQuery = new PerformQuery();
-        performQuery.performQuery({
-                WHERE: {
-                    OR: [
-                        {
-                            AND: [
-                                {
-                                    GT: {
-                                        courses_avg: 90
-                                    }
-                                },
-                                {
-                                    IS: {
-                                        courses_dept: "adhe"
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            EQ: {
-                                courses_avg: 95
-                            }
-                        }
-                    ]
-                },
-                OPTIONS: {
-                    COLUMNS: [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    ORDER: "courses_avg"
-                }
-            }, this.dataSets
-        );
-        return Promise.reject("Not implemented.");
+        return new Promise((resolve, reject) => {
+            let performQuery = new PerformQuery();
+            performQuery.performQuery(query, this.dataSets)
+                .then((result) => {
+                    resolve(result);
+                })
+                .catch((err) => {
+                    reject(new InsightError(err));
+                });
+        });
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
-        let results: InsightDataset[];
+        let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
             results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
@@ -99,21 +70,14 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
-        let dataset: InsightDataset;
+        let dataset: InsightDataset = {
+          id: "",
+          kind: InsightDatasetKind.Courses,
+          numRows: 0
+        };
         dataset.id = name;
         dataset.kind = type;
         dataset.numRows = num;
         return dataset;
-    }
-
-    public loadDatasets(id: string, datasets: IDataSet[]) {
-        return new Promise<IDataSet[]>((resolve) => {
-            const fs = require("fs");
-            let file = fs.readFile("data/" + id + ".json");
-            let dataset = JSON.parse(file);
-            datasets.push(dataset);
-            resolve(datasets);
-        });
-
     }
 }

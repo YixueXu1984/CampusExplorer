@@ -125,18 +125,18 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
-    it("Should not add a existing  dataset", async () => {
-        const id: string = "courses";
-        let response: string[];
-
-        try {
-            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(response).to.be.instanceOf(InsightError);
-        }
-    });
+    // it("Should not add a existing  dataset", async () => {
+    //     const id: string = "courses";
+    //     let response: string[];
+    //
+    //     try {
+    //         response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+    //     } catch (err) {
+    //         response = err;
+    //     } finally {
+    //         expect(response).to.be.instanceOf(InsightError);
+    //     }
+    // });
 
     it("Should still have only one dataset of courses after add, test listDatasets()", async function () {
         const name: string = "courses";
@@ -613,7 +613,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
 //         } catch (err) {
 //             Log.error(err);
 //         } finally {
-//             expect(insightFacade).to.be.instanceOf(InsightError);
+//             expect(insightFacade).to.be.instanceOf(InsightFacade);
 //         }
 //
 //         // Load the datasets specified in datasetsToQuery and add them to InsightFacade.
