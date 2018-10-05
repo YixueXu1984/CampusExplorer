@@ -52,7 +52,11 @@ export default class PerformQuery {
                         if (order !== "") {
                             this.orderResult(result, order);
                         }
-                        resolve(result);
+                        if (result.length > 5000) {
+                            reject(result);
+                        } else {
+                            resolve(result);
+                        }
                     })
                     .catch((err) => {
                         reject(err);

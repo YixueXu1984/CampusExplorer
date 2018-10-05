@@ -55,9 +55,9 @@ export default class Interpreter {
     }
 
     private executeIS(key: string, filterValue: number | string, section: ICourseSection): boolean {
-        let s = filterValue.toString();
-        let bool = this.wildComparison(key, s, section);
-        return (section[key] === s);
+        let regExp = new RegExp(filterValue.toString().replace(/\*/g, "."));
+        let test = (regExp.test(section[key].toString().replace(/\s/g, "")));
+        return (regExp.test(section[key].toString().replace(/\s/g, "")));
     }
 
     private executeWHERE(node: INode, section: ICourseSection): boolean {
