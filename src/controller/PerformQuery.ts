@@ -11,6 +11,7 @@ export default class PerformQuery {
     private columnsToQuery: string[];
     private root: INode;
     private result: any[];
+    private order: string;
 
     constructor() {
         Log.trace("Perform Query");
@@ -30,6 +31,7 @@ export default class PerformQuery {
             childNodes: []
         };
         this.result = [];
+        this.order = "";
     }
 
     public performQuery(query: any, datasets: IDataSet[]): Promise<any[]> {
@@ -55,11 +57,14 @@ export default class PerformQuery {
                 childNodes: []
             };
             this.result = [];
+            this.order = "";
 
             try {
                 this.dataSetToQuery = this.dataSets[0];
-                // this.handleOptions(query.OPTIONS);
-                this.handleBody(query.WHERE);
+                this.handleOptions(query.OPTIONS);
+                let result = this.handleBody(query.WHERE);
+                this.orderResult(result);
+                resolve(result);
             } catch (err) {
                 reject(err);
             }
@@ -72,20 +77,31 @@ export default class PerformQuery {
         // parse filter into a tree, create a root node for WHERE first
         this.root = this.createNode("WHERE", "", "", 0);
         this.parseFilters(Object.keys(body), Object.values(body), 1, this.root.childNodes);
-        // this.testTreeCreation(this.root);
-
-        if (this.root.childNodes.length === 0) {
-            // empty where case
-            return this.dataSetToQuery.courses;
-        }
 
         this.dataSetToQuery.courses.forEach((section) => {
             if (this.filterCourses(this.root, section)) {
-                result.push(section);
+                result.push(this.createResult(section));
             }
         });
         Log.trace(String(result.length));
         return result;
+
+    }
+
+    private handleOptions(options: any) {
+        // TODO: should tell us which dataSet to query
+        if (options.COLUMNS.length < 1) {
+            throw new Error("Need to specify at least one column");
+        }
+
+        for (let column of options.COLUMNS) {
+            this.columnsToQuery.push(this.validateColumn(column));
+        }
+
+        if (options.ORDER !== undefined) {
+            this.validateOrder(options.ORDER);
+            this.order = options.ORDER;
+        }
 
     }
 
@@ -189,34 +205,26 @@ export default class PerformQuery {
     }
 
     private executeWHERE(node: INode, section: ICourseSection): boolean {
-        let allTrue = node.childNodes.every((childNode) => {
-            return this.filterCourses(childNode, section);
-        });
-
+        let allTrue: boolean = true;
+        for (let childNode of node.childNodes) {
+            if (!this.filterCourses(childNode, section)) {
+                allTrue = false;
+            }
+        }
         return allTrue;
     }
 
     private executeAND(node: INode, section: ICourseSection): boolean {
-        // let allTrue = node.childNodes.every((childNode) => {
-        //     return this.filterCourses(childNode, section);
-        // });
-        //
-        // return allTrue;
         let allTrue: boolean = true;
         for (let childNode of node.childNodes) {
-                if (!this.filterCourses(childNode, section)) {
-                    allTrue = false;
-                }
+            if (!this.filterCourses(childNode, section)) {
+                allTrue = false;
+            }
         }
         return allTrue;
     }
 
     private executeOR(node: INode, section: ICourseSection): boolean {
-        // let atLeastOneTrue = node.childNodes.find((childNode) => {
-        //     return this.filterCourses(childNode, section);
-        // });
-        //
-        // return atLeastOneTrue !== undefined;
         let atLeastOneTrue: boolean = false;
         for (let childNode of node.childNodes) {
             if (this.filterCourses(childNode, section)) {
@@ -228,6 +236,15 @@ export default class PerformQuery {
 
     private executeNOT(node: INode, section: ICourseSection): boolean {
         return !(this.filterCourses(node.childNodes[0], section));
+    }
+
+    private createResult(section: ICourseSection): any {
+        let result: any = {};
+        for (let column of this.columnsToQuery) {
+            result[this.dataSetToQuery.id + "_" + column] = section[column];
+        }
+
+        return result;
     }
 
     private isAnd(filter: string): boolean {
@@ -344,5 +361,83 @@ export default class PerformQuery {
         } else {
             return false;
         }
+    }
+
+    private validateColumn(column: string): string {
+        let dataSetId: string;
+        let dataSetKey: string;
+        let keyArrHolder: string[] = column.split("_");
+        dataSetId = keyArrHolder[0];
+        dataSetKey = keyArrHolder[1];
+
+        if (dataSetId === undefined || dataSetKey === undefined) {
+            throw new Error("Invalid key structure");
+        }
+
+        if (dataSetId !== this.dataSetToQuery.id) {
+            throw new Error("numerous dataset ids present in query");
+        }
+
+        switch (dataSetKey) {
+            case "dept":
+                return dataSetKey;
+            case "id":
+                return dataSetKey;
+            case "instructor":
+                return dataSetKey;
+            case "title":
+                return dataSetKey;
+            case "uuid":
+                return dataSetKey;
+            case "avg":
+                return dataSetKey;
+            case "pass":
+                return dataSetKey;
+            case "fail":
+                return dataSetKey;
+            case "audit":
+                return dataSetKey;
+            case "year":
+                return dataSetKey;
+            default:
+                throw new Error("Invalid key in columns");
+        }
+
+    }
+
+    private validateOrder(order: string): void {
+        let dataSetId: string;
+        let dataSetKey: string;
+        let keyArrHolder: string[] = order.split("_");
+        dataSetId = keyArrHolder[0];
+        dataSetKey = keyArrHolder[1];
+
+        if (dataSetId === undefined || dataSetKey === undefined) {
+            throw new Error("Invalid key structure");
+        }
+
+        if (dataSetId !== this.dataSetToQuery.id) {
+            throw new Error("numerous dataset ids present in query");
+        }
+
+        let existInColumns = this.columnsToQuery.find((currKey) => {
+            return currKey === dataSetKey;
+        });
+
+        if (existInColumns === undefined) {
+            throw new Error("key used in order not present in columns");
+        }
+    }
+
+    private orderResult(result: any[]) {
+        result.sort((a, b) => {
+            if (a[this.order] < b[this.order]) {
+                return -1;
+            } else if (a[this.order] > b[this.order]) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
     }
 }
