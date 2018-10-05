@@ -125,7 +125,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
-    it("Should not add a existing dataset", async () => {
+    it("Should not add a existing  dataset", async () => {
         const id: string = "courses";
         let response: string[];
 
