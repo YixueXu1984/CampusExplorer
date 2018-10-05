@@ -55,13 +55,32 @@ export default class InsightFacade implements IInsightFacade {
         let performQuery = new PerformQuery();
         performQuery.performQuery({
                 WHERE: {
-                    GT: {
-                        courses_avg: 97
-                    }
+                    OR: [
+                        {
+                            AND: [
+                                {
+                                    GT: {
+                                        courses_avg: 90
+                                    }
+                                },
+                                {
+                                    IS: {
+                                        courses_dept: "adhe"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            EQ: {
+                                courses_avg: 95
+                            }
+                        }
+                    ]
                 },
                 OPTIONS: {
                     COLUMNS: [
                         "courses_dept",
+                        "courses_id",
                         "courses_avg"
                     ],
                     ORDER: "courses_avg"

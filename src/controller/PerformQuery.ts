@@ -2,11 +2,15 @@ import Log from "../Util";
 import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {IDataSet} from "../model/DataSet";
 import {ICourseSection} from "../model/CourseSection";
-import {ICourse} from "../model/Course";
+import {ITree} from "../model/Tree";
+import {INode} from "../model/Node";
 
 export default class PerformQuery {
     public dataSets: IDataSet[];
     public dataSetToQuery: IDataSet;
+    private columnsToQuery: string[];
+    private root: INode;
+    private result: any[];
 
     constructor() {
         Log.trace("Perform Query");
@@ -17,6 +21,15 @@ export default class PerformQuery {
             numRows: 0,
             courses: []
         };
+        this.columnsToQuery = [];
+        this.root = {
+            level: 0,
+            filterName: "",
+            key: "",
+            filterValue: "",
+            childNodes: []
+        };
+        this.result = [];
     }
 
     public performQuery(query: any, datasets: IDataSet[]): Promise<any[]> {
@@ -33,10 +46,20 @@ export default class PerformQuery {
                 numRows: 0,
                 courses: []
             }; // clear dataSetToQuery
+            this.columnsToQuery = [];
+            this.root = {
+                level: 0,
+                filterName: "",
+                key: "",
+                filterValue: "",
+                childNodes: []
+            };
+            this.result = [];
 
             try {
+                this.dataSetToQuery = this.dataSets[0];
+                // this.handleOptions(query.OPTIONS);
                 this.handleBody(query.WHERE);
-                this.handleOptions(query.OPTIONS);
             } catch (err) {
                 reject(err);
             }
@@ -44,25 +67,175 @@ export default class PerformQuery {
         });
     }
 
-    private handleBody(body: any) {
-        this.isFilter(Object.entries(body));
-    }
+    private handleBody(body: any): any[] {
+        let result: any[] = [];
+        // parse filter into a tree, create a root node for WHERE first
+        this.root = this.createNode("WHERE", "", "", 0);
+        this.parseFilters(Object.keys(body), Object.values(body), 1, this.root.childNodes);
+        // this.testTreeCreation(this.root);
 
-    private handleOptions(options: any) {
-        // TODO: COME BACK FOR THIS
-    }
+        if (this.root.childNodes.length === 0) {
+            // empty where case
+            return this.dataSetToQuery.courses;
+        }
 
-    // only work with Mcomp right now with a simple case
-    private isFilter(filters: Array<[string, any]>) {
-        filters.forEach((currValue) => {
-            if (this.isMcomp(currValue[0]) && this.validateMcomp(Object.entries(currValue))) {
-                return this.executeMcomp(currValue);
+        this.dataSetToQuery.courses.forEach((section) => {
+            if (this.filterCourses(this.root, section)) {
+                result.push(section);
             }
         });
+        Log.trace(String(result.length));
+        return result;
+
     }
 
-    private isLcomp(filter: string): boolean {
-        return filter === "AND" || filter === "OR";
+    // TODO: ALL THE VALIDATION
+    private parseFilters(filterNames: string[], filterBody: any[], level: number, nodes: INode[]) {
+        let i = 0;
+        for (let filterName of filterNames) {
+            if (this.isMcomp(filterName)) {
+                // validate key, validate filterValue
+                let key = this.validateKey(Object.keys(filterBody[i]), filterName);
+                let filterValue = this.validateInputValue(Object.values(filterBody[i]), filterName);
+                nodes.push(this.createNode(filterName, key, filterValue, level));
+            } else if (this.isScomp(filterName)) {
+                // validate key, validate filterValue
+                let key = this.validateKey(Object.keys(filterBody[i]), filterName);
+                let filterValue = this.validateInputValue(Object.values(filterBody[i]), filterName);
+                nodes.push(this.createNode(filterName, key, filterValue, level));
+            } else if (this.isAnd(filterName) && this.validateLcomp(filterBody[i])) {
+                // validate and recurse
+                let newNode = this.createNode(filterName, "", "", level);
+                nodes.push(newNode);
+                for (let filters of filterBody[i]) {
+                    this.parseFilters(Object.keys(filters), Object.values(filters), level + 1, newNode.childNodes);
+                }
+            } else if (this.isOr(filterName) && this.validateLcomp(filterBody[i])) {
+                // validate and recurse
+                let newNode = this.createNode(filterName, "", "", level);
+                nodes.push(newNode);
+                for (let filters of filterBody[i]) {
+                    this.parseFilters(Object.keys(filters), Object.values(filters), level + 1, newNode.childNodes);
+                }
+            } else if (this.isNeg(filterName) && this.validateNeg(filterBody[i])) {
+                // validate and recurse
+                let newNode = this.createNode(filterName, "", "", level);
+                nodes.push(newNode);
+                let filter = filterBody[i];
+                this.parseFilters(Object.keys(filter), Object.values(filter), level + 1, newNode.childNodes);
+
+            } else {
+                throw new Error("Invalid filter format");
+            }
+            i = i + 1;
+        }
+    }
+
+    private createNode(filterName: string, key: string, filterValue: string | number, level: number): INode {
+        let node: INode = {
+            level,
+            filterName,
+            key,
+            filterValue,
+            childNodes: []
+        };
+        return node;
+    }
+
+    private testTreeCreation(node: INode) {
+        Log.trace(node.filterName + " " + String(node.level) + " " + node.key + " " + String(node.filterValue));
+        for (let childnode of node.childNodes) {
+            this.testTreeCreation(childnode);
+        }
+    }
+
+    private filterCourses(node: INode, section: ICourseSection): boolean {
+        switch (node.filterName) {
+            case "WHERE":
+                return this.executeWHERE(node, section);
+            case "GT":
+                return this.executeGT(node.key, node.filterValue, section);
+            case "LT":
+                return this.executeLT(node.key, node.filterValue, section);
+            case "EQ":
+                return this.executeEQ(node.key, node.filterValue, section);
+            case "IS":
+                return this.executeIS(node.key, node.filterValue, section);
+            case "AND":
+                return this.executeAND(node, section);
+            case "OR":
+                return this.executeOR(node, section);
+            case "NOT":
+                return this.executeNOT(node, section);
+            default:
+                throw new Error("WTF, its not suppose to get here");
+        }
+    }
+
+    private executeGT(key: string, filterValue: number | string, section: ICourseSection): boolean {
+        return section[key] > filterValue;
+    }
+
+    private executeLT(key: string, filterValue: number | string, section: ICourseSection): boolean {
+        return section[key] < filterValue;
+    }
+
+    private executeEQ(key: string, filterValue: number | string, section: ICourseSection): boolean {
+        return section[key] === filterValue;
+    }
+
+    private executeIS(key: string, filterValue: number | string, section: ICourseSection): boolean {
+        return section[key] === filterValue;
+    }
+
+    private executeWHERE(node: INode, section: ICourseSection): boolean {
+        let allTrue = node.childNodes.every((childNode) => {
+            return this.filterCourses(childNode, section);
+        });
+
+        return allTrue;
+    }
+
+    private executeAND(node: INode, section: ICourseSection): boolean {
+        // let allTrue = node.childNodes.every((childNode) => {
+        //     return this.filterCourses(childNode, section);
+        // });
+        //
+        // return allTrue;
+        let allTrue: boolean = true;
+        for (let childNode of node.childNodes) {
+                if (!this.filterCourses(childNode, section)) {
+                    allTrue = false;
+                }
+        }
+        return allTrue;
+    }
+
+    private executeOR(node: INode, section: ICourseSection): boolean {
+        // let atLeastOneTrue = node.childNodes.find((childNode) => {
+        //     return this.filterCourses(childNode, section);
+        // });
+        //
+        // return atLeastOneTrue !== undefined;
+        let atLeastOneTrue: boolean = false;
+        for (let childNode of node.childNodes) {
+            if (this.filterCourses(childNode, section)) {
+                atLeastOneTrue = true;
+            }
+        }
+        return atLeastOneTrue;
+    }
+
+    private executeNOT(node: INode, section: ICourseSection): boolean {
+        return !(this.filterCourses(node.childNodes[0], section));
+    }
+
+    private isAnd(filter: string): boolean {
+        return filter === "AND";
+    }
+
+    private isOr(filter: string): boolean {
+        return filter === "OR";
     }
 
     private isNeg(filter: string): boolean {
@@ -77,89 +250,99 @@ export default class PerformQuery {
         return filter === "IS";
     }
 
-    private validateMcomp(keyInputs: Array<[string, any]>): boolean {
-        if (keyInputs.length === 1 && this.validateKey(keyInputs[0][0], keyInputs[0][1])) {
-            return true;
+    private validateKey(keys: string[], filterName: string): string {
+        let key: string = "";
+        if (keys.length !== 1) {
+            throw new Error("multiple key inside filter");
         } else {
-            throw new Error("more than one key and inputs in Mcomp");
+            key = keys[0];
         }
-    }
 
-    private validateKey(key: string, input: any): boolean {
-        let dataSetId: string = "";
-        let dataSetKey: string = "";
+        let dataSetId: string;
+        let dataSetKey: string;
         let keyArrHolder: string[] = key.split("_");
         dataSetId = keyArrHolder[0];
         dataSetKey = keyArrHolder[1];
 
-        if (dataSetId === "" || dataSetKey === "") {
+        if (dataSetId === undefined || dataSetKey === undefined) {
             throw new Error("Invalid key structure");
         }
 
-        return this.isValidKeyInput(dataSetKey, input) && this.isValidId(dataSetId);
-    }
+        if (dataSetId !== this.dataSetToQuery.id) {
+            throw new Error("numerous dataset ids present in query");
+        }
 
-    private isValidKeyInput(key: string, input: any): boolean {
-        if (key === "dept" && typeof input === "string") {
-            return true;
-        } else if (key === "id" && typeof input === "string") {
-            return true;
-        } else if (key === "avg" && typeof input === "number") {
-            return true;
-        } else if (key === "instructor" && typeof input === "string") {
-            return true;
-        } else if (key === "title" && typeof input === "string") {
-            return true;
-        } else if (key === "pass" && typeof input === "number") {
-            return true;
-        } else if (key === "fail" && typeof input === "number") {
-            return true;
-        } else if (key === "audit" && typeof input === "number") {
-            return true;
-        } else if (key === "uuid" && typeof input === "string") {
-            return true;
-        } else if (key === "year" && typeof input === "number") {
-            return true;
+        if (this.isMcomp(filterName) && this.validateMcompKey(dataSetKey)) {
+            return dataSetKey;
+        } else if (this.isScomp(filterName) && this.validateScompKey(dataSetKey)) {
+            return dataSetKey;
         } else {
-            throw new Error("Invalid input key/type");
+            throw new Error("failed to validate Key");
         }
     }
 
-    private isValidId(id: string): boolean {
-        this.dataSetToQuery = this.dataSets.find((currValue) => {
-            return currValue.id === id;
-        });
-
-        return this.dataSetToQuery.id !== "";
+    private validateMcompKey(key: string): boolean {
+        switch (key) {
+            case "avg":
+                return true;
+            case "pass":
+                return true;
+            case "fail":
+                return true;
+            case "audit":
+                return true;
+            case "year":
+                return true;
+            default:
+                return false;
+        }
     }
 
-    private isInputString(input: string): boolean {
-        return false; // stub
+    private validateScompKey(key: string): boolean {
+        switch (key) {
+            case "dept":
+                return true;
+            case "id":
+                return true;
+            case "instructor":
+                return true;
+            case "title":
+                return true;
+            case "uuid":
+                return true;
+            default:
+                return false;
+        }
     }
 
-    private executeMcomp(keyInput: [string, any]) {
-        let key: string = "";
-        let input: number = 0;
-        let queryResult: ICourseSection[] = []; // TODO: Make a return object
-        if (keyInput[0] === "GT") {
-            let keyInputHolder = Object.entries(keyInput[1]);
-            key = keyInputHolder[0][0];
-            input = keyInputHolder[0][1];
-
-            this.dataSetToQuery.courses.forEach((course) => {
-                course.sections.forEach((section) => {
-                    if (section[key] > input) {
-                        // TODO: INCOMPLETE
-                        queryResult.push(section);
-                    }
-                });
-            });
-            return queryResult;
-
-        } else if (keyInput[0] === "LT") {
-            // TODO: COME BACK HERE
+    private validateInputValue(inputs: any[], filterName: string): string | number {
+        let input: string | number;
+        if (inputs.length !== 1) {
+            throw new Error("multiple input value for a key");
+        }
+        input = inputs[0];
+        if (this.isMcomp(filterName) && typeof input === "number") {
+            return input;
+        } else if (this.isScomp(filterName) && typeof  input === "string") {
+            return input;
         } else {
-            // TODO: COME BACK HERE
+            throw new Error("failed to validate input value");
+        }
+    }
+
+    private validateLcomp(body: any[]): boolean {
+        if (body.length >= 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private validateNeg(body: any[]): boolean {
+        if (body.length === 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
