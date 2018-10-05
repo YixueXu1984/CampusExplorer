@@ -2,6 +2,7 @@ import Log from "../Util";
 import {INode} from "../model/Node";
 import {ICourseSection} from "../model/CourseSection";
 import {IDataSet} from "../model/DataSet";
+import {error} from "util";
 
 export default class Interpreter {
     constructor() {
@@ -105,18 +106,23 @@ export default class Interpreter {
 
     private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
         let bool: boolean;
-        let array = Array();
-        let startIndex = 0;
-        array = key.split("*");
-        let i: number;
-        bool = true;
-        for (i = 0 , i < array.length; i++;) {
-            let index = filterValue.indexOf(array[i], startIndex);
-            if (index === -1) {
-                bool = false;
-                break;
-            } else { startIndex = index; }
-        }
+        if (filterValue.substr(0, 1) === "*") {
+            bool = key.includes(filterValue.substr(1, filterValue.length ));
+        } else if (filterValue.substr(filterValue.length - 1 , filterValue.length) === "*")  {
+            bool = key.includes(filterValue.substr(0, filterValue.length - 1));
+        } else {bool = false; }
+        // let array = Array();
+        // let startIndex = 0;
+        // array = key.split("*");
+        // let i: number;
+        // bool = true;
+        // for (i = 0 , i < array.length; i++;) {
+        //     let index = filterValue.indexOf(array[i], startIndex);
+        //     if (index === -1) {
+        //         bool = false;
+        //         break;
+        //     } else { startIndex = index; }
+        // }
         return bool;
     }
 }
