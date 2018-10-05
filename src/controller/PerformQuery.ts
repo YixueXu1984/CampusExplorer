@@ -154,21 +154,4 @@ export default class PerformQuery {
             }
         });
     }
-
-    private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
-        let bool: boolean;
-        let array = Array();
-        let startIndex = 0;
-        array = key.split("*");
-        let i: number;
-        bool = true;
-        for (i = 0 , i < array.length; i++;) {
-            let index = filterValue.indexOf(array[i], startIndex);
-            if (index === -1) {
-                bool = false;
-                break;
-            } else { startIndex = index; }
-        }
-        return bool;
-    }
 }
