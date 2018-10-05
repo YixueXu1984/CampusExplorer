@@ -3,6 +3,7 @@ import {INode} from "../model/Node";
 import {ICourseSection} from "../model/CourseSection";
 import {IDataSet} from "../model/DataSet";
 import {error, isBoolean} from "util";
+import {InsightError} from "./IInsightFacade";
 
 export default class Interpreter {
     constructor() {
@@ -110,12 +111,19 @@ export default class Interpreter {
     }
 
     private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
-        if (filterValue.substr(0, 1) === "*") {
-            return key.includes(filterValue.substr(0, filterValue.length - 1), 0);
-            // key.includes(filterValue.substr(1, filterValue.length ));
-        } else if (filterValue.substr(filterValue.length - 1 , filterValue.length) === "*")  {
+        if (filterValue.substr(0, 1) === "*"
+            && !(filterValue.substr(filterValue.length - 1, 1 ) === "*")) {
+            return key.includes(filterValue.substr(1, filterValue.length ));
+        } else if (filterValue.substr(filterValue.length - 1 , 1) === "*"
+            && !(filterValue.substr(0, 1) === "*"))  {
             return key.includes(filterValue.substr(0, filterValue.length - 1));
-        } else {return false; }
+        } else if (filterValue.substr(filterValue.length - 1 , 1) === "*"
+            && (filterValue.substr(0, 1) === "*")
+        && !(filterValue.substr(1, filterValue.length - 2).includes("*"))) {
+            return key.includes(filterValue.substr(1, filterValue.length - 2 ));
+            // key.includes(filterValue.substr(1, filterValue.length - 1));
+        } else if (filterValue.substr(1, filterValue.length - 1).includes("*")) {
+            throw error(new InsightError("wrong placement of wildcard.")); }
         // let bool: boolean;
         // let array = Array();
         // let startIndex = 0;
