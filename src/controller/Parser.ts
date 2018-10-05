@@ -172,7 +172,7 @@ export default class Parser {
     }
 
     private validateNeg(body: any[]): boolean {
-        if (body.length === 1) {
+        if (Object.keys(body).length === 1) {
             return true;
         } else {
             return false;

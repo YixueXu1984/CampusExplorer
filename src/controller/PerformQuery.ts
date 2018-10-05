@@ -99,8 +99,12 @@ export default class PerformQuery {
 
     private handleOrder(order: string, columnsToQuery: string[]): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            if (order !== undefined && this.validateOrder(order, columnsToQuery)) {
+            if (order === undefined) {
+                resolve("");
+            } else if (order !== undefined && this.validateOrder(order, columnsToQuery)) {
                 resolve(order);
+            } else {
+                reject(order);
             }
         });
     }
