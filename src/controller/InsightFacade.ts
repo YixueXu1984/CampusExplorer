@@ -52,36 +52,30 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let performQuery = new PerformQuery();
-        performQuery.performQuery({
-            WHERE: {
-                GT: {
-                    courses_avg: 97
-                }
-            },
-            OPTIONS: {
-                COLUMNS: [
-                    "courses_dept",
-                    "courses_avg"
-                ],
-                ORDER: "courses_avg"
-            }}, this.dataSets
-        );
-        return Promise.reject("Not implemented.");
+        return new Promise((resolve, reject) => {
+            let performQuery = new PerformQuery();
+            performQuery.performQuery(query, this.dataSets)
+                .then((result) => {
+                    resolve(result);
+                })
+                .catch((err) => {
+                    reject(new InsightError(err));
+                });
+        });
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
         let results: InsightDataset[];
         this.dataSets.forEach((currDataSet) => {
-           results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
+            results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
         return Promise.resolve(results);
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
         let dataset: InsightDataset;
-        dataset.id      = name;
-        dataset.kind    = type;
+        dataset.id = name;
+        dataset.kind = type;
         dataset.numRows = num;
         return dataset;
     }
