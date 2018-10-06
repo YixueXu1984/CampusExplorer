@@ -1,7 +1,6 @@
 {
     "title": "SELECT dept, id, avg WHERE avg 'NOT' < 99",
     "query": {
-
             "WHERE":  {
                 "NOT":  {
                     "LT":  {
@@ -17,8 +16,23 @@
                 ],
                 "ORDER"  :"courses_avg"
             }
-
     },
     "isQueryValid": true,
-    "result":[{"courses_avg":99.19,"courses_dept":"cnps","courses_id":"574"},{"courses_avg":99.78,"courses_dept":"math","courses_id":"527"},{"courses_avg":99.78,"courses_dept":"math","courses_id":"527"}]
+    "result": [
+        {
+            "courses_avg": 99.19,
+            "courses_dept": "cnps",
+            "courses_id": "574"
+        },
+        {
+            "courses_avg": 99.78,
+            "courses_dept": "math",
+            "courses_id": "527"
+        },
+        {
+            "courses_avg": 99.78,
+            "courses_dept": "math",
+            "courses_id": "527"
+        }
+    ]
 }

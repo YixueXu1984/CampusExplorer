@@ -9,11 +9,12 @@
                         }
                     }
                 },
-                {"NOT":{
-                    "IS":{
-                        "courses_dept": "cpsc"
+                {
+                    "NOT":{
+                        "IS":{
+                            "courses_dept": "cpsc"
+                        }
                     }
-                }
                 },
 
                 {

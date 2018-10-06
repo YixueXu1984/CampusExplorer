@@ -1,10 +1,9 @@
 {
-    "title": "More than one GT operands",
+    "title": "Invalid Query with Invalid Order Key",
     "query": {
         "WHERE": {
             "GT": {
-                "courses_avg": 98,
-                "courses_pass": 10
+                "courses_avg":97
             }
         },
         "OPTIONS": {
@@ -16,6 +15,5 @@
         }
     },
     "isQueryValid": false,
-    "result": "Multiple key inside filter"
+    "result": "todo"
 }
-

@@ -3,13 +3,12 @@
     "query": {
         "WHERE": {
             "NOT": {
-                "NOT":{
+                "NOT": {
                     "GT": {
-                        "courses_avg":98
+                        "courses_avg": 98
                     }
                 }
             }
-
         },
         "OPTIONS": {
             "COLUMNS": [
