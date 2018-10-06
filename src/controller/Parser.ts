@@ -182,14 +182,14 @@ export default class Parser {
     private validateInputString(input: string) {
         let testInput = input;
         if (input.length >= 3) {
-           testInput = input.substring(1, input.length - 1);
-           let charsNotAsterix = testInput.match(/[*]/);
+            testInput = input.substring(1, input.length - 1);
+            let charsNotAsterix = testInput.match(/[*]/);
 
-           if (charsNotAsterix === undefined || charsNotAsterix === null) {
-               return true;
-           } else {
-               return false;
-           }
+            if (charsNotAsterix === undefined || charsNotAsterix === null) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return true;
         }
