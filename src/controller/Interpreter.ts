@@ -126,8 +126,7 @@ export default class Interpreter {
             && (filterValue.substr(0, 1) === "*")
             && !(filterValue.substr(1, filterValue.length - 2).includes("*"))) {
             return key.includes(filterValue.substr(1, filterValue.length - 2 ));
-        } else if (filterValue.substr(1, filterValue.length - 1).includes("*")) {
-            throw error(new InsightError("wrong placement of wildcard.")); }
+        }
      }
 
 }
