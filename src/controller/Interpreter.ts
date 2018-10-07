@@ -63,10 +63,9 @@ export default class Interpreter {
         bool = false;
         if (s.includes("*")) {
             if (s === "*" || s === "**") {
-                bool = true;
-            } else {bool = this.wildComparison(seckey, s, section); }
-        }
-        return (section[key] === s) || bool;
+                return true;
+            } else {return this.wildComparison(seckey, s, section); }
+        } else {return (section[key] === s); }
 
         // let regExp = new RegExp(filterValue.toString().replace(/\*/g, "."));
         // let test = (regExp.test(section[key].toString().replace(/\s/g, "")));
