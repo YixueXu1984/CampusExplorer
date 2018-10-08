@@ -61,11 +61,15 @@ export default class Interpreter {
         let seckey = section[key].toString();
         let bool: boolean;
         bool = false;
-        if (s.includes("*")) {
-            if (s === "*" || s === "**") {
+        if (s.includes("*")) { // potential wildcards
+            if (s === "*" || s === "**") { // return all sets
                 return true;
-            } else {return this.wildComparison(seckey, s, section); }
-        } else {return (section[key] === s); }
+            } else {
+                return this.wildComparison(seckey, s, section);
+            }
+        } else { // no wildcard
+            return (section[key] === s);
+        }
 
         // let regExp = new RegExp(filterValue.toString().replace(/\*/g, "."));
         // let test = (regExp.test(section[key].toString().replace(/\s/g, "")));
@@ -116,17 +120,19 @@ export default class Interpreter {
     }
 
     private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
-        if (filterValue.substr(0, 1) === "*"
-            && !(filterValue.substr(filterValue.length - 1, 1 ) === "*")) {
-            return key.includes(filterValue.substr(1, filterValue.length ));
-        } else if (filterValue.substr(filterValue.length - 1 , 1) === "*"
-            && !(filterValue.substr(0, 1) === "*"))  {
+        if ((filterValue.substr(1, filterValue.length - 2).includes("*")))  {
+            return false;
+        }
+
+        if (filterValue.startsWith("*") && !(filterValue.endsWith("*"))) {
+            return key.includes(filterValue.substr(1, filterValue.length - 1));
+        } else if ((filterValue.endsWith("*")) && !(filterValue.startsWith("*"))) {
             return key.includes(filterValue.substr(0, filterValue.length - 1));
-        } else if (filterValue.substr(filterValue.length - 1 , 1) === "*"
-            && (filterValue.substr(0, 1) === "*")
-            && !(filterValue.substr(1, filterValue.length - 2).includes("*"))) {
+        } else if ((filterValue.endsWith("*") && (filterValue.startsWith("*") &&
+                    !(filterValue.substr(1, filterValue.length - 2).includes("*"))))) {
             return key.includes(filterValue.substr(1, filterValue.length - 2 ));
+        } else {
+            return false;
         }
      }
-
 }
