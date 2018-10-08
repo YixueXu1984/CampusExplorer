@@ -125,9 +125,9 @@ export default class Interpreter {
         }
 
         if (filterValue.startsWith("*") && !(filterValue.endsWith("*"))) {
-            return key.includes(filterValue.substr(1, filterValue.length - 1));
+            return key.endsWith(filterValue.substr(1, filterValue.length - 1));
         } else if ((filterValue.endsWith("*")) && !(filterValue.startsWith("*"))) {
-            return key.includes(filterValue.substr(0, filterValue.length - 1));
+            return key.startsWith(filterValue.substr(0, filterValue.length - 1));
         } else if ((filterValue.endsWith("*") && (filterValue.startsWith("*") &&
                     !(filterValue.substr(1, filterValue.length - 2).includes("*"))))) {
             return key.includes(filterValue.substr(1, filterValue.length - 2 ));
