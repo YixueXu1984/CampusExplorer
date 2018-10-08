@@ -1,0 +1,30 @@
+{
+    "title": "SELECT dept, avg WHERE avg 'IS'(invalid) 97",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_instructor": "*-*"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_avg": 90
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_instructor",
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result":[{"courses_instructor":"advisor, -","courses_dept":"sowk","courses_id":"570","courses_avg":90.13},{"courses_instructor":"merida-donis, walter","courses_dept":"mech","courses_id":"545","courses_avg":90.17},{"courses_instructor":"staub-french, sheryl","courses_dept":"civl","courses_id":"526","courses_avg":90.2},{"courses_instructor":"adler-bock, marcy;avery, lisa ann","courses_dept":"audi","courses_id":"576","courses_avg":90.43},{"courses_instructor":"milner-bolotin, marina","courses_dept":"edcp","courses_id":"559","courses_avg":90.64},{"courses_instructor":"kim, young-heon","courses_dept":"math","courses_id":"516","courses_avg":91.25},{"courses_instructor":"brown, helen jean;o'flynn-magee, katherine;smye, victoria;tan, elsie","courses_dept":"nurs","courses_id":"338","courses_avg":91.33},{"courses_instructor":"chieng, sie-tan;stiemer, siegfried","courses_dept":"civl","courses_id":"446","courses_avg":91.46},{"courses_instructor":"lamonde, anne-marie","courses_dept":"edcp","courses_id":"410","courses_avg":91.48},{"courses_instructor":"milner-bolotin, marina","courses_dept":"etec","courses_id":"533","courses_avg":91.74},{"courses_instructor":"tsai, tai-peng","courses_dept":"math","courses_id":"515","courses_avg":92},{"courses_instructor":"driscoll-bell, jean","courses_dept":"thtr","courses_id":"356","courses_avg":92.32},{"courses_instructor":"tsai, tai-peng","courses_dept":"math","courses_id":"516","courses_avg":92.38},{"courses_instructor":"bally, marcel bertran;bennewith, kevin;cote, helene;devlin, angela;rajcan-separovic, evica;shah, sohrab;steidl, christian;verchere, bruce;wellington, cheryl lea;weng, andrew","courses_dept":"path","courses_id":"502","courses_avg":92.58},{"courses_instructor":"tsai, tai-peng","courses_dept":"math","courses_id":"516","courses_avg":92.75},{"courses_instructor":"doyle-waters, mary;taylor, darlene","courses_dept":"spph","courses_id":"516","courses_avg":93.73},{"courses_instructor":"kim, young-heon","courses_dept":"math","courses_id":"516","courses_avg":93.8},{"courses_instructor":"milner-bolotin, marina","courses_dept":"etec","courses_id":"533","courses_avg":93.95},{"courses_instructor":"oviedo-joekes, eugenia","courses_dept":"spph","courses_id":"550","courses_avg":94.36},{"courses_instructor":"milner-bolotin, marina","courses_dept":"etec","courses_id":"533","courses_avg":95.19},{"courses_instructor":"milner-bolotin, marina","courses_dept":"etec","courses_id":"533","courses_avg":95.96}]
+}

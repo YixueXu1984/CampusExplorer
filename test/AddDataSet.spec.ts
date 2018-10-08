@@ -2,7 +2,7 @@ import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
 import {expect} from "chai";
-import {InsightDataset, InsightDatasetKind} from "../src/controller/IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
 
 describe("AddDataSet", () => {
     const datasetsToLoad: { [id: string]: string } = {
@@ -63,7 +63,7 @@ describe("AddDataSet", () => {
         } catch (err) {
             response = err;
         } finally {
-            expect(response).to.deep.equal([]);
+            expect(response).to.be.instanceOf(InsightError);
         }
     });
 
@@ -76,7 +76,7 @@ describe("AddDataSet", () => {
         } catch (err) {
             response = err;
         } finally {
-            expect(response).to.deep.equal([]);
+            expect(response).to.be.instanceOf(InsightError);
         }
     });
 });

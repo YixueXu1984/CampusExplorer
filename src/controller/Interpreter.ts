@@ -125,7 +125,7 @@ export default class Interpreter {
         }
 
         if (filterValue.startsWith("*") && !(filterValue.endsWith("*"))) {
-            return key.includes(filterValue.substr(1, filterValue.length));
+            return key.includes(filterValue.substr(1, filterValue.length - 1));
         } else if ((filterValue.endsWith("*")) && !(filterValue.startsWith("*"))) {
             return key.includes(filterValue.substr(0, filterValue.length - 1));
         } else if ((filterValue.endsWith("*") && (filterValue.startsWith("*") &&
@@ -135,5 +135,4 @@ export default class Interpreter {
             return false;
         }
      }
-
 }
