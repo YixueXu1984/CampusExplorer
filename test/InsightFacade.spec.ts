@@ -507,7 +507,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
-     // Test removeDataset() & listDatasets()
+    // Test removeDataset() & listDatasets()
     it("Should remove the existing courses dataset", async () => {
         const id: string = "courses";
         let response: string;
@@ -526,49 +526,49 @@ describe("InsightFacade Add/Remove Dataset", function () {
             response = await insightFacade.listDatasets();
         } catch (err) {
             response = err;
-       } finally {
+        } finally {
             expect(response).to.deep.equal([]);
         }
     });
 
     it("Should throw error for delete non-existing dataset", async () => {
-         const id: string = "specificCourses";
-         let response: string;
+        const id: string = "specificCourses";
+        let response: string;
 
-         try {
-             response = await insightFacade.removeDataset(id);
-         } catch (err) {
-             response = err;
-         } finally {
-             expect(response).to.be.instanceOf(NotFoundError);
-         }
-     });
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.be.instanceOf(NotFoundError);
+        }
+    });
 
     it("Should throw error for removing dataset with invalid path", async () => {
-         const id: string = "invalidPath";
-         let response: string;
+        const id: string = "invalidPath";
+        let response: string;
 
-         try {
-             response = await insightFacade.removeDataset(id);
-         } catch (err) {
-             response = err;
-         } finally {
-             expect(response).to.be.instanceOf(NotFoundError);
-         }
-     });
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.be.instanceOf(NotFoundError);
+        }
+    });
 
     it("Should throw error for removing using null file name", async () => {
-         const id: string = null;
-         let response: string;
+        const id: string = null;
+        let response: string;
 
-         try {
-             response = await insightFacade.removeDataset(id);
-         } catch (err) {
-             response = err;
-         } finally {
-             expect(response).to.be.instanceOf(InsightError);
-         }
-     });
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.be.instanceOf(InsightError);
+        }
+    });
 
     it("Should throw error for adding wrong kind of dataset", async () => {
         const id: string = "courses3";
@@ -584,17 +584,17 @@ describe("InsightFacade Add/Remove Dataset", function () {
     });
 
     it("Should throw error for removing using undefined file name", async () => {
-         const id: string = undefined;
-         let response: string;
+        const id: string = undefined;
+        let response: string;
 
-         try {
-             response = await insightFacade.removeDataset(id);
+        try {
+            response = await insightFacade.removeDataset(id);
         } catch (err) {
-             response = err;
-         } finally {
-             expect(response).to.be.instanceOf(InsightError);
-         }
-     });
+            response = err;
+        } finally {
+            expect(response).to.be.instanceOf(InsightError);
+        }
+    });
 
     it("should added valid dataset 'courses3' to datasets", async () => {
         const id: string = "courses3";
@@ -608,7 +608,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
             expect(response).to.be.deep.equal(id);
         }
     });
- });
+});
 
 // This test suite dynamically generates tests from the JSON files in test/queries.
 // You should not need to modify it; instead, add additional files to the queries directory.

@@ -1,0 +1,23 @@
+{
+    "title": "courses_fail == 50",
+    "query": {
+        "WHERE": {
+            "EQ":{
+                "courses_fail": 50,
+                "courses_fail": 60
+            }
+
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg",
+                "courses_fail",
+                "courses_audit"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "two EQUALS for same key"
+}
