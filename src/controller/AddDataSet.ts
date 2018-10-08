@@ -6,7 +6,6 @@ import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
 export default class AddDataSet {
-    private dataDir = ".../data/";
 
     constructor() {
         Log.trace("Add Data Set");

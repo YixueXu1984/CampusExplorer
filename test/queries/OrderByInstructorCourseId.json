@@ -22,8 +22,7 @@
             "ORDER": "courses_id"
         }
     },
-
-
+    "isQueryValid": true,
     "result": [
         {
             "courses_dept": "phil",

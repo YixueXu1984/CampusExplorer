@@ -2,6 +2,8 @@ import Log from "../Util";
 import {INode} from "../model/Node";
 import {ICourseSection} from "../model/CourseSection";
 import {IDataSet} from "../model/DataSet";
+import {InsightError} from "./IInsightFacade";
+import {error} from "util";
 
 export default class Interpreter {
     constructor() {
@@ -56,8 +58,18 @@ export default class Interpreter {
 
     private executeIS(key: string, filterValue: number | string, section: ICourseSection): boolean {
         let s = filterValue.toString();
-        let bool = this.wildComparison(key, s, section);
-        return (section[key] === s);
+        let seckey = section[key].toString();
+        let bool: boolean;
+        bool = false;
+        if (s.includes("*")) {
+            if (s === "*" || s === "**") {
+                return true;
+            } else {return this.wildComparison(seckey, s, section); }
+        } else {return (section[key] === s); }
+
+        // let regExp = new RegExp(filterValue.toString().replace(/\*/g, "."));
+        // let test = (regExp.test(section[key].toString().replace(/\s/g, "")));
+        // return (regExp.test(section[key].toString().replace(/\s/g, "")));
     }
 
     private executeWHERE(node: INode, section: ICourseSection): boolean {
@@ -104,19 +116,17 @@ export default class Interpreter {
     }
 
     private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
-        let bool: boolean;
-        let array = Array();
-        let startIndex = 0;
-        array = key.split("*");
-        let i: number;
-        bool = true;
-        for (i = 0 , i < array.length; i++;) {
-            let index = filterValue.indexOf(array[i], startIndex);
-            if (index === -1) {
-                bool = false;
-                break;
-            } else { startIndex = index; }
+        if (filterValue.substr(0, 1) === "*"
+            && !(filterValue.substr(filterValue.length - 1, 1 ) === "*")) {
+            return key.includes(filterValue.substr(1, filterValue.length ));
+        } else if (filterValue.substr(filterValue.length - 1 , 1) === "*"
+            && !(filterValue.substr(0, 1) === "*"))  {
+            return key.includes(filterValue.substr(0, filterValue.length - 1));
+        } else if (filterValue.substr(filterValue.length - 1 , 1) === "*"
+            && (filterValue.substr(0, 1) === "*")
+            && !(filterValue.substr(1, filterValue.length - 2).includes("*"))) {
+            return key.includes(filterValue.substr(1, filterValue.length - 2 ));
         }
-        return bool;
-    }
+     }
+
 }

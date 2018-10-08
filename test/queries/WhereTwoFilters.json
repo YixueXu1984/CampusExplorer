@@ -1,36 +1,124 @@
-
 {
     "title": "Where with two filters not joined by Logic filters",
     "query": {
         "WHERE": {
-            "IS":{
-                "courses_dept": "cpen"
-            },
-
-            "GT":{
-                "courses_avg": 90
+            "NOT": {
+                "NOT": {
+                    "GT": {
+                        "courses_avg": 98
+                    }
+                }
             }
         },
         "OPTIONS": {
             "COLUMNS": [
                 "courses_dept",
-                "courses_id",
-                "courses_avg",
-                "courses_instructor",
-                "courses_title",
-                "courses_pass",
-                "courses_fail",
-                "courses_audit",
-                "courses_uuid"
-
+                "courses_avg"
             ],
-
             "ORDER": "courses_avg"
         }
     },
-    "isQueryValid": false,
-    "result": "Invalid Query Format"
-
-
-
+    "isQueryValid": true,
+    "result": [
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.08
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.21
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.21
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.36
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.45
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.45
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.5
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.5
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.58
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.58
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.58
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.58
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.7
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.71
+        },
+        {
+            "courses_dept": "nurs",
+            "courses_avg": 98.71
+        },
+        {
+            "courses_dept": "eece",
+            "courses_avg": 98.75
+        },
+        {
+            "courses_dept": "eece",
+            "courses_avg": 98.75
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.76
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.76
+        },
+        {
+            "courses_dept": "epse",
+            "courses_avg": 98.8
+        },
+        {
+            "courses_dept": "spph",
+            "courses_avg": 98.98
+        },
+        {
+            "courses_dept": "spph",
+            "courses_avg": 98.98
+        },
+        {
+            "courses_dept": "cnps",
+            "courses_avg": 99.19
+        },
+        {
+            "courses_dept": "math",
+            "courses_avg": 99.78
+        },
+        {
+            "courses_dept": "math",
+            "courses_avg": 99.78
+        }
+    ]
 }

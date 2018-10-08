@@ -4,8 +4,8 @@
         "WHERE": {
             "AND" : [
                 {
-                    "IS": {
-                        "courses_dept": "cpsc"
+                    "GT": {
+                        "courses_avg": 98
                     }
                 },
                 {}
@@ -20,7 +20,6 @@
             "ORDER": "courses_pass"
         }
     },
-
     "isQueryValid": false,
     "result": "todo"
 }

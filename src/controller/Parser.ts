@@ -156,7 +156,7 @@ export default class Parser {
         input = inputs[0];
         if (this.isMcomp(filterName) && typeof input === "number") {
             return input;
-        } else if (this.isScomp(filterName) && typeof  input === "string") {
+        } else if (this.isScomp(filterName) && typeof input === "string" && this.validateInputString(input)) {
             return input;
         } else {
             throw new Error("failed to validate input value");
@@ -172,10 +172,27 @@ export default class Parser {
     }
 
     private validateNeg(body: any[]): boolean {
-        if (body.length === 1) {
+        if (Object.keys(body).length === 1) {
             return true;
         } else {
             return false;
         }
+    }
+
+    private validateInputString(input: string) {
+        let testInput = input;
+        if (input.length >= 3) {
+            testInput = input.substring(1, input.length - 1);
+            let charsNotAsterix = testInput.match(/[*]/);
+
+            if (charsNotAsterix === undefined || charsNotAsterix === null) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+
     }
 }
