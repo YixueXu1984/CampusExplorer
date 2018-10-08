@@ -1,19 +1,28 @@
 {
-    "title": "c**c case",
+    "title": "test wildcard in dept",
     "query": {
         "WHERE": {
-            "AND":[
+            "AND": [
                 {
-                    "IS": {
-                        "courses_dept":"c**c"
-                    }
-                }
-            ,
+                    "AND": [
+                        {
+                            "GT": {
+                                "courses_avg": 50
+                            }
+                        },
+                        {
+                            "IS": {
+                                "courses_dept": "***"
+                            }
+                        }
+                    ]
+                },
                 {
                     "EQ": {
-                        "courses_avg":99
-                    }}]
-
+                        "courses_avg": 95
+                    }
+                }
+            ]
         },
         "OPTIONS": {
             "COLUMNS": [
@@ -25,4 +34,4 @@
         }
     },
     "isQueryValid": false,
-"result":[]}
+    "result":[]}
