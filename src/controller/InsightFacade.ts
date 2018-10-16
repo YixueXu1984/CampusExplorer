@@ -1,6 +1,6 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
-import AddDataSet from "./AddDataSet";
+import AddDataSetCourses from "./AddDataSetCourses";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
@@ -26,7 +26,7 @@ export default class InsightFacade implements IInsightFacade {
                 }
             });
 
-            let addDataSet: AddDataSet = new AddDataSet();
+            let addDataSet: AddDataSetCourses = new AddDataSetCourses();
             let dataSetsId: string[] = [];
             addDataSet.addDataset(id, content, kind)
                 .then((dataSet) => {
