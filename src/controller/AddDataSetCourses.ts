@@ -53,8 +53,6 @@ export default class AddDataSetCourses {
         }
     }
 
-    // TODO: implement checkValidBuilding
-
     private parseJson(sections: string): ICourseSection[] {
 
         let sectionsHolder: { result: any[] };
