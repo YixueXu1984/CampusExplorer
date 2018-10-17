@@ -1,0 +1,27 @@
+
+{
+    "title": "And with Invalid Filter",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "FILTER":{
+                        "courses_dept": "cpsc"
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "Invalid Query Format"
+
+
+
+}

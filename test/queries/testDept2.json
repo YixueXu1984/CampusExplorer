@@ -1,0 +1,19 @@
+{
+    "title": "SELECT dept, avg and instructor WHERE dept = cpsc ORDER BY avg",
+    "query": {
+        "WHERE": {
+            "IS": {
+                "invalid_department": "phil"
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

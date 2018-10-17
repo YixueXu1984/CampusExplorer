@@ -1,37 +1,21 @@
 {
-    "title": "test wildcard in dept",
+    "title": "SELECT dept, avg WHERE avg 'IS'(invalid) 97",
     "query": {
-        "WHERE": {
-            "AND": [
-                {
-                    "AND": [
-                        {
-                            "GT": {
-                                "courses_avg": 50
-                            }
-                        },
-                        {
-                            "IS": {
-                                "courses_dept": "c*sc"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "EQ": {
-                        "courses_avg": 95
-                    }
-                }
-            ]
-        },
-        "OPTIONS": {
-            "COLUMNS": [
-                "courses_dept",
-                "courses_id",
-                "courses_avg"
-            ],
-            "ORDER": "courses_avg"
+
+    "WHERE": {
+        "IS": {
+            "courses_avg":97
         }
     },
+    "OPTIONS": {
+        "COLUMNS": [
+            "courses_dept",
+            "courses_avg"
+        ],
+        "ORDER": "courses_avg"
+    }
+
+    },
     "isQueryValid": false,
-    "result":[]}
+    "result": "Not implemented."
+}

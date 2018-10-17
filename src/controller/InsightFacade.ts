@@ -49,6 +49,9 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
+        // TODO: add function GROUP
+        // TODO: add function APPLY
+        // TODO: add function SORT
         return new Promise((resolve, reject) => {
             let performQuery = new PerformQuery();
             performQuery.performQuery(query, this.dataSets)
@@ -70,6 +73,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
+        // TODO: implement Room case
         let dataset: InsightDataset = {
           id: "",
           kind: InsightDatasetKind.Courses,

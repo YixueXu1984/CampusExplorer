@@ -1,0 +1,35 @@
+{  "title": "Or (courses_avg > 90, courses_fail < 2, courses_auid = 3)",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "GT":{
+                        "courses_avg": 100
+                    }
+                },
+                {
+                    "LT":{
+                        "courses_fail": 0
+                    }
+                },
+                {
+                    "EQ":{
+                        "courses_audit": 8
+                    }
+                }
+            ]
+
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg",
+                "courses_fail",
+                "courses_audit"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result": []
+}

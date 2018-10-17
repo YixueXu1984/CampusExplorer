@@ -1,0 +1,30 @@
+{
+    "title": "number key but string",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "GT": {
+                        "courses_avg":"n"
+                    }
+                },
+                {
+                    "IS": {
+                        "courses_dept":"adhe"
+                    }
+                }
+            ]
+        },
+
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

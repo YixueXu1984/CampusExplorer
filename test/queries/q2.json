@@ -1,37 +1,36 @@
 {
-    "title": "test wildcard in dept",
+    "title": "empty body columns",
     "query": {
         "WHERE": {
-            "AND": [
+            "OR": [
                 {
-                    "AND": [
+                    "AND":[
                         {
                             "GT": {
-                                "courses_avg": 50
+                                "courses_avg":96
                             }
                         },
                         {
                             "IS": {
-                                "courses_dept": "*cpsc"
+                                "courses_dept":"adhe"
                             }
                         }
                     ]
                 },
                 {
                     "EQ": {
-                        "courses_avg": 95
+                        "courses_avg":97
                     }
                 }
             ]
         },
         "OPTIONS": {
             "COLUMNS": [
-                "courses_dept",
-                "courses_id",
-                "courses_avg"
+
             ],
             "ORDER": "courses_avg"
         }
     },
-    "isQueryValid": true,
-    "result":[{"courses_dept":"cpsc","courses_id":"589","courses_avg":95},{"courses_dept":"cpsc","courses_id":"589","courses_avg":95}]}
+    "isQueryValid": false,
+    "result": "Not implemented."
+}

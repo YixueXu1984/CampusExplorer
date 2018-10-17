@@ -1,0 +1,49 @@
+{  "title": "AND Nested Is",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "IS":{
+                        "courses_dept": "cpen"
+                    }
+                },
+
+                {
+                    "IS":{
+                        "courses_instructor": "lis, mieszko"
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg",
+                "courses_instructor",
+                "courses_title",
+                "courses_pass",
+                "courses_fail",
+                "courses_audit",
+                "courses_uuid"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+
+    "result": [
+        {
+            "courses_dept": "cpen",
+            "courses_id": "411",
+            "courses_avg": 71.13,
+            "courses_instructor": "lis, mieszko",
+            "courses_title": "comptr architctr",
+            "courses_pass": 38,
+            "courses_fail": 2,
+            "courses_audit": 0,
+            "courses_uuid": "81229"
+        }
+    ]
+
+}

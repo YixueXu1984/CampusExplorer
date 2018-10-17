@@ -1,0 +1,32 @@
+{
+    "title": "Is Contradict",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "IS":{
+                        "courses_dept": "cpsc"
+                    }
+                },
+
+                {
+                    "IS":{
+                        "courses_dept": "busi"
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result":[]
+
+
+}
+

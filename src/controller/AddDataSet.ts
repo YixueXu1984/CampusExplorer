@@ -53,6 +53,8 @@ export default class AddDataSet {
         }
     }
 
+    // TODO: implement checkValidBuilding
+
     private parseJson(sections: string): ICourseSection[] {
 
         let sectionsHolder: { result: any[] };
@@ -98,6 +100,7 @@ export default class AddDataSet {
     }
 
     private iterateThroughFiles(courses: JSZip, id: string, kind: InsightDatasetKind): Promise<IDataSet> {
+        // TODO: add case for Room
         return new Promise((resolve, reject) => {
             let promisearr: Array<Promise<ICourseSection[]>> = [];
             let dataSet: IDataSet = {
@@ -154,6 +157,7 @@ export default class AddDataSet {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
+            // TODO: add case for Room
             if (id === null || id === undefined) {
                 reject("invalid id");
             } else if (content === null || content === undefined) {

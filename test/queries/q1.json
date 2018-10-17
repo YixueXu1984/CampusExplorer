@@ -1,25 +1,25 @@
 {
-    "title": "test wildcard in dept",
+    "title": "Invalid Semantics, key not in columns array",
     "query": {
         "WHERE": {
-            "AND": [
+            "OR": [
                 {
-                    "AND": [
+                    "AND":[
                         {
                             "GT": {
-                                "courses_avg": 50
+                                "courses_avg":90
                             }
                         },
                         {
                             "IS": {
-                                "courses_dept": "cps*"
+                                "courses_dept":"adhe"
                             }
                         }
                     ]
                 },
                 {
                     "EQ": {
-                        "courses_avg": 95
+                        "courses_avg":95
                     }
                 }
             ]
@@ -30,8 +30,9 @@
                 "courses_id",
                 "courses_avg"
             ],
-            "ORDER": "courses_avg"
+            "ORDER": "courses_instructor"
         }
     },
-    "isQueryValid": true,
-    "result":[{"courses_dept":"cpsc","courses_id":"589","courses_avg":95},{"courses_dept":"cpsc","courses_id":"589","courses_avg":95}]}
+    "isQueryValid": false,
+    "result": "Invalid Query Format"
+}

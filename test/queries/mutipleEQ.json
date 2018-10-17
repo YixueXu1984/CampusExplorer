@@ -1,0 +1,21 @@
+{
+    "title": "More than one EQ operands",
+    "query": {
+        "WHERE": {
+            "EQ": {
+                "courses_avg": 95,
+                "courses_pass": 10
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "Multiple key inside filter"
+}
+
