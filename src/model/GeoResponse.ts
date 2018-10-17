@@ -1,4 +1,5 @@
 export interface IGeoResponse {
-    // TODO: implement GeoResponse
-    emptyFiled: string;
+    lat?: number;
+    lon?: number;
+    error?: string;
 }

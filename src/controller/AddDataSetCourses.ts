@@ -5,7 +5,7 @@ import {JSZipObject} from "jszip";
 import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
-export default class AddDataSet {
+export default class AddDataSetCourses {
 
     constructor() {
         Log.trace("Add Data Set");
@@ -52,8 +52,6 @@ export default class AddDataSet {
             return true;
         }
     }
-
-    // TODO: implement checkValidBuilding
 
     private parseJson(sections: string): ICourseSection[] {
 
