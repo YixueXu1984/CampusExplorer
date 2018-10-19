@@ -4,6 +4,8 @@ import AddDataSetCourses from "./AddDataSetCourses";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
+import * as fs from "fs";
+import {ICourseSection} from "../model/CourseSection";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -16,6 +18,13 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
+        this.loadDataSet()
+            .then((dataSets) => {
+                this.dataSets = dataSets;
+            })
+            .catch((err) => {
+                Log.error("failed to load cached datasets" + String(err));
+            });
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -75,13 +84,86 @@ export default class InsightFacade implements IInsightFacade {
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
         // TODO: implement Room case
         let dataset: InsightDataset = {
-          id: "",
-          kind: InsightDatasetKind.Courses,
-          numRows: 0
+            id: "",
+            kind: InsightDatasetKind.Courses,
+            numRows: 0
         };
         dataset.id = name;
         dataset.kind = type;
         dataset.numRows = num;
         return dataset;
+    }
+
+    private loadDataSet(): Promise<IDataSet[]> {
+        return new Promise<IDataSet[]>((resolve, reject) => {
+            fs.access("data/", (err) => {
+                if (err) {
+                    fs.mkdir("data/", (error) => {
+                        if (err) {
+                            reject(error);
+                        }
+                        this.readDir()
+                            .then((dataSets) => {
+                                return resolve(dataSets);
+                            })
+                            .catch((error2) => {
+                                return reject(error2);
+                            });
+
+                    });
+                } else {
+                    this.readDir()
+                        .then((dataSets) => {
+                            return resolve(dataSets);
+                        })
+                        .catch((error1) => {
+                            return reject(error1);
+                        });
+                }
+            });
+        });
+    }
+
+    private readDir(): Promise<IDataSet[]> {
+        return new Promise<IDataSet[]>((resolve, reject) => {
+            let dataSets: IDataSet[] = [];
+            let promiseArr: Array<Promise<IDataSet>> = [];
+            fs.readdir("data/", (err: Error, files: string[]) => {
+                if (err) {
+                    reject(err);
+                }
+
+                for (let file of files) {
+                    promiseArr.push(this.readFiles(file));
+                }
+
+                Promise.all(promiseArr)
+                    .then((dataSetArray) => {
+                        dataSetArray.forEach((dataSet) => {
+                            dataSets.push(dataSet);
+                        });
+                        resolve(dataSets);
+                    })
+                    .catch((error) => {
+                        return reject(error);
+                    });
+            });
+        });
+    }
+
+    private readFiles(file: string): Promise<IDataSet> {
+        return new Promise<IDataSet>((resolve, reject) => {
+            fs.readFile(file, "utf8", (err, data) => {
+                try {
+                    if (err) {
+                        throw err;
+                    }
+                    let dataSet: IDataSet = JSON.parse(data);
+                    resolve(dataSet);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
     }
 }

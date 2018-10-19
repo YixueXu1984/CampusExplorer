@@ -119,6 +119,7 @@ export default class Interpreter {
         return result;
     }
 
+    // TODO: Check this
     private wildComparison(key: string, filterValue: string, section: ICourseSection): boolean {
         if ((filterValue.substr(1, filterValue.length - 2).includes("*")))  {
             return false;

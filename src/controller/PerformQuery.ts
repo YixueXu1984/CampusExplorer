@@ -26,7 +26,6 @@ export default class PerformQuery {
                 reject("Missing WHERE or OPTIONS clause");
             }
 
-            // TODO: Some logic to load dataSet if it hasnt been around already
             this.dataSets = dataSets; // update datasets
 
             this.dataSetToQuery = {
@@ -201,31 +200,7 @@ export default class PerformQuery {
 
             if (FoundDataSet !== undefined) {
                 resolve(FoundDataSet);
-            // } else {
-            //     this.loadDataset(id)
-            //         .then((dataSetLoaded) => {
-            //             dataSets.push(dataSetLoaded);
-            //             resolve(dataSetLoaded);
-            //         })
-            //         .catch((dataSetNotFound) => {
-            //             reject(dataSetNotFound);
-            //         });
             }
         });
     }
-
-    // private loadDataset(id: string) {
-    //     return new Promise<IDataSet>((resolve, reject) => {
-    //         try {
-    //             const fs = require("fs");
-    //             let file = fs.readFile("data/" + id + ".json");
-    //             let dataset = JSON.parse(file);
-    //             this.dataSets.push(dataset);
-    //             resolve(dataset);
-    //         } catch (err) {
-    //             reject(err);
-    //         }
-    //     });
-    //
-    // }
 }

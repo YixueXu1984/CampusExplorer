@@ -18,14 +18,19 @@ export default class Parser {
     private parseFiltersHelper(filterNames: string[], filterBody: any[], nodes: INode[]) {
         let i = 0;
         for (let filterName of filterNames) {
-            if (this.isMcomp(filterName)) {
-                let key = this.validateKey(Object.keys(filterBody[i]), filterName);
-                let filterValue = this.validateInputValue(Object.values(filterBody[i]), filterName);
-                nodes.push(this.createNode(filterName, key, filterValue));
-            } else if (this.isScomp(filterName)) {
-                let key = this.validateKey(Object.keys(filterBody[i]), filterName);
-                let filterValue = this.validateInputValue(Object.values(filterBody[i]), filterName);
-                nodes.push(this.createNode(filterName, key, filterValue));
+            let key: string = "";
+            let input: string | number = "";
+            if (this.isMcomp(filterName) || this.isScomp(filterName)) {
+                key = this.extractKey(Object.keys(filterBody[i]));
+                input = this.extractInputValue(Object.values(filterBody[i]));
+            }
+
+            if (this.isMcomp(filterName) && this.validateKey(key, filterName)
+                && this.validateInputValue(input, filterName)) {
+                nodes.push(this.createNode(filterName, key, input));
+            } else if (this.isScomp(filterName) && this.validateKey(key, filterName)
+                && this.validateInputValue(input, filterName)) {
+                nodes.push(this.createNode(filterName, key, input));
             } else if (this.isAnd(filterName) && this.validateLcomp(filterBody[i])) {
                 let newNode = this.createNode(filterName, "", "");
                 nodes.push(newNode);
@@ -83,7 +88,7 @@ export default class Parser {
         return filter === "IS";
     }
 
-    private validateKey(keys: string[], filterName: string): string {
+    private extractKey(keys: string[]): string {
         let key: string = "";
         if (keys.length !== 1) {
             throw new Error("multiple key inside filter");
@@ -104,13 +109,25 @@ export default class Parser {
         if (dataSetId !== this.dataSetToQueryId) {
             throw new Error("numerous dataset ids present in query");
         }
+        return dataSetKey;
+    }
 
-        if (this.isMcomp(filterName) && this.validateMcompKey(dataSetKey)) {
-            return dataSetKey;
-        } else if (this.isScomp(filterName) && this.validateScompKey(dataSetKey)) {
-            return dataSetKey;
+    private extractInputValue(inputs: any[]): string | number {
+        let input: string | number;
+        if (inputs.length !== 1) {
+            throw new Error("multiple input value for a key");
+        }
+        input = inputs[0];
+        return input;
+    }
+
+    private validateKey(key: string, filterName: string): boolean {
+        if (this.isMcomp(filterName) && this.validateMcompKey(key)) {
+            return true;
+        } else if (this.isScomp(filterName) && this.validateScompKey(key)) {
+            return true;
         } else {
-            throw new Error("failed to validate Key");
+            return false;
         }
     }
 
@@ -148,18 +165,13 @@ export default class Parser {
         }
     }
 
-    private validateInputValue(inputs: any[], filterName: string): string | number {
-        let input: string | number;
-        if (inputs.length !== 1) {
-            throw new Error("multiple input value for a key");
-        }
-        input = inputs[0];
+    private validateInputValue(input: string | number, filterName: string): boolean {
         if (this.isMcomp(filterName) && typeof input === "number") {
-            return input;
+            return true;
         } else if (this.isScomp(filterName) && typeof input === "string" && this.validateInputString(input)) {
-            return input;
+            return true;
         } else {
-            throw new Error("failed to validate input value");
+            return false;
         }
     }
 
@@ -179,7 +191,7 @@ export default class Parser {
         }
     }
 
-    private validateInputString(input: string) {
+    private validateInputString(input: string): boolean {
         let testInput = input;
         if (input.length >= 3) {
             testInput = input.substring(1, input.length - 1);

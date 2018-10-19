@@ -139,9 +139,6 @@ export default class AddDataSetCourses {
 
     private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            if (!fs.existsSync( "data/")) {
-                fs.mkdirSync("data/");
-            }
             fs.writeFile("data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
                 if (err) {
                    return reject(err);
