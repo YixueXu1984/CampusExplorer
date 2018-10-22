@@ -4,6 +4,7 @@ import AddDataSetCourses from "./AddDataSetCourses";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
+import GetGeoLocation from "./GetGeoLocation";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -83,5 +84,10 @@ export default class InsightFacade implements IInsightFacade {
         dataset.kind = type;
         dataset.numRows = num;
         return dataset;
+    }
+
+    public getGeoLocation(location: string): Promise<number[]> {
+        let results =  new GetGeoLocation();
+        return results.getGeoLocation(location);
     }
 }
