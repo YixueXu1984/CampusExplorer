@@ -1,10 +1,4 @@
 import {InsightDatasetKind, InsightError, NotFoundError} from "./IInsightFacade";
-import {error} from "util";
-import {IGeoResponse} from "../model/GeoResponse";
-import Log from "../Util";
-import chaiHttp = require("chai-http");
-import * as Http from "http";
-import {fullResponse} from "restify";
 
 export default class GetGeoLocation  {
     public res: object;
@@ -24,7 +18,6 @@ export default class GetGeoLocation  {
         http.get("http://cs310.ugrad.cs.ubc.ca:11316/api/v1/project_l1k0b_q0t1b_v7e0b/" +
             encodedAddress, (res: any) => {
             const status = res.statusCode;
-            const contentType = res.headers["content-type"];
 
             let err;
             if (status !== 200) {
