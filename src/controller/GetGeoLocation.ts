@@ -9,8 +9,7 @@ export default class GetGeoLocation  {
     }
 
     public getGeoLocation(Location: string): Promise<number[]>  {
-        let address = Location;
-        let encodedAddress = encodeURI(address);
+        let encodedAddress = encodeURI(Location);
 
         return new Promise<number[]>((resolve, reject) => {
         const http = require("http");
@@ -19,13 +18,8 @@ export default class GetGeoLocation  {
             encodedAddress, (res: any) => {
             const status = res.statusCode;
 
-            let err;
             if (status !== 200) {
-                err = new Error("Request Failed: " + status);
-            }
-            if (err) {
-                res.resume();
-                reject (new InsightError("Returned error: input is not a valid address"));
+                reject(new Error("Request Failed: " + status));
             }  else {
                 res.setEncoding("utf8");
                 let data = "";
