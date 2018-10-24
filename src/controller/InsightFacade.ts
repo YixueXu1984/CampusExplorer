@@ -6,6 +6,7 @@ import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
+import GetGeoLocation from "./GetGeoLocation";
 
 /**
  * This is the main programmatic entry point for the project.
