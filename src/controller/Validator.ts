@@ -1,3 +1,6 @@
+import {InsightDatasetKind} from "./IInsightFacade";
+import {COLUMN_KEYS, MCOMP_KEYS, SCOMP_KEYS} from "./Enums";
+
 export default class Validator {
     constructor() {
         // validator
@@ -5,33 +8,10 @@ export default class Validator {
 
     // ---- VALIDATORS START --- //
     public validateColumn(dataSetKey: string): boolean {
-        switch (dataSetKey) {
-            case "dept":
-                return true;
-            case "id":
-                return true;
-            case "instructor":
-                return true;
-            case "title":
-                return true;
-            case "uuid":
-                return true;
-            case "avg":
-                return true;
-            case "pass":
-                return true;
-            case "fail":
-                return true;
-            case "audit":
-                return true;
-            case "year":
-                return true;
-            default:
-                return false;
-        }
-
+        return (Object.values(COLUMN_KEYS).includes(dataSetKey));
     }
 
+    // TODO: change how order is validated
     public validateOrder(columnsToQuery: string[], dataSetKey: string): boolean {
         let existInColumns = columnsToQuery.find((currKey) => {
             return currKey === dataSetKey;
@@ -75,37 +55,11 @@ export default class Validator {
     }
 
     public validateMcompKey(key: string): boolean {
-        switch (key) {
-            case "avg":
-                return true;
-            case "pass":
-                return true;
-            case "fail":
-                return true;
-            case "audit":
-                return true;
-            case "year":
-                return true;
-            default:
-                return false;
-        }
+        return Object.values(MCOMP_KEYS).includes(key);
     }
 
     public validateScompKey(key: string): boolean {
-        switch (key) {
-            case "dept":
-                return true;
-            case "id":
-                return true;
-            case "instructor":
-                return true;
-            case "title":
-                return true;
-            case "uuid":
-                return true;
-            default:
-                return false;
-        }
+        return Object.values(SCOMP_KEYS).includes(key);
     }
 
     public validateInputValue(input: string | number, filterName: string): boolean {
@@ -149,5 +103,36 @@ export default class Validator {
             return true;
         }
 
+    }
+
+    // TODO: these validations
+    // one or more of any character except underscore.
+    public validateApplyKey(key: string): boolean {
+        return false;
+    }
+
+    // The applykey in an APPLYRULE should be unique (no two APPLYRULE's should share an applykey with the same name).
+    public isUniqueApplyKey(applyKeys: string[], applyKey: string): boolean {
+        return false;
+    }
+
+    // If a GROUP is present, all COLUMNS terms must correspond to either GROUP keys or to applykeys defined
+    // in the APPLY block.
+    public existsInGroupApply(groupKeys: string[], applyKeys: string[], columnKey: string): boolean {
+        return false;
+    }
+
+    // SORT - Any keys provided must be in the COLUMNS.
+    public isSortInColumn(columnKeys: string[], sortKey: string): boolean {
+        return false;
+    }
+
+    public validateApplyToken(key: string, applyToken: string): boolean {
+        // CHECK OUT Enum
+        return false;
+    }
+
+    private validateDir(dir: string): boolean {
+        return dir === "UP" || dir === "down";
     }
 }

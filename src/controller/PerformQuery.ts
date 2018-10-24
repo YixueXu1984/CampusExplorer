@@ -5,6 +5,7 @@ import Interpreter from "./Interpreter";
 import InsightFacade from "./InsightFacade";
 import {INode} from "../model/Node";
 import Validator from "./Validator";
+import {IApplyObject} from "../model/ApplyObject";
 
 export default class PerformQuery {
     public dataSets: IDataSet[];
@@ -41,7 +42,7 @@ export default class PerformQuery {
             try {
                 let columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
 
-                // TODO: handleOrder query.OPTIONS.SORT
+                // TODO: handleOrder
                 let promiseArr: Array<Promise<any>> = [this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
                     this.parseBody(query.WHERE, columnsToQuery),
                     this.findDataSet(this.dataSetToQuery.id, dataSets)];
@@ -103,6 +104,7 @@ export default class PerformQuery {
         return columnsToQuery;
     }
 
+    // TODO: order now needs to extract both a key and a direction
     private handleOrder(order: string, columnsToQuery: string[]): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             if (order === undefined) {
@@ -113,6 +115,14 @@ export default class PerformQuery {
                 reject(order);
             }
         });
+    }
+
+    private handleGroup(groupKeys: string[]): Promise<string> {
+        return null;
+    }
+
+    private handleApply(applyObject: any[]): Promise<IApplyObject[]> {
+        return null;
     }
 
     private extractKey(columnOrder: string): string {
@@ -136,6 +146,7 @@ export default class PerformQuery {
         return dataSetKey;
     }
 
+    // TODO: this needs major change
     private orderResult(result: any[], orderBy: string) {
         result.sort((a, b) => {
             if (a[orderBy] < b[orderBy]) {
@@ -146,6 +157,10 @@ export default class PerformQuery {
                 return 0;
             }
         });
+    }
+
+    private applyTransformations(result: any[], applyObjects: IApplyObject[]): void {
+        // hmm not sure if this is right
     }
 
     private findDataSet(id: string, dataSets: IDataSet[]): Promise<IDataSet> {
