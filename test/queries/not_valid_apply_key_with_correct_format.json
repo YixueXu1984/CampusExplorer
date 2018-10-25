@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "Invalid APPLY key 'courses_john'",
     "query": {
         "WHERE": {
             "GT": {

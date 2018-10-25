@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "Multiple APPLY body, invalid query",
     "query": {
         "WHERE": {
             "GT": {

@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "Valid apply AVG calculation",
     "query": {
         "WHERE": {
             "GT": {

@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "Valid group key",
     "query": {
         "WHERE": {
             "GT": {

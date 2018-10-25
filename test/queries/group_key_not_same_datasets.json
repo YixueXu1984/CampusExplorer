@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "Group key is not from the same dataset",
     "query": {
         "WHERE": {
             "GT": {
@@ -14,7 +14,7 @@
         },
         "TRANSFORMATIONS": {
             "GROUP": [
-                "courses_title"
+                "rooms_title"
             ],
             "APPLY": [
                 {
