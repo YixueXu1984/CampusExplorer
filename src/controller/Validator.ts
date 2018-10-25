@@ -108,7 +108,9 @@ export default class Validator {
     // TODO: these validations
     // one or more of any character except underscore.
     public validateApplyKey(key: string): boolean {
-        return false;
+        if (key.length === 0 || key.includes("_")) {
+            return false;
+        } else { return true; }
     }
 
     // The applykey in an APPLYRULE should be unique (no two APPLYRULE's should share an applykey with the same name).
@@ -124,7 +126,11 @@ export default class Validator {
 
     // SORT - Any keys provided must be in the COLUMNS.
     public isSortInColumn(columnKeys: string[], sortKey: string): boolean {
-        return false;
+        if (columnKeys.includes(sortKey)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public validateApplyToken(key: string, applyToken: string): boolean {
@@ -133,6 +139,6 @@ export default class Validator {
     }
 
     private validateDir(dir: string): boolean {
-        return dir === "UP" || dir === "down";
+        return dir === "UP" || dir === "DOWN";
     }
 }
