@@ -1,0 +1,26 @@
+{
+    "title": "null apply key",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 98
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_title",
+                "overallAvg"
+            ]
+        },
+        "TRANSFORMATIONS": {
+            "GROUP":  [
+                "courses_title"
+            ],
+            "APPLY": null
+        }
+    },
+    "isQueryValid": false,
+
+    "result": []
+}
+
