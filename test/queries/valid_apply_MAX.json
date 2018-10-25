@@ -1,0 +1,32 @@
+{
+    "title": "Wrong Transformations key",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 98
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_title",
+                "maxavg"
+            ]
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "courses_title"
+            ],
+            "APPLY": [
+                {
+                    "maxavg": {
+                        "MAX": "courses_avg"
+                    }
+                }
+            ]
+        }
+    },
+    "isQueryValid": true,
+
+"result":[{"courses_title":"career planning","maxavg":99.19},{"courses_title":"multimedia sys","maxavg":98.75},{"courses_title":"assess lrn diffi","maxavg":98.7},{"courses_title":"educ stds autism","maxavg":98.8},{"courses_title":"dev el sk df&hrd","maxavg":98.45},{"courses_title":"algb topology i","maxavg":99.78},{"courses_title":"cl pro prim care","maxavg":98.71},{"courses_title":"fam nrs pract","maxavg":98.58},{"courses_title":"work int health","maxavg":98.98}]
+}
+

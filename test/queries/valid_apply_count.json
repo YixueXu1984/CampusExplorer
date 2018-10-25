@@ -1,0 +1,30 @@
+{
+    "title": "Wrong Transformations key",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 98
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_title",
+                "count"
+            ]
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "courses_title"
+            ],
+            "APPLY": [
+                {
+                    "count": {
+                        "COUNT": "courses_avg"
+                    }
+                }
+            ]
+        }
+    },
+    "isQueryValid": true,
+
+"result":[{"courses_title":"career planning","sum":1},{"courses_title":"multimedia sys","sum":1},{"courses_title":"assess lrn diffi","sum":3},{"courses_title":"educ stds autism","sum":3},{"courses_title":"dev el sk df&hrd","sum":1},{"courses_title":"algb topology i","sum":1},{"courses_title":"cl pro prim care","sum":2},{"courses_title":"fam nrs pract","sum":2},{"courses_title":"work int health","sum":1}]}
