@@ -5,8 +5,9 @@ import {InsightDatasetKind} from "./IInsightFacade";
 import {IDataSet} from "../model/DataSet";
 import Log from "../Util";
 import * as fs from "fs";
-import {ICourseSection} from "../model/CourseSection";
 import {IDataSetRooms} from "../model/DataSetRooms";
+import {stringify} from "querystring";
+import {ICourseSection} from "../model/CourseSection";
 
 export default class AddDataSetRooms {
     constructor() {
@@ -31,7 +32,7 @@ export default class AddDataSetRooms {
                     return this.getBuildingsPaths(index);
                 })
                 .then((buildings) => {
-                    return this.iterateThroughFiles(buildings, id, kind);
+                    return this.iterateThroughFiles(zip, buildings, id, kind);
                 })
                 .then((dataset) => {
                     return this.cacheDataSet(dataset);
@@ -48,64 +49,134 @@ export default class AddDataSetRooms {
     private getBuildingsPaths(cont: string): string[] {
         let buildingPaths: string[] = [];
         const parse5 = require("parse5");
-        const doc = parse5.parse(cont, {treeAdapter: parse5.treeAdapters.default});
+        const doc = parse5.parse(cont); // , {treeAdapter: parse5.treeAdapters.default}
         const tbodyNode = this.findTbody(doc);
-        for (let child of tbodyNode.childNodes) {
-            buildingPaths.push(this.findPath(child));
+        let i: number = 0;
+        if (tbodyNode !== null && typeof (tbodyNode.childNodes) !== "undefined" && tbodyNode.childNodes.length > 0) {
+            for (let child of tbodyNode.childNodes[3].childNodes) {
+                if (this.getAttr(child, "href") !== null) {
+                    buildingPaths.push(this.getAttr(child, "href"));
+                }
+            }
         }
-        for (let a of buildingPaths) {
-            Log.trace(a);
-            Log.trace("!!!!!!!!!!!!!!!!!!!!!!!");
+        for (let path of buildingPaths) {
+            Log.trace(path);
         }
         return buildingPaths;
     }
 
     private findTbody(node: any): any {
-        if (node.tagName === "tbody") {
-            return node;
-        } else if (node === null || node === undefined || node.childNodes === null) { // node
-            return;
-        } else {
-            for (let child of node.getChildNodes()) {
-                this.findTbody(child);
-            }
-        }
+        return this.findNode(node, "class", "views-table cols-5 table");
     }
 
-    private findPath(node: any): string {
-        let paths;
-        for (let attr of node.attrs) {
-            if (attr === "href") { // !!!!!!!!
-                return attr;
+    private findNode(node: any, attrName: string, attrValue: string): any {
+        if (typeof(node.attrs) !== "undefined") {
+            for (let attr of node.attrs) {
+                if (attr.name === attrName && attr.value === attrValue) {
+                    return node;
+                }
             }
         }
-        for (let child of node.childNodes) {
-            this.findPath(child);  // !!!!!!!!
-        }
-    }
-
-    private findNode(node: any, tag: string, value: string): any {
-        if (node.childNodes !== undefined) {
-            if (node.getTag === tag && node.value === value) {
-                return node;
+        if (typeof(node.childNodes) !== "undefined") {
+            if (node.childNodes.length > 0) {
+                for (let child of node.childNodes) {
+                        if (this.findNode(child, attrName, attrValue) !== null) {
+                            return this.findNode(child, attrName, attrValue);
+                        }
+                }
             }
         }
-        if (node.childNodes !== undefined && node.childNodes !== null) {
-            // for (let i = 0; i < node.childNodes.length; i++) {
-            //     if (this.findNode(node.childNodes[i], tag, value) !== null) {
-            //         return this.findNode(node.childNodes[i], tag, value);
-            //     }
-            // }
-        }
-    }
-
-    private iterateThroughFiles(buildings: string[], id: string, kind: InsightDatasetKind): Promise<IDataSet> {
-        // todo
         return null;
     }
 
-    private readEachHtmlFiles(buildingPath: string): Promise<IRoom[]> {
-        // todo
+    private getAttr(node: any, attrName: string): string {
+        if (typeof (node.attrs) !== "undefined") {
+            for (let attr of node.attrs) {
+                if (attr.name === attrName && attr.value !== null) {
+                    return attr.value;
+                }
+            }
+        }
+        if ( typeof (node.childNodes) !== "undefined") {
+            if (node.childNodes.length > 0) {
+                for (let child of node.childNodes) {
+                    if (this.getAttr(child, attrName) !== null) {
+                        return this.getAttr(child, attrName);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private iterateThroughFiles(cont: JSZip, buildingPaths: string[], id: string,
+                                kind: InsightDatasetKind): Promise<IDataSet> {
+        return new Promise((resolve, reject) => {
+            let promisearr: Array<Promise<IRoom[]>> = [];
+            let dataSet: IDataSetRooms = {
+                id: "",
+                numRows: 0,
+                kind: InsightDatasetKind.Rooms,
+                data: []
+            };
+            for (let path of buildingPaths) {
+                let value = cont.file(path).async("text");
+                // promisearr.push(this.parseHtml(value));
+            }
+            Promise.all(promisearr)
+                .then((rooms) => {
+                    let numRows: number = 0;
+                    for (let room of rooms) {
+                        if (room.length > 0) {
+                            numRows = numRows + room.length;
+                            dataSet.data = dataSet.data.concat(room);
+                            // Only add a building if it has at least one section in it
+                        }
+                    }
+                    if (dataSet.data.length === 0) { // This dataSet has no courses in it, or no valid sections
+                        throw new Error("Invalid dataset, no valid room");
+                    } else {
+                        dataSet.id = id;
+                        dataSet.kind = kind;
+                        dataSet.numRows = numRows;
+                        resolve(dataSet);
+                    }
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    private parseHtml(roominfo: string): IRoom[] {
+        // let roomsHolder: { result: any[]};
+        // roomsHolder = {
+        //     result: []
+        // };
+        // try {
+        //     // todo
+        // } catch (err) {
+        //     // skip rooms with invalid values
+        // }
+        // let rooms: IRoom[] = [];
+        // for (let room of roomsHolder.result) {
+        //     let mRoom: IRoom = {
+        //         fullname: "",
+        //         shortname: "",
+        //         number: "",
+        //         name: "",
+        //         address: "",
+        //         lat: 0,
+        //         lon: 0,
+        //         seats: 0,
+        //         type: "",
+        //         furniture: "",
+        //         href: ""
+        //     };
+        // }
+        // if (this.checkValidRoom(room)) {
+        //
+        // }
         return null;
     }
 

@@ -152,37 +152,4 @@ describe("AddDataSetRooms", () => {
             expect(response).to.deep.equal([]);
         }
     });
-
-    // it("Should add a specific dataset", async () => {
-    //     const id: string = "specificRooms";
-    //     let response: string[];
-    //
-    //     try {
-    //         response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal([id]);
-    //     }
-    // });
-
-    // it("Should have a dataset of specific courses after add, test listDatasets()", async function () {
-    //     const id: string = "specificRooms";
-    //     let expectedDataset: InsightDataset = {
-    //         id: "specificRooms",
-    //         kind: InsightDatasetKind.Rooms,
-    //         numRows: 61 // !!!!!!!!!
-    //     };
-    //     let expected: InsightDataset[] = [];
-    //     expected.push(expectedDataset);
-    //     let response: InsightDataset[] = [];
-    //     try {
-    //         response = await insightFacade.listDatasets();
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal(expected);
-    //     }
-    // });
-
 });
