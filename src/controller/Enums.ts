@@ -26,3 +26,11 @@ export enum MCOMP_KEYS {
     Eaudit = "audit",
     Eyear = "year"
 }
+
+export enum APPLY_TOKEN {
+    Emax = "MAX",
+    Emin = "MIN",
+    Eavg = "AVG",
+    Ecount = "COUNT",
+    Esum = "SUM"
+}
