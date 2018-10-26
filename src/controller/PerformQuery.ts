@@ -52,15 +52,13 @@ export default class PerformQuery {
                 // TODO: handleOrder
                 let promiseArr: Array<Promise<any>> = [this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
                     this.parseBody(query.WHERE),
-                    this.handleTransformations(query.TRANSFORMATIONS),
                     this.findDataSet(this.dataSetToQuery.id, dataSets)];
 
                 Promise.all(promiseArr)
                     .then((interpPrep) => {
                         let order = interpPrep[0];
                         let root = interpPrep[1];
-                        let transformations = interpPrep[2];
-                        let dataSet = interpPrep[3];
+                        let dataSet = interpPrep[2];
                         let result = this.interpretBody(root, dataSet, columnsToQuery.columnKeys);
                         if (order !== "") {
                             this.orderResult(result, order);
@@ -107,7 +105,13 @@ export default class PerformQuery {
             throw new Error("Need to specify at least one column");
         }
 
+        // TODO: this is a very temproray way of setting which dataSet we are querying
+        if (this.validator.validateKeyStructure(columns[0], this.dataSetToQuery.id)) {
+            this.setDataSetToQuery(columns[0]);
+        }
+
         for (let column of columns) {
+
             if (column.includes("_")) {
                 // a key
                 if (this.validator.validateKeyStructure(column, this.dataSetToQuery.id)
@@ -126,6 +130,7 @@ export default class PerformQuery {
                 }
             }
         }
+
         return columnsToQuery;
     }
 
@@ -204,6 +209,8 @@ export default class PerformQuery {
 
             if (FoundDataSet !== undefined) {
                 resolve(FoundDataSet);
+            } else {
+                reject("The dataset does not exist");
             }
         });
     }
@@ -214,5 +221,9 @@ export default class PerformQuery {
         dataSetKey = keyArrHolder[1];
 
         return dataSetKey;
+    }
+
+    private setDataSetToQuery(column: string) {
+        this.dataSetToQuery.id = column.split("_")[0];
     }
 }

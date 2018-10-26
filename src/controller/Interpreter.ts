@@ -113,7 +113,7 @@ export default class Interpreter {
     private createResult(section: ICourseSection, columnsToQuery: string[], dataSetToQueryId: string): any {
         let result: any = {};
         columnsToQuery.forEach((column) => {
-            result[dataSetToQueryId + "_" + column] = section[column];
+            result[column] = section[this.extractKey(column)];
         });
 
         return result;
@@ -135,4 +135,12 @@ export default class Interpreter {
             return false;
         }
      }
+
+    private extractKey(idKey: string): string {
+        let dataSetKey: string;
+        let keyArrHolder: string[] = idKey.split("_");
+        dataSetKey = keyArrHolder[1];
+
+        return dataSetKey;
+    }
 }

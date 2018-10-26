@@ -143,11 +143,7 @@ export default class Validator {
             return false;
         }
 
-        if (dataSetToQuery === "") {
-            dataSetToQuery = dataSetId; // sets the dataSetId to Query
-        }
-
-        if (dataSetId !== dataSetToQuery) {
+        if (dataSetId !== dataSetToQuery && dataSetToQuery !== "") {
             return false;
         }
         return true;
