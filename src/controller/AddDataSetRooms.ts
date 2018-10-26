@@ -52,8 +52,9 @@ export default class AddDataSetRooms {
         let buildingPaths: string[] = [];
         const parse5 = require("parse5");
         const doc = parse5.doc(cont);
-        // for (node: doc.childNodes[0]) {
-        // }
+        doc.forEach((node: any) => {
+            // todo
+        });
         return buildingPaths;
     }
 
