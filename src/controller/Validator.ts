@@ -108,9 +108,7 @@ export default class Validator {
     // TODO: these validations
     // one or more of any character except underscore.
     public validateApplyKey(key: string): boolean {
-        if (key.length === 0 || key.includes("_")) {
-            return false;
-        } else { return true; }
+        return !(key.length === 0 || key.includes("_"));
     }
 
     // The applykey in an APPLYRULE should be unique (no two APPLYRULE's should share an applykey with the same name).
@@ -121,16 +119,12 @@ export default class Validator {
     // If a GROUP is present, all COLUMNS terms must correspond to either GROUP keys or to applykeys defined
     // in the APPLY block.
     public existsInGroupApply(groupKeys: string[], applyKeys: string[], columnKey: string): boolean {
-        return false;
+        return groupKeys.includes(columnKey) || applyKeys.includes(columnKey);
     }
 
     // SORT - Any keys provided must be in the COLUMNS.
     public isSortInColumn(columnKeys: string[], sortKey: string): boolean {
-        if (columnKeys.includes(sortKey)) {
-            return true;
-        } else {
-            return false;
-        }
+        return columnKeys.includes(sortKey);
     }
 
     public validateApplyToken(key: string, applyToken: string): boolean {
