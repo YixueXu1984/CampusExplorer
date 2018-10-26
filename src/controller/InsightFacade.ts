@@ -5,6 +5,7 @@ import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
 import * as fs from "fs";
+import AddDataSetRooms from "./AddDataSetRooms";
 import {ICourseSection} from "../model/CourseSection";
 import GetGeoLocation from "./GetGeoLocation";
 
@@ -35,20 +36,35 @@ export default class InsightFacade implements IInsightFacade {
                     return reject(new InsightError("Trying to add an id that already exits"));
                 }
             });
-
-            let addDataSet: AddDataSetCourses = new AddDataSetCourses();
-            let dataSetsId: string[] = [];
-            addDataSet.addDataset(id, content, kind)
-                .then((dataSet) => {
-                    this.dataSets.push(dataSet);
-                    this.dataSets.forEach((currDataSet) => {
-                        dataSetsId.push(currDataSet.id);
+            if (kind === InsightDatasetKind.Courses) {
+                let addDataSet: AddDataSetCourses = new AddDataSetCourses();
+                let dataSetsId: string[] = [];
+                addDataSet.addDataset(id, content, kind)
+                    .then((dataSet) => {
+                        this.dataSets.push(dataSet);
+                        this.dataSets.forEach((currDataSet) => {
+                            dataSetsId.push(currDataSet.id);
+                        });
+                        resolve(dataSetsId);
+                    })
+                    .catch((err) => {
+                        reject(new InsightError(err));
                     });
-                    resolve(dataSetsId);
-                })
-                .catch((err) => {
-                    reject(new InsightError(err));
-                });
+            } else if (kind === InsightDatasetKind.Rooms) { // added case for Room
+                let addDataSet: AddDataSetRooms = new AddDataSetRooms();
+                let dataSetsId: string[] = [];
+                addDataSet.addDataset(id, content, kind)
+                    .then((dataSet) => {
+                        this.dataSets.push(dataSet);
+                        this.dataSets.forEach((currDataSet) => {
+                            dataSetsId.push(currDataSet.id);
+                        });
+                        resolve(dataSetsId);
+                    })
+                    .catch((err) => {
+                        reject(new InsightError(err));
+                    });
+            }
         });
     }
 
@@ -83,7 +99,6 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
-        // TODO: implement Room case
         let dataset: InsightDataset = {
             id: "",
             kind: InsightDatasetKind.Courses,
