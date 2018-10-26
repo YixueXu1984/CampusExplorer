@@ -10,6 +10,7 @@ import {IColumnObject} from "../model/ColumnObject";
 import {ITransformationObject} from "../model/TransformationObject";
 import {IOrderObject} from "../model/OrderObject";
 import {APPLY_TOKEN} from "./Enums";
+import {Decimal} from "decimal.js";
 
 export default class PerformQuery {
     public dataSets: IDataSet[];
@@ -365,18 +366,46 @@ export default class PerformQuery {
     }
 
     private applyCount(result: any[], applyObject: IApplyObject): any[] {
-        // TODO:
-        return null;
+        let countValue = 0;
+        let countArray: any[];
+        result.forEach((data) => {
+            countArray.push(data[applyObject.key]);
+        });
+
+        // find the number of unique occurrences
+        let count = countArray.filter(function (item, pos) {
+            return countArray.indexOf(item) === pos;
+        });
+        countValue = count.length;
+
+        result.forEach((data) => {
+            data[applyObject.applyKey] = countValue;
+        });
+        return result;
     }
 
     private applySum(result: any[], applyObject: IApplyObject): any[] {
-        // TODO:
-        return null;
+        let sumValue: number = 0;
+        result.forEach((data) => {
+            sumValue = sumValue + data[applyObject.key];
+            }
+        );
+        result.forEach(( (data) => {
+            data[applyObject.applyKey] = sumValue.toFixed(2);
+        }));
+        return result;
     }
 
     private applyAvg(result: any[], applyObject: IApplyObject): any[] {
-        // TODO:
-        return null;
+        let sum = new Decimal(0);
+        result.forEach((data) => {
+            sum = sum.add(data[applyObject.key]);
+        });
+        let avgValue = sum.toNumber() / result.length;
+        result.forEach((data) => {
+            data[applyObject.applyKey] = avgValue.toFixed(2);
+        });
+        return result;
     }
 
     private setDataSetToQuery(columnsToQuery: IColumnObject, transformations: ITransformationObject): IColumnObject {
