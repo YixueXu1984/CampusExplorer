@@ -7,7 +7,6 @@ import Log from "../Util";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
 import {IDataSetRooms} from "../model/DataSetRooms";
-import {stringify} from "querystring";
 
 export default class AddDataSetRooms {
     constructor() {
@@ -15,7 +14,6 @@ export default class AddDataSetRooms {
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
-        // stub
         return new Promise((resolve, reject) => {
             if (id === null || id === undefined) {
                 reject("invalid id");
@@ -24,7 +22,6 @@ export default class AddDataSetRooms {
             } else if (kind !== InsightDatasetKind.Rooms) {
                 reject("invalid kind");
             }
-
             let zip = new JSZip();
             zip.loadAsync(content, {base64: true})
                 .then((zipFile) => {
@@ -51,22 +48,64 @@ export default class AddDataSetRooms {
     private getBuildingsPaths(cont: string): string[] {
         let buildingPaths: string[] = [];
         const parse5 = require("parse5");
-        const doc = parse5.doc(cont);
-        doc.forEach((node: any) => {
-            // todo
-        });
+        const doc = parse5.parse(cont, {treeAdapter: parse5.treeAdapters.default});
+        const tbodyNode = this.findTbody(doc);
+        for (let child of tbodyNode.childNodes) {
+            buildingPaths.push(this.findPath(child));
+        }
+        for (let a of buildingPaths) {
+            Log.trace(a);
+            Log.trace("!!!!!!!!!!!!!!!!!!!!!!!");
+        }
         return buildingPaths;
     }
 
+    private findTbody(node: any): any {
+        if (node.tagName === "tbody") {
+            return node;
+        } else if (node === null || node === undefined || node.childNodes === null) { // node
+            return;
+        } else {
+            for (let child of node.getChildNodes()) {
+                this.findTbody(child);
+            }
+        }
+    }
+
+    private findPath(node: any): string {
+        let paths;
+        for (let attr of node.attrs) {
+            if (attr === "href") { // !!!!!!!!
+                return attr;
+            }
+        }
+        for (let child of node.childNodes) {
+            this.findPath(child);  // !!!!!!!!
+        }
+    }
+
+    private findNode(node: any, tag: string, value: string): any {
+        if (node.childNodes !== undefined) {
+            if (node.getTag === tag && node.value === value) {
+                return node;
+            }
+        }
+        if (node.childNodes !== undefined && node.childNodes !== null) {
+            // for (let i = 0; i < node.childNodes.length; i++) {
+            //     if (this.findNode(node.childNodes[i], tag, value) !== null) {
+            //         return this.findNode(node.childNodes[i], tag, value);
+            //     }
+            // }
+        }
+    }
+
     private iterateThroughFiles(buildings: string[], id: string, kind: InsightDatasetKind): Promise<IDataSet> {
+        // todo
         return null;
     }
 
-    private readEachHtmlFiles(building: JSZipObject): Promise<IRoom[]> {
-        return null;
-    }
-
-    private parseIndexHtml(file: string): string[] {
+    private readEachHtmlFiles(buildingPath: string): Promise<IRoom[]> {
+        // todo
         return null;
     }
 
