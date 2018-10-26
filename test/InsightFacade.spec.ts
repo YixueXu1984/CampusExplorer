@@ -49,7 +49,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
                 loadDatasetPromises.push(TestUtil.readFileAsync(path));
             }
             const loadedDatasets = (await Promise.all(loadDatasetPromises)).map((buf, i) => {
-                return { [Object.keys(datasetsToLoad)[i]]: buf.toString("base64") };
+                return {[Object.keys(datasetsToLoad)[i]]: buf.toString("base64")};
             });
             datasets = Object.assign({}, ...loadedDatasets);
             expect(Object.keys(datasets)).to.have.length.greaterThan(0);
@@ -636,31 +636,22 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
-    it("should return valid geolocation for a valid address", async () => {
-        let response: any;
-
-        try {
-            response = await insightFacade.getGeoLocation("6245 Agronomy Road V6T 1Z4");
-        } catch (err) {
-            response = err;
-        } finally {
-            expect(response).to.be.deep.equal([49.26125, -123.24807]);
-        }
-    });
+    // it("should return valid geolocation for a valid address", async () => {
+    //     let response: any;
+    //
+    //     try {
+    //         response = await insightFacade.getGeoLocation("6245 Agronomy Road V6T 1Z4");
+    //     } catch (err) {
+    //         response = err;
+    //     } finally {
+    //         expect(response).to.be.deep.equal([49.26125, -123.24807]);
+    //     }
+    // });
 });
 
 // This test suite dynamically generates tests from the JSON files in test/queries.
 // You should not need to modify it; instead, add additional files to the queries directory.
 // //
-// describe("InsightFacade PerformQuery", () => {
-//     const datasetsToQuery: { [id: string]: string } = {
-//         courses: "./test/data/courses.zip",
-//         courses3: "./test/data/courses3.zip",
-//     };
-//     let insightFacade: InsightFacade;
-//     let testQueries: ITestQuery[] = [];
-//
-
 describe("InsightFacade PerformQuery", () => {
     const datasetsToQuery: { [id: string]: string } = {
         courses: "./test/data/courses.zip",
@@ -698,7 +689,7 @@ describe("InsightFacade PerformQuery", () => {
                 loadDatasetPromises.push(TestUtil.readFileAsync(path));
             }
             const loadedDatasets = (await Promise.all(loadDatasetPromises)).map((buf, i) => {
-                return { [Object.keys(datasetsToQuery)[i]]: buf.toString("base64") };
+                return {[Object.keys(datasetsToQuery)[i]]: buf.toString("base64")};
             });
             expect(loadedDatasets).to.have.length.greaterThan(0);
 
@@ -738,21 +729,21 @@ describe("InsightFacade PerformQuery", () => {
     it("Should run test queries", () => {
         describe("Dynamic InsightFacade PerformQuery tests", () => {
             for (const test of testQueries) {
-                it(`[${test.filename}] ${test.title}`, async () => {
-                    let response: any[];
+                    it(`[${test.filename}] ${test.title}`, async () => {
+                        let response: any[];
 
-                    try {
-                        response = await insightFacade.performQuery(test.query);
-                    } catch (err) {
-                        response = err;
-                    } finally {
-                        if (test.isQueryValid) {
-                            expect(response).to.deep.equal(test.result);
-                        } else {
-                            expect(response).to.be.instanceOf(InsightError);
+                        try {
+                            response = await insightFacade.performQuery(test.query);
+                        } catch (err) {
+                            response = err;
+                        } finally {
+                            if (test.isQueryValid) {
+                                expect(response).to.deep.equal(test.result);
+                            } else {
+                                expect(response).to.be.instanceOf(InsightError);
+                            }
                         }
-                    }
-                });
+                    });
             }
         });
     });
