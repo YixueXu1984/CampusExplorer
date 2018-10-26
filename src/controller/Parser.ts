@@ -12,7 +12,7 @@ export default class Parser {
         this.validator = new Validator();
     }
 
-    public parseFilters(body: any, columnsToQuery: string[]): INode {
+    public parseFilters(body: any): INode {
         let root = this.createNode("WHERE", "", "");
         this.parseFiltersHelper(Object.keys(body), Object.values(body), root.childNodes);
         return root;
