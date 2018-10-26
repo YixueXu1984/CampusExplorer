@@ -19,7 +19,7 @@ export default class PerformQuery {
             id: "",
             kind: InsightDatasetKind.Courses,
             numRows: 0,
-            courses: []
+            data: []
         };
         this.validator = new Validator();
     }
@@ -36,7 +36,7 @@ export default class PerformQuery {
                 id: "",
                 kind: InsightDatasetKind.Courses,
                 numRows: 0,
-                courses: []
+                data: []
             };
 
             try {

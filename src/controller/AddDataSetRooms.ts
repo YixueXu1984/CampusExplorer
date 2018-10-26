@@ -6,50 +6,67 @@ import {IDataSet} from "../model/DataSet";
 import Log from "../Util";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
-import {IDataSetRoom} from "../model/DataSetRoom";
+import {IDataSetRooms} from "../model/DataSetRooms";
+import {stringify} from "querystring";
 
 export default class AddDataSetRooms {
-
-    private buildingList: string[];
-
     constructor() {
         Log.trace("Add dataset Rooms");
     }
 
-    private readIndexFile(folder: JSZipObject): void {
-        this.buildingList = this.parseIndexHtml(folder);
-    }
-
-    private parseIndexHtml(building: JSZipObject): string[] {
-        let buildingList: string[] = [];
-        let parse5 = require("parse5");
-        let document = parse5.parse();
-        return buildingList;
-    }
-
-    private getBuildingIndex(): string[] {
+    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
         // stub
-        return null;
-    }
-
-    private isLinkedInIndex(room: any): boolean {
-        // stub
-        return true;
-    }
-
-    private readEachHtmlFiles(building: JSZipObject): Promise<IRoom[]> {
         return new Promise((resolve, reject) => {
-            building.async("text")
-                .then((rooms) => {
-                    return this.parseHtml(rooms);
+            if (id === null || id === undefined) {
+                reject("invalid id");
+            } else if (content === null || content === undefined) {
+                reject("invalid content");
+            } else if (kind !== InsightDatasetKind.Rooms) {
+                reject("invalid kind");
+            }
+
+            let zip = new JSZip();
+            zip.loadAsync(content, {base64: true})
+                .then((zipFile) => {
+                    return zipFile.file("index.htm").async("text");
                 })
-                .then ((roomModel) => {
-                    resolve(roomModel);
+                .then((index) => {
+                    return this.getBuildingsPaths(index);
+                })
+                .then((buildings) => {
+                    return this.iterateThroughFiles(buildings, id, kind);
+                })
+                .then((dataset) => {
+                    return this.cacheDataSet(dataset);
+                })
+                .then((dataSet) => {
+                    resolve(dataSet);
                 })
                 .catch((err) => {
                     reject(err);
                 });
         });
+    }
+
+    private getBuildingsPaths(cont: string): string[] {
+        let buildingPaths: string[] = [];
+        const parse5 = require("parse5");
+        const doc = parse5.doc(cont);
+        // for (node: doc.childNodes[0]) {
+        // }
+        return buildingPaths;
+    }
+
+    private iterateThroughFiles(buildings: string[], id: string, kind: InsightDatasetKind): Promise<IDataSet> {
+        return null;
+    }
+
+    private readEachHtmlFiles(building: JSZipObject): Promise<IRoom[]> {
+        return null;
+    }
+
+    private parseIndexHtml(file: string): string[] {
+        return null;
     }
 
     private checkValidRoom(room: any): boolean {
@@ -80,50 +97,6 @@ export default class AddDataSetRooms {
         }
     }
 
-    private parseHtml(rooms: string): IRoom[] {
-        // stub
-        return null;
-    }
-
-    private iterateThroughFiles(courses: JSZip, id: string, kind: InsightDatasetKind): Promise<IDataSet> {
-        return new Promise((resolve, reject) => {
-            let promisearr: Array<Promise<IRoom[]>> = [];
-            let dataSet: IDataSetRoom = {
-                id: "",
-                numRows: 0,
-                kind: InsightDatasetKind.Rooms,
-                rooms: []
-            };
-            courses.folder("rooms").forEach((relativePath, room) => {
-                promisearr.push(this.readEachHtmlFiles(room));
-            });
-
-            Promise.all(promisearr)
-                .then((rooms) => {
-                    let numRows: number = 0;
-                    for (let room of rooms) {
-                        if (room.length > 0) {
-                            numRows = numRows + room.length;
-                            dataSet.rooms = dataSet.rooms.concat(room);
-                            // Only add a course if it has at least one section in it
-                        }
-                    }
-                    if (dataSet.rooms.length === 0) { // This dataSet has no courses in it, or no valid sections
-                        throw new Error("Invalid dataset, no valid room");
-                    } else {
-                        dataSet.id = id;
-                        dataSet.kind = kind;
-                        dataSet.numRows = numRows;
-                        // resolve(dataSet); // !!!
-                    }
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-
-        });
-    }
-
     private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
             fs.writeFile("data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
@@ -131,37 +104,7 @@ export default class AddDataSetRooms {
                     return reject(err);
                 }
                 return resolve(dataSet);
-
             });
-        });
-    }
-
-    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
-        // stub
-        return new Promise((resolve, reject) => {
-            if (id === null || id === undefined) {
-                reject("invalid id");
-            } else if (content === null || content === undefined) {
-                reject("invalid content");
-            } else if (kind !== InsightDatasetKind.Rooms) {
-                reject("invalid kind");
-            }
-
-            let zip = new JSZip();
-            zip.loadAsync(content, {base64: true})
-                .then((courses) => {
-                    return this.iterateThroughFiles(courses, id, kind);
-                })
-                .then((dataSet) => {
-                    // cache dataSet here
-                    return this.cacheDataSet(dataSet);
-                })
-                .then((dataSet) => {
-                    resolve(dataSet);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
         });
     }
 }
