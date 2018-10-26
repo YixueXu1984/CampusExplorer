@@ -1,5 +1,6 @@
 import {InsightDatasetKind} from "./IInsightFacade";
 import {COLUMN_KEYS, MCOMP_KEYS, SCOMP_KEYS} from "./Enums";
+import {IColumnObject} from "../model/ColumnObject";
 
 export default class Validator {
     constructor() {
@@ -7,21 +8,16 @@ export default class Validator {
     }
 
     // ---- VALIDATORS START --- //
-    public validateColumn(dataSetKey: string): boolean {
+    public validateColumnKeys(dataSetKey: string): boolean {
         return (Object.values(COLUMN_KEYS).includes(dataSetKey));
     }
 
     // TODO: change how order is validated
-    public validateOrder(columnsToQuery: string[], dataSetKey: string): boolean {
-        let existInColumns = columnsToQuery.find((currKey) => {
-            return currKey === dataSetKey;
+    public validateOrder(columnsToQuery: IColumnObject, orderKeys: string[]): boolean {
+        let columnsAllKeys = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
+        return orderKeys.every((orderKey) => {
+            return columnsAllKeys.includes(orderKey);
         });
-
-        if (existInColumns === undefined) {
-            throw new Error("key used in order not present in columns");
-        }
-
-        return true;
     }
 
     public isAnd(filter: string): boolean {
@@ -107,8 +103,8 @@ export default class Validator {
 
     // TODO: these validations
     // one or more of any character except underscore.
-    public validateApplyKey(key: string): boolean {
-        return false;
+    public validateApplyKeyStructure(key: string): boolean {
+        return key.length !== 0 && !key.includes("_");
     }
 
     // The applykey in an APPLYRULE should be unique (no two APPLYRULE's should share an applykey with the same name).
@@ -134,5 +130,26 @@ export default class Validator {
 
     private validateDir(dir: string): boolean {
         return dir === "UP" || dir === "down";
+    }
+
+    public validateKeyStructure(idKey: string, dataSetToQuery: string): boolean {
+        let dataSetId: string;
+        let dataSetKey: string;
+        let keyArrHolder: string[] = idKey.split("_");
+        dataSetId = keyArrHolder[0];
+        dataSetKey = keyArrHolder[1];
+
+        if (dataSetId === undefined || dataSetKey === undefined) {
+            return false;
+        }
+
+        if (dataSetToQuery === "") {
+            dataSetToQuery = dataSetId; // sets the dataSetId to Query
+        }
+
+        if (dataSetId !== dataSetToQuery) {
+            return false;
+        }
+        return true;
     }
 }
