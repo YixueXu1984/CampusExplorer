@@ -9,6 +9,23 @@ export default class Validator {
     }
 
     // ---- VALIDATORS START --- //
+    public validateQuerySize(query: any): boolean {
+        let length = Object.keys(query).length;
+        if (query.WHERE === undefined || query.OPTIONS === undefined) {
+            return false;
+        }
+
+        if (Object.keys(query).length > 3) {
+            return false;
+        }
+
+        if (Object.keys(query).length === 3 && query.TRANSFORMATIONS === undefined) {
+            return false;
+        }
+
+        return true;
+    }
+
     public validateColumnKeys(dataSetKey: string): boolean {
         return (Object.values(COLUMN_KEYS).includes(dataSetKey));
     }
