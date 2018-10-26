@@ -7,7 +7,6 @@ import Log from "../Util";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
 import {IDataSetRooms} from "../model/DataSetRooms";
-import {treeAdapters} from "parse5/lib";
 
 export default class AddDataSetRooms {
     constructor() {
