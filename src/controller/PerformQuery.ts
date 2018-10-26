@@ -33,6 +33,14 @@ export default class PerformQuery {
                 reject("Missing WHERE or OPTIONS clause");
             }
 
+            if (Object.keys(query).length > 3) {
+                reject("Too many keys in query body");
+            }
+
+            if (Object.keys(query).length === 3 && query.TRANSFORMATIONS === undefined) {
+                reject("Too many keys in query body");
+            }
+
             this.dataSets = dataSets; // update datasets
 
             this.dataSetToQuery = {
@@ -43,22 +51,20 @@ export default class PerformQuery {
             };
 
             try {
-                let columnsToQuery: IColumnObject = {
-                    columnKeys: [],
-                    columnApplykeys: [],
-                };
-                columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
 
-                // TODO: handleOrder
-                let promiseArr: Array<Promise<any>> = [this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
-                    this.parseBody(query.WHERE),
-                    this.findDataSet(this.dataSetToQuery.id, dataSets)];
+                let columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
+
+                let promiseArr: Array<Promise<any>> = [
+                    this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
+                    this.handleTransformations(query.TRANSFORMATIONS, columnsToQuery)];
 
                 Promise.all(promiseArr)
                     .then((interpPrep) => {
                         let order = interpPrep[0];
-                        let root = interpPrep[1];
-                        let dataSet = interpPrep[2];
+                        let transformations = interpPrep[1];
+                        this.setDataSetToQuery(columnsToQuery, transformations);
+                        let dataSet = this.findDataSet(this.dataSetToQuery.id, this.dataSets);
+                        let root = this.parseBody(query.WHERE);
                         let result = this.interpretBody(root, dataSet, columnsToQuery.columnKeys);
                         if (order !== "") {
                             this.orderResult(result, order);
@@ -79,16 +85,13 @@ export default class PerformQuery {
         });
     }
 
-    private parseBody(body: any): Promise<INode> {
-        return new Promise<INode>((resolve, reject) => {
-            try {
-                let parser = new Parser(this.dataSetToQuery.id);
-                let root = parser.parseFilters(body);
-                resolve(root);
-            } catch (err) {
-                reject(err);
-            }
-        });
+    private parseBody(body: any): INode {
+        try {
+            let parser = new Parser(this.dataSetToQuery.id);
+            return parser.parseFilters(body);
+        } catch (err) {
+            throw err;
+        }
     }
 
     private interpretBody(root: INode, dataSet: IDataSet, columnsToQuery: string[]): any[] {
@@ -105,16 +108,11 @@ export default class PerformQuery {
             throw new Error("Need to specify at least one column");
         }
 
-        // TODO: this is a very temproray way of setting which dataSet we are querying
-        if (this.validator.validateKeyStructure(columns[0], this.dataSetToQuery.id)) {
-            this.setDataSetToQuery(columns[0]);
-        }
-
         for (let column of columns) {
 
             if (column.includes("_")) {
                 // a key
-                if (this.validator.validateKeyStructure(column, this.dataSetToQuery.id)
+                if (this.validator.validateKeyStructure(column)
                     && this.validator.validateColumnKeys(this.extractKey(column))) {
                     columnsToQuery.columnKeys.push(column);
                 } else {
@@ -154,25 +152,107 @@ export default class PerformQuery {
                 orderObject.keys = order.keys;
             }
 
-            if (this.validator.validateOrder(columnsToQuery, orderObject.keys)) {
+            if (this.validator.validateOrder(columnsToQuery, orderObject.keys)
+                && this.validator.validateDir(orderObject.dir)) {
                 resolve(order);
             } else {
-                reject("columns in ORDER not in COLUMNS");
+                reject("columns in ORDER not in COLUMNS / direction in correct");
             }
         });
     }
 
-    private handleTransformations(transformation: any): Promise<ITransformationObject> {
-        // TODO: my man
-        return null;
+    private handleTransformations(transformation: any, columnsToQuery: IColumnObject): Promise<ITransformationObject> {
+        return new Promise<ITransformationObject>((resolve, reject) => {
+            let transformationObject: ITransformationObject = {
+                groupKeys: [],
+                applyObjects: []
+            };
+
+            if (transformation === undefined) {
+                resolve(transformationObject); // its ok to have no transformation
+            }
+
+            if (transformation.GROUP === undefined || transformation.APPlY === undefined) {
+                reject("Missing group or apply for transformation");
+            }
+
+            let promiseArr: Array<Promise<any>> = [
+                this.handleGroup(transformation.GROUP, columnsToQuery),
+                this.handleApply(transformation.APPLY, columnsToQuery)];
+
+            Promise.all(promiseArr)
+                .then((result) => {
+
+                    transformationObject.groupKeys = result[0];
+                    transformationObject.applyObjects = result[1];
+                    resolve(transformationObject);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
     }
 
-    private handleGroup(groupKeys: string[]): Promise<string> {
-        return null;
+    private handleGroup(transformation: any, columnsToQuery: IColumnObject): Promise<string[]> {
+        return new Promise<string[]>((resolve, reject) => {
+            if (transformation.GROUP === undefined || transformation.GROUP.length === 0) {
+                reject("Missing group");
+            }
+            // groupKey must be a valid key and must all be in columns
+            let groupKeys: string[] = transformation.GROUP;
+            // let allColumnKeys: string[] = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
+            let allKeysValid = groupKeys.every((groupKey) => {
+                return this.validator.validateKeyStructure(groupKey) &&
+                    columnsToQuery.columnKeys.includes(groupKey);
+            });
+
+            if (allKeysValid) {
+                resolve(groupKeys);
+            } else {
+                reject("keys in group is invalid structure");
+            }
+        });
     }
 
-    private handleApply(applyObject: any[]): Promise<IApplyObject[]> {
-        return null;
+    private handleApply(transformation: any, columnsToQuery: IColumnObject): Promise<IApplyObject[]> {
+        return new Promise<IApplyObject[]>((resolve, reject) => {
+            if (transformation.APPLY === undefined) {
+                reject("Missing Apply");
+            }
+            let transformations: any = transformation.APPLY;
+
+            let applyObjects: IApplyObject[] = [];
+            transformations.forEach((parameters: { apply: any }) => {
+                let apply = parameters.apply;
+                let applyObject: IApplyObject = {
+                    applyKey: "",
+                    applyToken: "",
+                    key: ""
+                };
+
+                let applyKey = Object.keys(apply)[0];
+                let applyBody = Object.values(apply)[0];
+                let applyToken = Object.keys(applyBody)[0];
+                let key = Object.values(applyBody)[0];
+                let allCloumnKeys: string[] = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
+
+                if (this.validator.validateApplyKeyStructure(applyKey)
+                    && this.validator.validateKeyStructure(key)
+                    && this.validator.validateApplyToken(key, applyToken)
+                    && allCloumnKeys.includes(applyKey)
+                    && allCloumnKeys.includes(key)
+                    && this.validator.isUniqueApplyKey(applyObjects, applyKey)) {
+                    applyObject.applyKey = applyKey;
+                    applyObject.applyToken = applyToken;
+                    applyObject.key = key;
+                    applyObjects.push(applyObject);
+                } else {
+                    reject("Invalid apply object structure");
+                }
+
+            });
+            resolve(applyObjects);
+        });
     }
 
     // TODO: this needs major change
@@ -197,22 +277,34 @@ export default class PerformQuery {
         // TODO:
     }
 
-    private applyFunction(reslut: any[], applyObject: IApplyObject): void {
+    private applyFunction(result: any[], applyObject: IApplyObject): void {
         // TODO:
     }
 
-    private findDataSet(id: string, dataSets: IDataSet[]): Promise<IDataSet> {
-        return new Promise<IDataSet>((resolve, reject) => {
-            let FoundDataSet = dataSets.find((dataSet) => {
-                return dataSet.id === id;
-            });
-
-            if (FoundDataSet !== undefined) {
-                resolve(FoundDataSet);
-            } else {
-                reject("The dataset does not exist");
-            }
+    private setDataSetToQuery(columnsToQuery: IColumnObject, transformations: ITransformationObject): void {
+        let transformationKeys = transformations.applyObjects.map((applyObject) => {
+            return applyObject.key;
         });
+        let allIdKeys = columnsToQuery.columnKeys.concat(transformationKeys);
+        this.dataSetToQuery.id = this.extractId(allIdKeys[0]);
+
+        if (!allIdKeys.every((IdKey) => {
+            return this.extractId(IdKey) === this.dataSetToQuery.id;
+        })) {
+            throw new Error("multiple different dataSetId in columns and transform");
+        }
+    }
+
+    private findDataSet(id: string, dataSets: IDataSet[]): IDataSet {
+        let FoundDataSet = dataSets.find((dataSet) => {
+            return dataSet.id === id;
+        });
+
+        if (FoundDataSet !== undefined) {
+            return FoundDataSet;
+        } else {
+            throw new Error("The dataset does not exist");
+        }
     }
 
     private extractKey(idKey: string): string {
@@ -223,7 +315,12 @@ export default class PerformQuery {
         return dataSetKey;
     }
 
-    private setDataSetToQuery(column: string) {
-        this.dataSetToQuery.id = column.split("_")[0];
+    private extractId(idKey: string): string {
+        let dataSetId: string;
+        let keyArrHolder: string[] = idKey.split("_");
+        dataSetId = keyArrHolder[0];
+
+        return dataSetId;
     }
+
 }

@@ -1,6 +1,7 @@
 import {InsightDatasetKind} from "./IInsightFacade";
-import {COLUMN_KEYS, MCOMP_KEYS, SCOMP_KEYS} from "./Enums";
+import {APPLY_TOKEN, COLUMN_KEYS, MCOMP_KEYS, SCOMP_KEYS} from "./Enums";
 import {IColumnObject} from "../model/ColumnObject";
+import {IApplyObject} from "../model/ApplyObject";
 
 export default class Validator {
     constructor() {
@@ -101,38 +102,35 @@ export default class Validator {
 
     }
 
-    // TODO: these validations
     // one or more of any character except underscore.
     public validateApplyKeyStructure(key: string): boolean {
         return key.length !== 0 && !key.includes("_");
     }
 
     // The applykey in an APPLYRULE should be unique (no two APPLYRULE's should share an applykey with the same name).
-    public isUniqueApplyKey(applyKeys: string[], applyKey: string): boolean {
-        return false;
-    }
-
-    // If a GROUP is present, all COLUMNS terms must correspond to either GROUP keys or to applykeys defined
-    // in the APPLY block.
-    public existsInGroupApply(groupKeys: string[], applyKeys: string[], columnKey: string): boolean {
-        return false;
-    }
-
-    // SORT - Any keys provided must be in the COLUMNS.
-    public isSortInColumn(columnKeys: string[], sortKey: string): boolean {
-        return false;
+    public isUniqueApplyKey(applyObjects: IApplyObject[], applyKey: string): boolean {
+        let applyKeys = applyObjects.map((applyObject) => {
+            return applyObject.applyKey;
+        });
+        return applyKeys.includes(applyKey);
     }
 
     public validateApplyToken(key: string, applyToken: string): boolean {
-        // CHECK OUT Enum
-        return false;
+        if (Object.values(APPLY_TOKEN).includes(applyToken)) {
+            switch (applyToken) {
+                case "COUNT":
+                    return Object.values(MCOMP_KEYS).includes(key) || Object.values(SCOMP_KEYS).includes(key);
+                default:
+                    return Object.values(MCOMP_KEYS).includes(key);
+            }
+        }
     }
 
-    private validateDir(dir: string): boolean {
+    public validateDir(dir: string): boolean {
         return dir === "UP" || dir === "down";
     }
 
-    public validateKeyStructure(idKey: string, dataSetToQuery: string): boolean {
+    public validateKeyStructure(idKey: string): boolean {
         let dataSetId: string;
         let dataSetKey: string;
         let keyArrHolder: string[] = idKey.split("_");
@@ -140,10 +138,6 @@ export default class Validator {
         dataSetKey = keyArrHolder[1];
 
         if (dataSetId === undefined || dataSetKey === undefined) {
-            return false;
-        }
-
-        if (dataSetId !== dataSetToQuery && dataSetToQuery !== "") {
             return false;
         }
         return true;
