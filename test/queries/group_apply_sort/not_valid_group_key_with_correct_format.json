@@ -1,0 +1,32 @@
+{
+    "title": "Wrong Transformations key",
+    "query": {
+               "WHERE": {
+                 "GT": {
+                   "courses_avg": 98
+                 }
+               },
+               "OPTIONS": {
+                 "COLUMNS": [
+                   "courses_title",
+                   "overallAvg"
+                 ]
+               },
+               "TRANSFORMATIONS": {
+                 "GROUP": [
+                   "courses_tttt"
+                 ],
+                 "APPLY": [
+                   {
+                     "overallAvg": {
+                       "AVG": "courses_avg"
+                     }
+                   }
+                 ]
+               }
+             },
+    "isQueryValid": false,
+
+    "result": []
+}
+
