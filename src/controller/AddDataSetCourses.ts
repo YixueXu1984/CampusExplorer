@@ -152,7 +152,6 @@ export default class AddDataSetCourses {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            // TODO: add case for Room
             if (id === null || id === undefined) {
                 reject("invalid id");
             } else if (content === null || content === undefined) {
