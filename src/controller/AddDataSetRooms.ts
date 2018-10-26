@@ -58,8 +58,8 @@ export default class AddDataSetRooms {
                 }
             }
         }
-        for (let path of buildingPaths) {
-            Log.trace(path);
+        for (let i of buildingPaths) {
+            Log.trace(i);
         }
         return buildingPaths;
     }
@@ -68,10 +68,10 @@ export default class AddDataSetRooms {
         return this.findNode(node, "class", "views-table cols-5 table").childNodes[3];
     }
 
-    private findNodeWithName(node: any, attrKey: string, attrValue: string): any { // !!!!!!!!!!
+    private findNodeWithName(node: any, nodeName: string, attrKey: string, attrValue: string): any {
         if (typeof(node.attrs) !== "undefined") {
             for (let attr of node.attrs) {
-                if (attr.name === attrKey && attr.value === attrValue) {
+                if (attr.name === attrKey && attr.value === attrValue && node.name === nodeName) {
                     return node;
                 }
             }
@@ -79,8 +79,8 @@ export default class AddDataSetRooms {
         if (typeof(node.childNodes) !== "undefined") {
             if (node.childNodes.length > 0) {
                 for (let child of node.childNodes) {
-                    if (this.findNode(child, attrKey, attrValue) !== null) {
-                        return this.findNode(child, attrKey, attrValue);
+                    if (this.findNodeWithName(child, nodeName, attrKey, attrValue) !== null) {
+                        return this.findNodeWithName(child, nodeName, attrKey, attrValue);
                     }
                 }
             }
@@ -139,7 +139,7 @@ export default class AddDataSetRooms {
                 data: []
             };
             for (let path of buildingPaths) {
-                let value = cont.file(path).async("text")
+                return cont.file(path).async("text")
                 .then((html) => {
                     promisearr.push(this.parseHtml(html)); // !!!!!
                 })
@@ -173,64 +173,69 @@ export default class AddDataSetRooms {
     }
 
     private parseHtml(roominfo: string): Promise<IRoom[]> {
-        let roomsHolder: { result: any[]};
-        roomsHolder = {
-            result: []
-        };
+        return new Promise((resolve, reject) => {
+            let roomsHolder: { result: any[] };
+            roomsHolder = {
+                result: []
+            };
+            Log.trace("XXXXXXXXXXXX!!!!!!!!!!!!!");
+            try {
+                // todo
+                let roomHolder: { cont: any[] };
+                roomHolder = {
+                    cont: []
+                };
 
-        try {
-            // todo
-            const parse5 = require("parse5");
-            const doc = parse5.parse(roominfo); // , {treeAdapter: parse5.treeAdapters.default}
-            const tbodyNode = this.findTbody(doc);
-            if (tbodyNode !== null && typeof (tbodyNode.childNodes) !== "undefined"
-                && tbodyNode.childNodes.length > 0) {
-                for (let child of tbodyNode.childNodes) {
-                    // todo
+                const parse5 = require("parse5");
+                const doc = parse5.parse(roominfo);
+                let fullname = this.findNodeWithName(doc, "div", "id", "building-info").childNodes[1].
+                    childNodes[0].childNodes[0].name;
+                Log.trace("!!!!!!!!!!!!!" + fullname);
+                if (doc !== null && typeof (doc.childNodes) !== "undefined"
+                    && doc.childNodes.length > 0) {
+                    for (let child of doc.childNodes) {
+                        // todo
+                        roomHolder.cont.push("!!!");
+                    }
+                    roomsHolder.result.push(roomHolder.cont);
                 }
+            } catch (err) {
+                // skip rooms with invalid values
             }
-
-            let roomHolder: {cont: any[]};
-            roomHolder = {
-                cont : []
-            };
-
-        } catch (err) {
-            // skip rooms with invalid values
-        }
-        let rooms: IRoom[] = [];
-        for (let room of roomsHolder.result) {
-            let mRoom: IRoom = {
-                fullname: "",
-                shortname: "",
-                number: "",
-                name: "",
-                address: "",
-                lat: 0,
-                lon: 0,
-                seats: 0,
-                type: "",
-                furniture: "",
-                href: ""
-            };
-            if (this.checkValidRoom(room)) {
-                mRoom.fullname = room[0];
-                mRoom.shortname = room[1];
-                mRoom.number = room[3];
-                mRoom.name = room[4];
-                mRoom.address = room[5];
-                mRoom.lat = room[6];
-                mRoom.lon = room[7];
-                mRoom.seats = room[8];
-                mRoom.type = room[9];
-                mRoom.furniture = room[10];
-                mRoom.href = room[11];
-            } else {
-                continue;
+            let rooms: IRoom[] = [];
+            for (let room of roomsHolder.result) {
+                let mRoom: IRoom = {
+                    fullname: "",
+                    shortname: "",
+                    number: "",
+                    name: "",
+                    address: "",
+                    lat: 0,
+                    lon: 0,
+                    seats: 0,
+                    type: "",
+                    furniture: "",
+                    href: ""
+                };
+                if (this.checkValidRoom(room)) {
+                    mRoom.fullname = room[0];
+                    mRoom.shortname = room[1];
+                    mRoom.number = room[3];
+                    mRoom.name = room[4];
+                    mRoom.address = room[5];
+                    mRoom.lat = room[6];
+                    mRoom.lon = room[7];
+                    mRoom.seats = room[8];
+                    mRoom.type = room[9];
+                    mRoom.furniture = room[10];
+                    mRoom.href = room[11];
+                } else {
+                    continue;
+                }
+                rooms.push(mRoom);
             }
-            rooms.push(mRoom);
-        }
-        return null; // !!!!!
+            resolve(rooms); // !!!!!
+        });
     }
 
     private checkValidRoom(room: any): boolean {
