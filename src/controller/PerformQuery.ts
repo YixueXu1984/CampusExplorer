@@ -4,10 +4,16 @@ import Parser from "./Parser";
 import Interpreter from "./Interpreter";
 import InsightFacade from "./InsightFacade";
 import {INode} from "../model/Node";
+import Validator from "./Validator";
+import {IApplyObject} from "../model/ApplyObject";
+import {IColumnObject} from "../model/ColumnObject";
+import {ITransformationObject} from "../model/TransformationObject";
+import {IOrderObject} from "../model/OrderObject";
 
 export default class PerformQuery {
     public dataSets: IDataSet[];
     public dataSetToQuery: IDataSet;
+    private validator: Validator;
 
     constructor() {
         // Log.trace("Perform Query");
@@ -18,6 +24,7 @@ export default class PerformQuery {
             numRows: 0,
             courses: []
         };
+        this.validator = new Validator();
     }
 
     public performQuery(query: any, dataSets: IDataSet[]): Promise<any[]> {
@@ -26,7 +33,6 @@ export default class PerformQuery {
                 reject("Missing WHERE or OPTIONS clause");
             }
 
-            // TODO: Some logic to load dataSet if it hasnt been around already
             this.dataSets = dataSets; // update datasets
 
             this.dataSetToQuery = {
@@ -37,10 +43,15 @@ export default class PerformQuery {
             };
 
             try {
-                let columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
+                let columnsToQuery: IColumnObject = {
+                    columnKeys: [],
+                    columnApplykeys: [],
+                };
+                columnsToQuery = this.handleColumns(query.OPTIONS.COLUMNS);
 
+                // TODO: handleOrder
                 let promiseArr: Array<Promise<any>> = [this.handleOrder(query.OPTIONS.ORDER, columnsToQuery),
-                    this.parseBody(query.WHERE, columnsToQuery),
+                    this.parseBody(query.WHERE),
                     this.findDataSet(this.dataSetToQuery.id, dataSets)];
 
                 Promise.all(promiseArr)
@@ -48,7 +59,7 @@ export default class PerformQuery {
                         let order = interpPrep[0];
                         let root = interpPrep[1];
                         let dataSet = interpPrep[2];
-                        let result = this.interpretBody(root, dataSet, columnsToQuery);
+                        let result = this.interpretBody(root, dataSet, columnsToQuery.columnKeys);
                         if (order !== "") {
                             this.orderResult(result, order);
                         }
@@ -68,11 +79,11 @@ export default class PerformQuery {
         });
     }
 
-    private parseBody(body: any, columnsToQuery: string[]): Promise<INode> {
+    private parseBody(body: any): Promise<INode> {
         return new Promise<INode>((resolve, reject) => {
             try {
                 let parser = new Parser(this.dataSetToQuery.id);
-                let root = parser.parseFilters(body, columnsToQuery);
+                let root = parser.parseFilters(body);
                 resolve(root);
             } catch (err) {
                 reject(err);
@@ -85,102 +96,86 @@ export default class PerformQuery {
         return interpreter.filterCourses(root, dataSet, columnsToQuery);
     }
 
-    private handleColumns(columns: string[]): string[] {
-        let columnsToQuery: string[] = [];
+    private handleColumns(columns: string[]): IColumnObject {
+        let columnsToQuery: IColumnObject = {
+            columnKeys: [],
+            columnApplykeys: []
+        };
         if (columns.length < 1) {
             throw new Error("Need to specify at least one column");
         }
 
-        for (let column of columns) {
-            columnsToQuery.push(this.validateColumn(column));
+        // TODO: this is a very temproray way of setting which dataSet we are querying
+        if (this.validator.validateKeyStructure(columns[0], this.dataSetToQuery.id)) {
+            this.setDataSetToQuery(columns[0]);
         }
+
+        for (let column of columns) {
+
+            if (column.includes("_")) {
+                // a key
+                if (this.validator.validateKeyStructure(column, this.dataSetToQuery.id)
+                    && this.validator.validateColumnKeys(this.extractKey(column))) {
+                    columnsToQuery.columnKeys.push(column);
+                } else {
+                    throw new Error("failed to validate key in columns");
+                }
+
+            } else {
+                // an apply key
+                if (this.validator.validateApplyKeyStructure(column)) {
+                    columnsToQuery.columnApplykeys.push(column);
+                } else {
+                    throw new Error("failed to validate applyKey in columns");
+                }
+            }
+        }
+
         return columnsToQuery;
     }
 
-    private handleOrder(order: string, columnsToQuery: string[]): Promise<string> {
+    // TODO: order now needs to extract both a key and a direction
+    private handleOrder(order: any, columnsToQuery: IColumnObject): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             if (order === undefined) {
-                resolve("");
-            } else if (order !== undefined && this.validateOrder(order, columnsToQuery)) {
+                resolve(""); // no ordering provided
+            }
+
+            let orderObject: IOrderObject = {
+                dir: "",
+                keys: []
+            };
+
+            if (typeof order === "string") {
+                orderObject.dir = "UP"; // default is always ascending order i think...
+                orderObject.keys.push(order);
+            } else {
+                orderObject.dir = order.dir;
+                orderObject.keys = order.keys;
+            }
+
+            if (this.validator.validateOrder(columnsToQuery, orderObject.keys)) {
                 resolve(order);
             } else {
-                reject(order);
+                reject("columns in ORDER not in COLUMNS");
             }
         });
     }
 
-    private validateColumn(column: string): string {
-        let dataSetId: string;
-        let dataSetKey: string;
-        let keyArrHolder: string[] = column.split("_");
-        dataSetId = keyArrHolder[0];
-        dataSetKey = keyArrHolder[1];
-
-        if (dataSetId === undefined || dataSetKey === undefined) {
-            throw new Error("Invalid key structure");
-        }
-
-        if (this.dataSetToQuery.id === "") {
-            this.dataSetToQuery.id = dataSetId; // sets the dataSetId to Query
-        }
-
-        if (dataSetId !== this.dataSetToQuery.id) {
-            throw new Error("numerous dataset ids present in query");
-        }
-
-        switch (dataSetKey) {
-            case "dept":
-                return dataSetKey;
-            case "id":
-                return dataSetKey;
-            case "instructor":
-                return dataSetKey;
-            case "title":
-                return dataSetKey;
-            case "uuid":
-                return dataSetKey;
-            case "avg":
-                return dataSetKey;
-            case "pass":
-                return dataSetKey;
-            case "fail":
-                return dataSetKey;
-            case "audit":
-                return dataSetKey;
-            case "year":
-                return dataSetKey;
-            default:
-                throw new Error("Invalid key in columns");
-        }
-
+    private handleTransformations(transformation: any): Promise<ITransformationObject> {
+        // TODO: my man
+        return null;
     }
 
-    private validateOrder(order: string, columnsToQuery: string[]): boolean {
-        let dataSetId: string;
-        let dataSetKey: string;
-        let keyArrHolder: string[] = order.split("_");
-        dataSetId = keyArrHolder[0];
-        dataSetKey = keyArrHolder[1];
-
-        if (dataSetId === undefined || dataSetKey === undefined) {
-            throw new Error("Invalid key structure");
-        }
-
-        if (dataSetId !== this.dataSetToQuery.id) {
-            throw new Error("numerous dataset ids present in query");
-        }
-
-        let existInColumns = columnsToQuery.find((currKey) => {
-            return currKey === dataSetKey;
-        });
-
-        if (existInColumns === undefined) {
-            throw new Error("key used in order not present in columns");
-        }
-
-        return true;
+    private handleGroup(groupKeys: string[]): Promise<string> {
+        return null;
     }
 
+    private handleApply(applyObject: any[]): Promise<IApplyObject[]> {
+        return null;
+    }
+
+    // TODO: this needs major change
     private orderResult(result: any[], orderBy: string) {
         result.sort((a, b) => {
             if (a[orderBy] < b[orderBy]) {
@@ -193,6 +188,19 @@ export default class PerformQuery {
         });
     }
 
+    private applyTransformations(result: any[], applyObjects: IApplyObject[]): any[] {
+        // hmm not sure if this is right
+        return null;
+    }
+
+    private groupBy(result: any[], groupKeys: string[]): void {
+        // TODO:
+    }
+
+    private applyFunction(reslut: any[], applyObject: IApplyObject): void {
+        // TODO:
+    }
+
     private findDataSet(id: string, dataSets: IDataSet[]): Promise<IDataSet> {
         return new Promise<IDataSet>((resolve, reject) => {
             let FoundDataSet = dataSets.find((dataSet) => {
@@ -201,31 +209,21 @@ export default class PerformQuery {
 
             if (FoundDataSet !== undefined) {
                 resolve(FoundDataSet);
-            // } else {
-            //     this.loadDataset(id)
-            //         .then((dataSetLoaded) => {
-            //             dataSets.push(dataSetLoaded);
-            //             resolve(dataSetLoaded);
-            //         })
-            //         .catch((dataSetNotFound) => {
-            //             reject(dataSetNotFound);
-            //         });
+            } else {
+                reject("The dataset does not exist");
             }
         });
     }
 
-    // private loadDataset(id: string) {
-    //     return new Promise<IDataSet>((resolve, reject) => {
-    //         try {
-    //             const fs = require("fs");
-    //             let file = fs.readFile("data/" + id + ".json");
-    //             let dataset = JSON.parse(file);
-    //             this.dataSets.push(dataset);
-    //             resolve(dataset);
-    //         } catch (err) {
-    //             reject(err);
-    //         }
-    //     });
-    //
-    // }
+    private extractKey(idKey: string): string {
+        let dataSetKey: string;
+        let keyArrHolder: string[] = idKey.split("_");
+        dataSetKey = keyArrHolder[1];
+
+        return dataSetKey;
+    }
+
+    private setDataSetToQuery(column: string) {
+        this.dataSetToQuery.id = column.split("_")[0];
+    }
 }

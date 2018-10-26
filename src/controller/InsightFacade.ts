@@ -1,9 +1,13 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
-import AddDataSet from "./AddDataSet";
+import AddDataSetCourses from "./AddDataSetCourses";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
+import * as fs from "fs";
+import AddDataSetRooms from "./AddDataSetRooms";
+import {ICourseSection} from "../model/CourseSection";
+import GetGeoLocation from "./GetGeoLocation";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -16,6 +20,13 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.dataSets = [];
+        this.loadDataSet()
+            .then((dataSets) => {
+                this.dataSets = dataSets;
+            })
+            .catch((err) => {
+                Log.error("failed to load cached datasets" + String(err));
+            });
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -25,20 +36,35 @@ export default class InsightFacade implements IInsightFacade {
                     return reject(new InsightError("Trying to add an id that already exits"));
                 }
             });
-
-            let addDataSet: AddDataSet = new AddDataSet();
-            let dataSetsId: string[] = [];
-            addDataSet.addDataset(id, content, kind)
-                .then((dataSet) => {
-                    this.dataSets.push(dataSet);
-                    this.dataSets.forEach((currDataSet) => {
-                        dataSetsId.push(currDataSet.id);
+            if (kind === InsightDatasetKind.Courses) {
+                let addDataSet: AddDataSetCourses = new AddDataSetCourses();
+                let dataSetsId: string[] = [];
+                addDataSet.addDataset(id, content, kind)
+                    .then((dataSet) => {
+                        this.dataSets.push(dataSet);
+                        this.dataSets.forEach((currDataSet) => {
+                            dataSetsId.push(currDataSet.id);
+                        });
+                        resolve(dataSetsId);
+                    })
+                    .catch((err) => {
+                        reject(new InsightError(err));
                     });
-                    resolve(dataSetsId);
-                })
-                .catch((err) => {
-                    reject(new InsightError(err));
-                });
+            } else if (kind === InsightDatasetKind.Rooms) { // added case for Room
+                let addDataSet: AddDataSetRooms = new AddDataSetRooms();
+                let dataSetsId: string[] = [];
+                addDataSet.addDataset(id, content, kind)
+                    .then((dataSet) => {
+                        this.dataSets.push(dataSet);
+                        this.dataSets.forEach((currDataSet) => {
+                            dataSetsId.push(currDataSet.id);
+                        });
+                        resolve(dataSetsId);
+                    })
+                    .catch((err) => {
+                        reject(new InsightError(err));
+                    });
+            }
         });
     }
 
@@ -73,15 +99,92 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
-        // TODO: implement Room case
         let dataset: InsightDataset = {
-          id: "",
-          kind: InsightDatasetKind.Courses,
-          numRows: 0
+            id: "",
+            kind: InsightDatasetKind.Courses,
+            numRows: 0
         };
         dataset.id = name;
         dataset.kind = type;
         dataset.numRows = num;
         return dataset;
+    }
+
+    private loadDataSet(): Promise<IDataSet[]> {
+        return new Promise<IDataSet[]>((resolve, reject) => {
+            fs.access("data/", (err) => {
+                if (err) {
+                    fs.mkdir("data/", (error) => {
+                        if (err) {
+                            reject(error);
+                        }
+                        this.readDir()
+                            .then((dataSets) => {
+                                return resolve(dataSets);
+                            })
+                            .catch((error2) => {
+                                return reject(error2);
+                            });
+
+                    });
+                } else {
+                    this.readDir()
+                        .then((dataSets) => {
+                            return resolve(dataSets);
+                        })
+                        .catch((error1) => {
+                            return reject(error1);
+                        });
+                }
+            });
+        });
+    }
+
+    private readDir(): Promise<IDataSet[]> {
+        return new Promise<IDataSet[]>((resolve, reject) => {
+            let dataSets: IDataSet[] = [];
+            let promiseArr: Array<Promise<IDataSet>> = [];
+            fs.readdir("data/", (err: Error, files: string[]) => {
+                if (err) {
+                    reject(err);
+                }
+
+                for (let file of files) {
+                    promiseArr.push(this.readFiles(file));
+                }
+
+                Promise.all(promiseArr)
+                    .then((dataSetArray) => {
+                        dataSetArray.forEach((dataSet) => {
+                            dataSets.push(dataSet);
+                        });
+                        resolve(dataSets);
+                    })
+                    .catch((error) => {
+                        return reject(error);
+                    });
+            });
+        });
+    }
+
+    private readFiles(file: string): Promise<IDataSet> {
+        return new Promise<IDataSet>((resolve, reject) => {
+            fs.readFile(file, "utf8", (err, data) => {
+                try {
+                    if (err) {
+                        throw err;
+                    }
+                    let dataSet: IDataSet = JSON.parse(data);
+                    resolve(dataSet);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
+    }
+
+    public getGeoLocation(location: string): Promise<number[]> {
+        let results =  new GetGeoLocation();
+        return results.getGeoLocation(location);
     }
 }
