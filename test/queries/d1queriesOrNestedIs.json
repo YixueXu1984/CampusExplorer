@@ -31,7 +31,8 @@
         }
     },
     "isQueryValid": true,
-    "result":[
+
+    "result": [
         {
             "courses_dept": "cpen",
             "courses_id": "331",
@@ -539,4 +540,5 @@
             "courses_uuid": "6223"
         }
     ]
+
 }

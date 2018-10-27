@@ -1,29 +1,26 @@
 {
-    "title": "notdatasetorder",
+    "title": "invalidLogicComparison",
     "query": {
         "WHERE": {
-            "AND": [
+            "AND" : [
                 {
                     "IS": {
                         "courses_dept": "cpsc"
                     }
                 },
-                {
-                    "GT": {
-                        "courses_avg": 94
-                    }
-                }
+                {}
             ]
         },
         "OPTIONS": {
             "COLUMNS": [
                 "courses_dept",
                 "courses_id",
-                "courses_avg"
+                "courses_pass"
             ],
-            "ORDER": "invalid_order_key"
+            "ORDER": "courses_pass"
         }
     },
+
     "isQueryValid": false,
-    "result": "invalid order key"
+    "result": "todo"
 }

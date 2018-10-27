@@ -1,0 +1,36 @@
+{
+    "title": "SELECT dept and avg WHERE dept == '*an*' && avg > 95 ORDER BY avg",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_dept": "*an*"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_avg": 95
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result":[
+        {
+            "courses_dept": "plan",
+            "courses_avg": 96.47
+        },
+        {
+            "courses_dept": "plan",
+            "courses_avg": 96.47
+        }
+    ]}
