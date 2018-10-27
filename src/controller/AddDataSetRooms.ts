@@ -139,7 +139,7 @@ export default class AddDataSetRooms {
                 data: []
             };
             for (let path of buildingPaths) { // PROBLEM HERE
-                let file = cont.file(path);
+                let file = cont.file(path); // cont is JSZip, might need to call loadaync on it before call .file(path)
                 if (file !== null) {
                     file.async("text") // cont.file(path) is null, causing an Type error to be thrown
                         .then((info) => {
