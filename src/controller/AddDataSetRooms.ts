@@ -99,9 +99,9 @@ export default class AddDataSetRooms {
         if (typeof(node.childNodes) !== "undefined") {
             if (node.childNodes.length > 0) {
                 for (let child of node.childNodes) {
-                        if (this.findNode(child, attrName, attrValue) !== null) {
-                            return this.findNode(child, attrName, attrValue);
-                        }
+                    if (this.findNode(child, attrName, attrValue) !== null) {
+                        return this.findNode(child, attrName, attrValue);
+                    }
                 }
             }
         }
@@ -116,7 +116,7 @@ export default class AddDataSetRooms {
                 }
             }
         }
-        if ( typeof (node.childNodes) !== "undefined") {
+        if (typeof (node.childNodes) !== "undefined") {
             if (node.childNodes.length > 0) {
                 for (let child of node.childNodes) {
                     if (this.getAttr(child, attrName) !== null) {
@@ -139,10 +139,13 @@ export default class AddDataSetRooms {
                 data: []
             };
             for (let path of buildingPaths) { // PROBLEM HERE
-                cont.file(path).async("text") // cont.file(path) is null, causing an Type error to be thrown
-                    .then((info) => {
-                        promisearr.push(this.parseHtml(info)); // !!!!!
-                    });
+                let file = cont.file(path);
+                if (file !== null) {
+                    file.async("text") // cont.file(path) is null, causing an Type error to be thrown
+                        .then((info) => {
+                            promisearr.push(this.parseHtml(info)); // !!!!!
+                        });
+                }
             }
             Promise.all(promisearr)
                 .then((rooms) => {
@@ -181,8 +184,8 @@ export default class AddDataSetRooms {
                 const doc = parse5.parse(roominfo);
 
                 // fill-in roomHolder
-                let fullname = this.findNodeWithName(doc, "div", "id", "building-info").childNodes[1].
-                    childNodes[0].childNodes[0].name;
+                let fullname = this.findNodeWithName(doc, "div", "id", "building-info")
+                    .childNodes[1].childNodes[0].childNodes[0].name;
                 Log.trace("!!!!!!!!!!!!!" + fullname);
 
                 if (doc !== null && typeof (doc.childNodes) !== "undefined"
