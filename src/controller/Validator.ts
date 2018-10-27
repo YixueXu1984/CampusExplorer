@@ -33,7 +33,6 @@ export default class Validator {
         return (Object.values(COLUMN_KEYS).includes(dataSetKey));
     }
 
-    // TODO: change how order is validated
     public validateOrder(columnsToQuery: IColumnObject, orderKeys: string[]): boolean {
         let columnsAllKeys = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
         return orderKeys.every((orderKey) => {
