@@ -138,12 +138,11 @@ export default class AddDataSetRooms {
                 kind: InsightDatasetKind.Rooms,
                 data: []
             };
-            for (let path of buildingPaths) {
-                let test = cont.files[path];
-                test.async("text")
-                .then((html) => {
-                    promisearr.push(this.parseHtml(html)); // !!!!!
-                });
+            for (let path of buildingPaths) { // PROBLEM HERE
+                cont.file(path).async("text") // cont.file(path) is null, causing an Type error to be thrown
+                    .then((info) => {
+                        promisearr.push(this.parseHtml(info)); // !!!!!
+                    });
             }
             Promise.all(promisearr)
                 .then((rooms) => {
