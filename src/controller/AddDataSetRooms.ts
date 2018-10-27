@@ -139,13 +139,11 @@ export default class AddDataSetRooms {
                 data: []
             };
             for (let path of buildingPaths) {
-                return cont.file(path).async("text")
+                let test = cont.files[path];
+                test.async("text")
                 .then((html) => {
                     promisearr.push(this.parseHtml(html)); // !!!!!
-                })
-                    .catch(( err) => {
-                        reject(err);
-                    });
+                });
             }
             Promise.all(promisearr)
                 .then((rooms) => {
@@ -154,17 +152,12 @@ export default class AddDataSetRooms {
                         if (room.length > 0) {
                             numRows = numRows + room.length;
                             dataSet.data = dataSet.data.concat(room);
-                            // Only add a building if it has at least one section in it
                         }
                     }
-                    if (dataSet.data.length === 0) { // This dataSet has no courses in it, or no valid sections
-                        throw new Error("Invalid dataset, no valid room");
-                    } else {
-                        dataSet.id = id;
-                        dataSet.kind = kind;
-                        dataSet.numRows = numRows;
-                        resolve(dataSet);
-                    }
+                    dataSet.id = id;
+                    dataSet.kind = kind;
+                    dataSet.numRows = numRows;
+                    resolve(dataSet);
                 })
                 .catch((err) => {
                     reject(err);
@@ -178,7 +171,6 @@ export default class AddDataSetRooms {
             roomsHolder = {
                 result: []
             };
-            Log.trace("XXXXXXXXXXXX!!!!!!!!!!!!!");
             try {
                 // todo
                 let roomHolder: { cont: any[] };
@@ -188,9 +180,12 @@ export default class AddDataSetRooms {
 
                 const parse5 = require("parse5");
                 const doc = parse5.parse(roominfo);
+
+                // fill-in roomHolder
                 let fullname = this.findNodeWithName(doc, "div", "id", "building-info").childNodes[1].
                     childNodes[0].childNodes[0].name;
                 Log.trace("!!!!!!!!!!!!!" + fullname);
+
                 if (doc !== null && typeof (doc.childNodes) !== "undefined"
                     && doc.childNodes.length > 0) {
                     for (let child of doc.childNodes) {
