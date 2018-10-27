@@ -1,14 +1,17 @@
 import {INode} from "../model/Node";
 import Log from "../Util";
 import Validator from "./Validator";
+import {InsightDatasetKind} from "./IInsightFacade";
 
 export default class Parser {
     private readonly dataSetToQueryId: string;
+    private readonly dataSetToQueryType: InsightDatasetKind;
     private validator: Validator;
 
-    constructor(dataSetToQueryId: string)  {
+    constructor(dataSetToQueryId: string, dataSetToQueryType: InsightDatasetKind) {
         // Log.trace("Parser created");
         this.dataSetToQueryId = dataSetToQueryId;
+        this.dataSetToQueryType = dataSetToQueryType;
         this.validator = new Validator();
     }
 
@@ -28,10 +31,12 @@ export default class Parser {
                 input = this.extractInputValue(Object.values(filterBody[i]));
             }
 
-            if (this.validator.isMcomp(filterName) && this.validator.validateKey(key, filterName)
+            if (this.validator.isMcomp(filterName)
+                && this.validator.validateKey(key, filterName, this.dataSetToQueryType)
                 && this.validator.validateInputValue(input, filterName)) {
                 nodes.push(this.createNode(filterName, key, input));
-            } else if (this.validator.isScomp(filterName) && this.validator.validateKey(key, filterName)
+            } else if (this.validator.isScomp(filterName)
+                && this.validator.validateKey(key, filterName, this.dataSetToQueryType)
                 && this.validator.validateInputValue(input, filterName)) {
                 nodes.push(this.createNode(filterName, key, input));
             } else if (this.validator.isAnd(filterName) && this.validator.validateLcomp(filterBody[i])) {
