@@ -1,0 +1,25 @@
+{
+    "title": "invalidLogicComparison",
+    "query": {
+        "WHERE": {
+            "AND" : [
+                {
+                    "GT": {
+                        "courses_avg": 98
+                    }
+                },
+                {}
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_pass"
+            ],
+            "ORDER": "courses_pass"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

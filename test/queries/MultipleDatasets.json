@@ -1,0 +1,29 @@
+{
+    "title": "MultipleDatasets",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "IS": {
+                        "courses_dept":"cpsc"
+                    }
+                }
+            ,
+                {
+                    "GT": {
+                        "course_avg":94
+                    }}]
+
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses3_id",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "MultipleDatasets"
+}

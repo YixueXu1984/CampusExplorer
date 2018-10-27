@@ -11,7 +11,10 @@ export default class Validator {
     // ---- VALIDATORS START --- //
     public validateQuerySize(query: any): boolean {
         let length = Object.keys(query).length;
-        if (query.WHERE === undefined || query.OPTIONS === undefined) {
+        if (query.WHERE === undefined
+            || query.OPTIONS === undefined
+            || query.WHERE === null
+            || query.OPTIONS === null) {
             return false;
         }
 

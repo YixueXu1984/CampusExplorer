@@ -1,0 +1,28 @@
+{
+    "title": "SELECT dept, avg WHERE avg 'IS'(invalid) 97",
+    "query": {
+        "WHERE":{
+            "AND":[
+                {
+                    "IS":{
+                        "courses_dept":"math"
+                    }
+                },
+                {
+                    "IS":{
+                        "courses_instructor":"*john"
+                    }
+                }
+            ]
+        },
+        "OPTIONS":{
+            "COLUMNS":[
+                "courses_dept",
+                "courses_instructor"
+            ],
+            "ORDER":"courses_instructor"
+        }
+    },
+    "isQueryValid": true,
+    "result":[{"courses_dept":"math","courses_instructor":"griesmer, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"macdonald, john"},{"courses_dept":"math","courses_instructor":"steinberger, john"}]
+}

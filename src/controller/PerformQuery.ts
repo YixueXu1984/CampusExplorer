@@ -54,7 +54,9 @@ export default class PerformQuery {
                     .then((interpPrep) => {
                         let columnsToQuery: IColumnObject = interpPrep[0];
                         let transformations: ITransformationObject = interpPrep[1];
-                        columnsToQuery = this.finalizeColumnsToQuery(columnsToQuery, transformations);
+                        if (transformations.groupKeys.length !== 0) {
+                            columnsToQuery = this.finalizeColumnsToQuery(columnsToQuery, transformations);
+                        }
                         let order: IOrderObject = this.handleOrder(query.OPTIONS.ORDER, columnsToQuery);
                         this.setDataSetToQuery(columnsToQuery);
                         let dataSet: IDataSet = this.findDataSet(this.dataSetToQuery.id, this.dataSets);
@@ -140,11 +142,15 @@ export default class PerformQuery {
         });
         let allKeysInColumn = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
 
-        allKeysInColumn.every((key) => {
+        let allKeysInColumnBool = allKeysInColumn.every((key) => {
             return transformations.groupKeys.includes(key) ||
                 allApplyKeys.includes(key);
 
         });
+
+        if (!allKeysInColumnBool) {
+            throw new Error("every key/applKey in columns is in apply or groupBy");
+        }
 
         // add key into columnsToQuery if it DNE in columnsToQuery but exists in applyObject
         let applyObjectKeys: string[] = transformations.applyObjects.map((applyObject) => {
@@ -194,12 +200,9 @@ export default class PerformQuery {
 
             if (transformation === undefined) {
                 resolve(transformationObject); // its ok to have no transformation
+            } else if (transformation === null) {
+                reject("transformation is null");
             }
-
-            if (transformation.GROUP === undefined || transformation.APPLY === undefined) {
-                reject("Missing group or apply for transformation");
-            }
-
             let promiseArr: Array<Promise<any>> = [
                 this.handleGroup(transformation),
                 this.handleApply(transformation)];
@@ -219,7 +222,9 @@ export default class PerformQuery {
 
     private handleGroup(transformation: any): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
-            if (transformation.GROUP === undefined || transformation.GROUP.length === 0) {
+            if (transformation.GROUP === undefined
+                || transformation.GROUP === null
+                || transformation.GROUP.length === 0) {
                 reject("Missing group");
             }
             // groupKey must be a valid key and must all be in columns
@@ -239,7 +244,8 @@ export default class PerformQuery {
 
     private handleApply(transformation: any): Promise<IApplyObject[]> {
         return new Promise<IApplyObject[]>((resolve, reject) => {
-            if (transformation.APPLY === undefined) {
+            if (transformation.APPLY === undefined
+                || transformation.APPLY === null) {
                 reject("Missing Apply");
             }
             let transformations: any[] = transformation.APPLY;
@@ -254,6 +260,9 @@ export default class PerformQuery {
 
                 let applyKey = Object.keys(apply)[0];
                 let applyBody = Object.values(apply)[0];
+                if (Object.keys(applyBody).length > 1) {
+                    reject("Apply body should only have 1 key");
+                }
                 let applyToken = Object.keys(applyBody)[0];
                 let key = Object.values(applyBody)[0];
 
@@ -367,10 +376,10 @@ export default class PerformQuery {
 
     }
 
-    private applyMax(result: any[], applyObject: IApplyObject): number {
+    private applyMax(groupResult: any[], applyObject: IApplyObject): number {
         let maxValue: number = -Infinity;
         // find the maxValue of the given key in data
-        result.forEach((data) => {
+        groupResult.forEach((data) => {
             if (data[applyObject.key] > maxValue) {
                 maxValue = data[applyObject.key];
             }
@@ -379,10 +388,10 @@ export default class PerformQuery {
         return maxValue;
     }
 
-    private applyMin(result: any[], applyObject: IApplyObject): number {
+    private applyMin(groupResult: any[], applyObject: IApplyObject): number {
         let minValue: number = Infinity;
         // find the maxValue of the given key in data
-        result.forEach((data) => {
+        groupResult.forEach((data) => {
             if (data[applyObject.key] < minValue) {
                 minValue = data[applyObject.key];
             }
@@ -391,47 +400,30 @@ export default class PerformQuery {
         return minValue;
     }
 
-    private applyCount(result: any[], applyObject: IApplyObject): number {
-        let countValue = 0;
-        let countArray: any[];
-        result.forEach((data) => {
-            countArray.push(data[applyObject.key]);
+    private applyCount(groupResult: any[], applyObject: IApplyObject): number {
+        let uniqueSet: Set<number | string> = new Set();
+        groupResult.forEach((data) => {
+            uniqueSet.add(data[applyObject.key]);
         });
-
-        // find the number of unique occurrences
-        let count = countArray.filter(function (item, pos) {
-            return countArray.indexOf(item) === pos;
-        });
-        countValue = count.length;
-
-        result.forEach((data) => {
-            data[applyObject.applyKey] = countValue;
-        });
-        return result;
+        return uniqueSet.size;
     }
 
-    private applySum(result: any[], applyObject: IApplyObject): number {
+    private applySum(groupResult: any[], applyObject: IApplyObject): number {
         let sumValue: number = 0;
-        result.forEach((data) => {
-            sumValue = sumValue + data[applyObject.key];
+        groupResult.forEach((data) => {
+                sumValue = sumValue + data[applyObject.key];
             }
         );
-        result.forEach(( (data) => {
-            data[applyObject.applyKey] = sumValue.toFixed(2);
-        }));
-        return result;
+        return Number(sumValue.toFixed(2));
     }
 
-    private applyAvg(result: any[], applyObject: IApplyObject): number {
+    private applyAvg(groupResult: any[], applyObject: IApplyObject): number {
         let sum = new Decimal(0);
-        result.forEach((data) => {
+        groupResult.forEach((data) => {
             sum = sum.add(data[applyObject.key]);
         });
-        let avgValue = sum.toNumber() / result.length;
-        result.forEach((data) => {
-            data[applyObject.applyKey] = avgValue.toFixed(2);
-        });
-        return result;
+        let avgValue = sum.toNumber() / groupResult.length;
+        return Number(avgValue.toFixed(2));
     }
 
     private setDataSetToQuery(columnsToQuery: IColumnObject): void {

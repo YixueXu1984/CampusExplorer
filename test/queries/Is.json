@@ -1,0 +1,19 @@
+{
+    "title": "SELECT dept, avg WHERE dept = cpen",
+    "query": {
+        "WHERE": {
+            "IS": {
+                "course_dept": "cpen"
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "numerous dataset ids present"
+}
