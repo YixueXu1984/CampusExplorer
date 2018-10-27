@@ -53,9 +53,9 @@ export default class PerformQuery {
                     .then((interpPrep) => {
                         let columnsToQuery: IColumnObject = interpPrep[0];
                         let transformations: ITransformationObject = interpPrep[1];
-                        // columnsToQuery = this.finalizeColumnsToQuery(columnsToQuery, transformations);
+                        columnsToQuery = this.finalizeColumnsToQuery(columnsToQuery, transformations);
                         let order: IOrderObject = this.handleOrder(query.OPTIONS.ORDER, columnsToQuery);
-                        columnsToQuery = this.setDataSetToQuery(columnsToQuery, transformations);
+                        this.setDataSetToQuery(columnsToQuery);
                         let dataSet: IDataSet = this.findDataSet(this.dataSetToQuery.id, this.dataSets);
                         let root: INode = this.parseBody(query.WHERE);
                         let result = this.interpretBody(root, dataSet, columnsToQuery.columnKeys);
@@ -131,12 +131,32 @@ export default class PerformQuery {
         });
     }
 
-    private finalizeColumnsToQuery(columnsToQuery: IColumnObject, transformations: ITransformationObject): void {
-        // validate that every key/applKey in apply and groupBy is actually in columns
-        let applyKeysInColumns: boolean = transformations.applyObjects.every((applyObject) => {
-            return columnsToQuery.columnApplykeys.includes(applyObject.applyKey);
+    private finalizeColumnsToQuery(columnsToQuery: IColumnObject,
+                                   transformations: ITransformationObject): IColumnObject {
+        // validate that every key/applKey in columns is in apply or groupBy
+        let allApplyKeys = transformations.applyObjects.map((applyObject) => {
+            return applyObject.applyKey;
         });
-        // add key into columnsToQuery if it DNE
+        let allKeysInColumn = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
+
+        allKeysInColumn.every((key) => {
+            return transformations.groupKeys.includes(key) ||
+                allApplyKeys.includes(key);
+
+        });
+
+        // add key into columnsToQuery if it DNE in columnsToQuery but exists in applyObject
+        let applyObjectKeys: string[] = transformations.applyObjects.map((applyObject) => {
+            return applyObject.key;
+        });
+
+        applyObjectKeys.forEach((key) => {
+            if (!columnsToQuery.columnKeys.includes(key)) {
+                columnsToQuery.columnKeys.push(key);
+            }
+        });
+
+        return columnsToQuery;
     }
 
     private handleOrder(order: any, columnsToQuery: IColumnObject): IOrderObject {
@@ -221,11 +241,10 @@ export default class PerformQuery {
             if (transformation.APPLY === undefined) {
                 reject("Missing Apply");
             }
-            let transformations: any = transformation.APPLY;
+            let transformations: any[] = transformation.APPLY;
 
             let applyObjects: IApplyObject[] = [];
-            transformations.forEach((parameters: { apply: any }) => {
-                let apply = parameters.apply;
+            transformations.forEach((apply) => {
                 let applyObject: IApplyObject = {
                     applyKey: "",
                     applyToken: "",
@@ -239,7 +258,7 @@ export default class PerformQuery {
 
                 if (this.validator.validateApplyKeyStructure(applyKey)
                     && this.validator.validateKeyStructure(key)
-                    && this.validator.validateApplyToken(key, applyToken)
+                    && this.validator.validateApplyToken(this.extractKey(key), applyToken)
                     && this.validator.isUniqueApplyKey(applyObjects, applyKey)) {
                     applyObject.applyKey = applyKey;
                     applyObject.applyToken = applyToken;
@@ -287,34 +306,49 @@ export default class PerformQuery {
     }
 
     private applyTransformations(result: any[], transformations: ITransformationObject): any[] {
-        let transformationResult: any[] = result;
-        transformationResult = this.groupBy(transformationResult, transformations.groupKeys);
-        transformations.applyObjects.forEach((applyObject) => {
-            transformationResult = this.applyFunction(transformationResult, applyObject);
-        });
+        let transformationResult: any[] = [];
+        let groups: Map<string, any[]> = this.groupBy(result, transformations.groupKeys);
+        let groupsIterator = groups.entries();
+        // for each apply object has to be used on each group
 
+        for (let group of groupsIterator) {
+            transformationResult.push(this.applyEachGroup(group, transformations.applyObjects));
+        }
         return transformationResult;
     }
 
-    private groupBy(result: any[], groupKeys: string[]): any[] {
-        let transformationResult: any[] = result;
+    private applyEachGroup(group: any[], applyObjects: IApplyObject[]): any {
+        let groupObject: any = JSON.parse(group[0]);
+
+        applyObjects.forEach((applyObject) => {
+            groupObject[applyObject.applyKey] = this.applyFunction(group[1], applyObject);
+        });
+
+        return groupObject;
+    }
+
+    private groupBy(result: any[], groupKeys: string[]): Map<string, any[]> {
         let groups = new Map<string, any[]>();
         result.forEach((data) => {
-            let groupName: string = "";
+            let group: any = {};
+            // creates a group object
             for (let key of groupKeys) {
-                groupName = groupName + String(data[key]);
+                group[key] = data[key];
             }
 
-            if (!groups.has(groupName)) {
-                groups.set(groupName, [data]);
+            // if group is not in groups map, create new group with curr data
+            // if it i in groups map, push the curr data to that group
+            let groupKey = JSON.stringify(group);
+            if (!groups.has(groupKey)) {
+                groups.set(groupKey, [data]);
             } else {
-                groups.get(groupName).push(data);
+                groups.get(groupKey).push(data);
             }
         });
-        return transformationResult;
+        return groups;
     }
 
-    private applyFunction(result: any[], applyObject: IApplyObject): any[] {
+    private applyFunction(result: any[], applyObject: IApplyObject): number {
         switch (applyObject.applyToken) {
             case APPLY_TOKEN.Emax:
                 return this.applyMax(result, applyObject);
@@ -332,8 +366,8 @@ export default class PerformQuery {
 
     }
 
-    private applyMax(result: any[], applyObject: IApplyObject): any[] {
-        let maxValue: number = 0;
+    private applyMax(result: any[], applyObject: IApplyObject): number {
+        let maxValue: number = -Infinity;
         // find the maxValue of the given key in data
         result.forEach((data) => {
             if (data[applyObject.key] > maxValue) {
@@ -341,15 +375,11 @@ export default class PerformQuery {
             }
         });
 
-        // create a new column named applyKey with this maxvalue for all data
-        result.forEach((data) => {
-            data[applyObject.applyKey] = maxValue;
-        });
-        return result;
+        return maxValue;
     }
 
-    private applyMin(result: any[], applyObject: IApplyObject): any[] {
-        let minValue: number = 0;
+    private applyMin(result: any[], applyObject: IApplyObject): number {
+        let minValue: number = Infinity;
         // find the maxValue of the given key in data
         result.forEach((data) => {
             if (data[applyObject.key] < minValue) {
@@ -357,33 +387,25 @@ export default class PerformQuery {
             }
         });
 
-        // create a new column named applyKey with this maxvalue for all data
-        result.forEach((data) => {
-            data[applyObject.applyKey] = minValue;
-        });
-        return result;
+        return minValue;
     }
 
-    private applyCount(result: any[], applyObject: IApplyObject): any[] {
+    private applyCount(result: any[], applyObject: IApplyObject): number {
         // TODO:
         return null;
     }
 
-    private applySum(result: any[], applyObject: IApplyObject): any[] {
+    private applySum(result: any[], applyObject: IApplyObject): number {
         // TODO:
         return null;
     }
 
-    private applyAvg(result: any[], applyObject: IApplyObject): any[] {
+    private applyAvg(result: any[], applyObject: IApplyObject): number {
         // TODO:
         return null;
     }
 
-    private setDataSetToQuery(columnsToQuery: IColumnObject, transformations: ITransformationObject): IColumnObject {
-        let transformationKeys = transformations.applyObjects.map((applyObject) => {
-            return applyObject.key;
-        });
-        columnsToQuery.columnKeys = columnsToQuery.columnKeys.concat(transformationKeys);
+    private setDataSetToQuery(columnsToQuery: IColumnObject): void {
         this.dataSetToQuery.id = this.extractId(columnsToQuery.columnKeys[0]);
         let allKeysSameId: boolean = !columnsToQuery.columnKeys.every((IdKey) => {
             return this.extractId(IdKey) === this.dataSetToQuery.id;
@@ -392,7 +414,6 @@ export default class PerformQuery {
         if (allKeysSameId) {
             throw new Error("multiple different dataSetId in columns and transform");
         }
-        return columnsToQuery;
     }
 
     private findDataSet(id: string, dataSets: IDataSet[]): IDataSet {

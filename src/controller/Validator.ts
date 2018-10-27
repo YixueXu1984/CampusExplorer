@@ -129,7 +129,7 @@ export default class Validator {
         let applyKeys = applyObjects.map((applyObject) => {
             return applyObject.applyKey;
         });
-        return applyKeys.includes(applyKey);
+        return !applyKeys.includes(applyKey);
     }
 
     public validateApplyToken(key: string, applyToken: string): boolean {
