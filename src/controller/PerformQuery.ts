@@ -21,12 +21,6 @@ export default class PerformQuery {
     constructor() {
         // Log.trace("Perform Query");
         this.dataSets = [];
-        this.dataSetToQuery = {
-            id: "",
-            kind: InsightDatasetKind.Courses,
-            numRows: 0,
-            data: []
-        };
         this.validator = new Validator();
     }
 
@@ -37,14 +31,6 @@ export default class PerformQuery {
             }
 
             this.dataSets = dataSets; // update datasets
-
-            this.dataSetToQuery = {
-                id: "",
-                kind: InsightDatasetKind.Courses,
-                numRows: 0,
-                data: []
-            };
-
             try {
 
                 let promiseArr: Array<Promise<any>> = [
@@ -59,10 +45,14 @@ export default class PerformQuery {
                             columnsToQuery = this.finalizeColumnsToQuery(columnsToQuery, transformations);
                         }
                         let order: IOrderObject = this.handleOrder(query.OPTIONS.ORDER, columnsToQuery);
-                        this.setDataSetToQuery(columnsToQuery);
-                        let dataSet: IDataSet = this.findDataSet(this.dataSetToQuery.id, this.dataSets);
-                        let root: INode = this.parseBody(query.WHERE);
-                        let result = this.interpretBody(root, dataSet, columnsToQuery.columnKeys);
+                        let dataSetId = this.setDataSetToQuery(columnsToQuery);
+                        let dataSetToQuery: IDataSet = this.findDataSet(dataSetId, this.dataSets);
+                        if (!this.validateAllColumnsToQuery(columnsToQuery, dataSetToQuery.kind, dataSetToQuery.id)) {
+                            throw new Error("failed to validate all columns to query");
+                        }
+
+                        let root: INode = this.parseBody(query.WHERE, dataSetToQuery);
+                        let result = this.interpretBody(root, dataSetToQuery, columnsToQuery.columnKeys);
                         if (transformations.groupKeys.length !== 0) {
                             let transformer = new Transformer();
                             result = transformer.applyTransformations(result, transformations);
@@ -87,9 +77,9 @@ export default class PerformQuery {
         });
     }
 
-    private parseBody(body: any): INode {
+    private parseBody(body: any, dataSetToQuery: IDataSet): INode {
         try {
-            let parser = new Parser(this.dataSetToQuery.id);
+            let parser = new Parser(dataSetToQuery.id, dataSetToQuery.kind);
             return parser.parseFilters(body);
         } catch (err) {
             throw err;
@@ -115,8 +105,7 @@ export default class PerformQuery {
 
                 if (column.includes("_")) {
                     // a key
-                    if (this.validator.validateKeyStructure(column)
-                        && this.validator.validateColumnKeys(this.extractKey(column))) {
+                    if (this.validator.validateKeyStructure(column)) {
                         columnsToQuery.columnKeys.push(column);
                     } else {
                         reject("failed to validate key in columns");
@@ -166,6 +155,20 @@ export default class PerformQuery {
         });
 
         return columnsToQuery;
+    }
+
+    private validateAllColumnsToQuery(columnsToQuery: IColumnObject, dataSetType: InsightDatasetKind,
+                                      dataSetToQueryId: string): boolean {
+        let allKeysSameId: boolean = !columnsToQuery.columnKeys.every((IdKey) => {
+            return this.extractId(IdKey) === dataSetToQueryId;
+        });
+
+        if (allKeysSameId) {
+            throw new Error("multiple different dataSetId in columns and transform");
+        }
+        return columnsToQuery.columnKeys.every((key) => {
+            return this.validator.validateColumnKeys(this.extractKey(key), dataSetType);
+        });
     }
 
     private handleOrder(order: any, columnsToQuery: IColumnObject): IOrderObject {
@@ -317,15 +320,8 @@ export default class PerformQuery {
         return 0; // none of the keys helped to resolve tie
     }
 
-    private setDataSetToQuery(columnsToQuery: IColumnObject): void {
-        this.dataSetToQuery.id = this.extractId(columnsToQuery.columnKeys[0]);
-        let allKeysSameId: boolean = !columnsToQuery.columnKeys.every((IdKey) => {
-            return this.extractId(IdKey) === this.dataSetToQuery.id;
-        });
-
-        if (allKeysSameId) {
-            throw new Error("multiple different dataSetId in columns and transform");
-        }
+    private setDataSetToQuery(columnsToQuery: IColumnObject): string {
+        return this.extractId(columnsToQuery.columnKeys[0]);
     }
 
     private findDataSet(id: string, dataSets: IDataSet[]): IDataSet {

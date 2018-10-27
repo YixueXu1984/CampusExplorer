@@ -1,5 +1,12 @@
 import {InsightDatasetKind} from "./IInsightFacade";
-import {APPLY_TOKEN, COLUMN_KEYS, MCOMP_KEYS, SCOMP_KEYS} from "./Enums";
+import {
+    APPLY_TOKEN,
+    COLUMN_KEYS_COURSES, COLUMN_KEYS_ROOMS,
+    MCOMP_KEYS_COURSES,
+    MCOMP_KEYS_ROOMS,
+    SCOMP_KEYS_COURSES,
+    SCOMP_KEYS_ROOMS
+} from "./Enums";
 import {IColumnObject} from "../model/ColumnObject";
 import {IApplyObject} from "../model/ApplyObject";
 
@@ -29,8 +36,13 @@ export default class Validator {
         return true;
     }
 
-    public validateColumnKeys(dataSetKey: string): boolean {
-        return (Object.values(COLUMN_KEYS).includes(dataSetKey));
+    public validateColumnKeys(dataSetKey: string, dataSetType: InsightDatasetKind): boolean {
+        switch (dataSetType) {
+            case InsightDatasetKind.Courses:
+                return Object.values(COLUMN_KEYS_COURSES).includes(dataSetKey);
+            case InsightDatasetKind.Rooms:
+                return Object.values(COLUMN_KEYS_ROOMS).includes(dataSetKey);
+        }
     }
 
     public validateOrder(columnsToQuery: IColumnObject, orderKeys: string[]): boolean {
@@ -60,22 +72,32 @@ export default class Validator {
         return filter === "IS";
     }
 
-    public validateKey(key: string, filterName: string): boolean {
-        if (this.isMcomp(filterName) && this.validateMcompKey(key)) {
+    public validateKey(key: string, filterName: string, dataSetType: InsightDatasetKind): boolean {
+        if (this.isMcomp(filterName) && this.validateMcompKey(key, dataSetType)) {
             return true;
-        } else if (this.isScomp(filterName) && this.validateScompKey(key)) {
+        } else if (this.isScomp(filterName) && this.validateScompKey(key, dataSetType)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public validateMcompKey(key: string): boolean {
-        return Object.values(MCOMP_KEYS).includes(key);
+    public validateMcompKey(key: string, dataSetType: InsightDatasetKind): boolean {
+        switch (dataSetType) {
+            case InsightDatasetKind.Courses:
+                return Object.values(MCOMP_KEYS_COURSES).includes(key);
+            case InsightDatasetKind.Rooms:
+                return Object.values(MCOMP_KEYS_ROOMS).includes(key);
+        }
     }
 
-    public validateScompKey(key: string): boolean {
-        return Object.values(SCOMP_KEYS).includes(key);
+    public validateScompKey(key: string, dataSetType: InsightDatasetKind): boolean {
+        switch (dataSetType) {
+            case InsightDatasetKind.Courses:
+                return Object.values(SCOMP_KEYS_COURSES).includes(key);
+            case InsightDatasetKind.Rooms:
+                return Object.values(SCOMP_KEYS_ROOMS).includes(key);
+        }
     }
 
     public validateInputValue(input: string | number, filterName: string): boolean {
@@ -138,9 +160,10 @@ export default class Validator {
         if (Object.values(APPLY_TOKEN).includes(applyToken)) {
             switch (applyToken) {
                 case "COUNT":
-                    return Object.values(MCOMP_KEYS).includes(key) || Object.values(SCOMP_KEYS).includes(key);
+                    return Object.values(MCOMP_KEYS_COURSES).includes(key)
+                        || Object.values(SCOMP_KEYS_COURSES).includes(key);
                 default:
-                    return Object.values(MCOMP_KEYS).includes(key);
+                    return Object.values(MCOMP_KEYS_COURSES).includes(key);
             }
         }
     }
