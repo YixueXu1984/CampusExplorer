@@ -45,6 +45,7 @@ export default class InsightFacade implements IInsightFacade {
                         this.dataSets.forEach((currDataSet) => {
                             dataSetsId.push(currDataSet.id);
                         });
+                        Log.trace("7777777");
                         resolve(dataSetsId);
                     })
                     .catch((err) => {

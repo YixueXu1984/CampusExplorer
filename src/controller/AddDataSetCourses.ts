@@ -5,6 +5,7 @@ import {JSZipObject} from "jszip";
 import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
 import {ICourseSection} from "../model/CourseSection";
+import {IDataSetCourseSections} from "../model/DataSetCourseSections";
 export default class AddDataSetCourses {
 
     constructor() {
@@ -101,11 +102,11 @@ export default class AddDataSetCourses {
         // TODO: add case for Room
         return new Promise((resolve, reject) => {
             let promisearr: Array<Promise<ICourseSection[]>> = [];
-            let dataSet: IDataSet = {
+            let dataSet: IDataSetCourseSections = {
                 id: "",
                 numRows: 0,
                 kind: InsightDatasetKind.Courses,
-                courses: []
+                data: []
             };
             courses.folder("courses").forEach((relativePath, course) => {
                 promisearr.push(this.readEachJsonFile(course));
@@ -117,11 +118,11 @@ export default class AddDataSetCourses {
                     for (let courseSection of courseSections) {
                         if (courseSection.length > 0) {
                             numRows = numRows + courseSection.length;
-                            dataSet.courses = dataSet.courses.concat(courseSection);
+                            dataSet.data = dataSet.data.concat(courseSection);
                             // Only add a course if it has at least one section in it
                         }
                     }
-                    if (dataSet.courses.length === 0) { // This dataSet has no courses in it, or no valid sections
+                    if (dataSet.data.length === 0) { // This dataSet has no courses in it, or no valid sections
                         throw new Error("Invalid dataset, no valid sections");
                     } else {
                         dataSet.id = id;
