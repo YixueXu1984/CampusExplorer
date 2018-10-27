@@ -7,7 +7,7 @@
 // describe("AddDataSetRooms", () => {
 //     const datasetsToLoad: { [id: string]: string } = {
 //         rooms: "./test/data/rooms.zip",
-//         specificRooms: "./test/data/specificRooms.zip",
+//         // specificRooms: "./test/data/specificRooms.zip",
 //     };
 //
 //     let insightFacade: InsightFacade;
@@ -22,7 +22,7 @@
 //                 loadDatasetPromises.push(TestUtil.readFileAsync(path));
 //             }
 //             const loadedDatasets = (await Promise.all(loadDatasetPromises)).map((buf, i) => {
-//                 return { [Object.keys(datasetsToLoad)[i]]: buf.toString("base64") };
+//                 return {[Object.keys(datasetsToLoad)[i]]: buf.toString("base64")};
 //             });
 //             datasets = Object.assign({}, ...loadedDatasets);
 //             expect(Object.keys(datasets)).to.have.length.greaterThan(0);
@@ -65,10 +65,9 @@
 //         }
 //     });
 //
-//     it("Should add a valid dataset: courses", async () => {
+//     it("Should add a valid dataset: rooms", async () => {
 //         const id: string = "rooms";
 //         let response: string[];
-//
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
 //         } catch (err) {
@@ -153,37 +152,4 @@
 //             expect(response).to.deep.equal([]);
 //         }
 //     });
-//
-//     it("Should add a specific dataset", async () => {
-//         const id: string = "specificRooms";
-//         let response: string[];
-//
-//         try {
-//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
-//         } catch (err) {
-//             response = err;
-//         } finally {
-//             expect(response).to.deep.equal([id]);
-//         }
-//     });
-//
-//     it("Should have a dataset of specific courses after add, test listDatasets()", async function () {
-//         const id: string = "specificRooms";
-//         let expectedDataset: InsightDataset = {
-//             id: "specificRooms",
-//             kind: InsightDatasetKind.Rooms,
-//             numRows: 61 // !!!!!!!!!
-//         };
-//         let expected: InsightDataset[] = [];
-//         expected.push(expectedDataset);
-//         let response: InsightDataset[] = [];
-//         try {
-//             response = await insightFacade.listDatasets();
-//         } catch (err) {
-//             response = err;
-//         } finally {
-//             expect(response).to.deep.equal(expected);
-//         }
-//     });
-//
 // });

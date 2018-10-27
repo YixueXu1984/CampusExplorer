@@ -1,6 +1,14 @@
 import {InsightDatasetKind} from "./IInsightFacade";
-import {COLUMN_KEYS, MCOMP_KEYS, SCOMP_KEYS} from "./Enums";
+import {
+    APPLY_TOKEN,
+    COLUMN_KEYS_COURSES, COLUMN_KEYS_ROOMS,
+    MCOMP_KEYS_COURSES,
+    MCOMP_KEYS_ROOMS,
+    SCOMP_KEYS_COURSES,
+    SCOMP_KEYS_ROOMS
+} from "./Enums";
 import {IColumnObject} from "../model/ColumnObject";
+import {IApplyObject} from "../model/ApplyObject";
 
 export default class Validator {
     constructor() {
@@ -8,11 +16,35 @@ export default class Validator {
     }
 
     // ---- VALIDATORS START --- //
-    public validateColumnKeys(dataSetKey: string): boolean {
-        return (Object.values(COLUMN_KEYS).includes(dataSetKey));
+    public validateQuerySize(query: any): boolean {
+        let length = Object.keys(query).length;
+        if (query.WHERE === undefined
+            || query.OPTIONS === undefined
+            || query.WHERE === null
+            || query.OPTIONS === null) {
+            return false;
+        }
+
+        if (Object.keys(query).length > 3) {
+            return false;
+        }
+
+        if (Object.keys(query).length === 3 && query.TRANSFORMATIONS === undefined) {
+            return false;
+        }
+
+        return true;
     }
 
-    // TODO: change how order is validated
+    public validateColumnKeys(dataSetKey: string, dataSetType: InsightDatasetKind): boolean {
+        switch (dataSetType) {
+            case InsightDatasetKind.Courses:
+                return Object.values(COLUMN_KEYS_COURSES).includes(dataSetKey);
+            case InsightDatasetKind.Rooms:
+                return Object.values(COLUMN_KEYS_ROOMS).includes(dataSetKey);
+        }
+    }
+
     public validateOrder(columnsToQuery: IColumnObject, orderKeys: string[]): boolean {
         let columnsAllKeys = columnsToQuery.columnKeys.concat(columnsToQuery.columnApplykeys);
         return orderKeys.every((orderKey) => {
@@ -40,22 +72,32 @@ export default class Validator {
         return filter === "IS";
     }
 
-    public validateKey(key: string, filterName: string): boolean {
-        if (this.isMcomp(filterName) && this.validateMcompKey(key)) {
+    public validateKey(key: string, filterName: string, dataSetType: InsightDatasetKind): boolean {
+        if (this.isMcomp(filterName) && this.validateMcompKey(key, dataSetType)) {
             return true;
-        } else if (this.isScomp(filterName) && this.validateScompKey(key)) {
+        } else if (this.isScomp(filterName) && this.validateScompKey(key, dataSetType)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public validateMcompKey(key: string): boolean {
-        return Object.values(MCOMP_KEYS).includes(key);
+    public validateMcompKey(key: string, dataSetType: InsightDatasetKind): boolean {
+        switch (dataSetType) {
+            case InsightDatasetKind.Courses:
+                return Object.values(MCOMP_KEYS_COURSES).includes(key);
+            case InsightDatasetKind.Rooms:
+                return Object.values(MCOMP_KEYS_ROOMS).includes(key);
+        }
     }
 
-    public validateScompKey(key: string): boolean {
-        return Object.values(SCOMP_KEYS).includes(key);
+    public validateScompKey(key: string, dataSetType: InsightDatasetKind): boolean {
+        switch (dataSetType) {
+            case InsightDatasetKind.Courses:
+                return Object.values(SCOMP_KEYS_COURSES).includes(key);
+            case InsightDatasetKind.Rooms:
+                return Object.values(SCOMP_KEYS_ROOMS).includes(key);
+        }
     }
 
     public validateInputValue(input: string | number, filterName: string): boolean {
@@ -101,38 +143,36 @@ export default class Validator {
 
     }
 
-    // TODO: these validations
     // one or more of any character except underscore.
     public validateApplyKeyStructure(key: string): boolean {
         return key.length !== 0 && !key.includes("_");
     }
 
     // The applykey in an APPLYRULE should be unique (no two APPLYRULE's should share an applykey with the same name).
-    public isUniqueApplyKey(applyKeys: string[], applyKey: string): boolean {
-        return false;
-    }
-
-    // If a GROUP is present, all COLUMNS terms must correspond to either GROUP keys or to applykeys defined
-    // in the APPLY block.
-    public existsInGroupApply(groupKeys: string[], applyKeys: string[], columnKey: string): boolean {
-        return false;
-    }
-
-    // SORT - Any keys provided must be in the COLUMNS.
-    public isSortInColumn(columnKeys: string[], sortKey: string): boolean {
-        return false;
+    public isUniqueApplyKey(applyObjects: IApplyObject[], applyKey: string): boolean {
+        let applyKeys = applyObjects.map((applyObject) => {
+            return applyObject.applyKey;
+        });
+        return !applyKeys.includes(applyKey);
     }
 
     public validateApplyToken(key: string, applyToken: string): boolean {
-        // CHECK OUT Enum
-        return false;
+        if (Object.values(APPLY_TOKEN).includes(applyToken)) {
+            switch (applyToken) {
+                case "COUNT":
+                    return Object.values(MCOMP_KEYS_COURSES).includes(key)
+                        || Object.values(SCOMP_KEYS_COURSES).includes(key);
+                default:
+                    return Object.values(MCOMP_KEYS_COURSES).includes(key);
+            }
+        }
     }
 
-    private validateDir(dir: string): boolean {
+    public validateDir(dir: string): boolean {
         return dir === "UP" || dir === "down";
     }
 
-    public validateKeyStructure(idKey: string, dataSetToQuery: string): boolean {
+    public validateKeyStructure(idKey: string): boolean {
         let dataSetId: string;
         let dataSetKey: string;
         let keyArrHolder: string[] = idKey.split("_");
@@ -140,10 +180,6 @@ export default class Validator {
         dataSetKey = keyArrHolder[1];
 
         if (dataSetId === undefined || dataSetKey === undefined) {
-            return false;
-        }
-
-        if (dataSetId !== dataSetToQuery && dataSetToQuery !== "") {
             return false;
         }
         return true;

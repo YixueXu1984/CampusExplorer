@@ -12,7 +12,7 @@ export default class Interpreter {
 
     public filterCourses(node: INode, dataSetToQuery: IDataSet, columnsToQuery: string[]): any[] {
         let result: any[] = [];
-        dataSetToQuery.courses.forEach((section) => {
+        dataSetToQuery.data.forEach((section) => {
             if (this.filterCoursesHelper(node, section)) {
                 result.push(this.createResult(section, columnsToQuery, dataSetToQuery.id));
             }

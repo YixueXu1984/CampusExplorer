@@ -703,21 +703,21 @@ describe("InsightFacade PerformQuery", () => {
     it("Should run test queries", () => {
         describe("Dynamic InsightFacade PerformQuery tests", () => {
             for (const test of testQueries) {
-                    it(`[${test.filename}] ${test.title}`, async () => {
-                        let response: any[];
+                it(`[${test.filename}] ${test.title}`, async () => {
+                    let response: any[];
 
-                        try {
-                            response = await insightFacade.performQuery(test.query);
-                        } catch (err) {
-                            response = err;
-                        } finally {
-                            if (test.isQueryValid) {
-                                expect(response).to.deep.equal(test.result);
-                            } else {
-                                expect(response).to.be.instanceOf(InsightError);
-                            }
+                    try {
+                        response = await insightFacade.performQuery(test.query);
+                    } catch (err) {
+                        response = err;
+                    } finally {
+                        if (test.isQueryValid) {
+                            expect(response).to.deep.equal(test.result);
+                        } else {
+                            expect(response).to.be.instanceOf(InsightError);
                         }
-                    });
+                    }
+                });
             }
         });
     });
