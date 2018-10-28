@@ -8,6 +8,7 @@ import * as fs from "fs";
 import {IDataSetRooms} from "../model/DataSetRooms";
 import {stringify} from "querystring";
 import {ICourseSection} from "../model/CourseSection";
+import GetGeoLocation from "./GetGeoLocation";
 
 export default class AddDataSetRooms {
     constructor() {
@@ -24,18 +25,20 @@ export default class AddDataSetRooms {
                 reject("invalid kind");
             }
             let zip = new JSZip();
-            zip.loadAsync(content, {base64: true})
-                .then((zipFile) => {
-                    return zipFile.file("index.htm").async("text");
+            let zipFileProm = zip.loadAsync(content, {base64: true});
+            let indexProm = zipFileProm.then((zipFile) => {
+                return zipFile.file("index.htm").async("text");
+            });
+            let buildingsProm = indexProm.then((index) => {
+                return this.getBuildingsPaths(index);
+            });
+
+            Promise.all([zipFileProm, indexProm, buildingsProm])
+                .then((promiseResults) => {
+                    return this.iterateThroughFiles(promiseResults[0], promiseResults[2], id, kind);
                 })
-                .then((index) => {
-                    return this.getBuildingsPaths(index);
-                })
-                .then((buildings) => {
-                    return this.iterateThroughFiles(zip, buildings, id, kind);
-                })
-                .then((dataset) => {
-                    return this.cacheDataSet(dataset);
+                .then((dataSet) => {
+                    return this.cacheDataSet(dataSet);
                 })
                 .then((dataSet) => {
                     resolve(dataSet);
@@ -46,119 +49,93 @@ export default class AddDataSetRooms {
         });
     }
 
-    private getBuildingsPaths(cont: string): string[] {
-        let buildingPaths: string[] = [];
+    private getBuildingsPaths(cont: string): any[] {
+        // an interface would be nice here
+        let buildingPaths: any[] = [];
         const parse5 = require("parse5");
-        const doc = parse5.parse(cont); // , {treeAdapter: parse5.treeAdapters.default}
-        const tbodyNode = this.findTbody(doc);
-        if (tbodyNode !== null && typeof (tbodyNode.childNodes) !== "undefined" && tbodyNode.childNodes.length > 0) {
-            for (let child of tbodyNode.childNodes) {
-                if (this.getAttr(child, "href") !== null) {
-                    buildingPaths.push(this.getAttr(child, "href"));
-                }
+        const root = parse5.parse(cont); // , {treeAdapter: parse5.treeAdapters.default}
+        let tbodyNode = this.findNode(root, "tbody");
+        if (tbodyNode === null) {
+            throw new Error("failed to find tBody in index.html");
+        }
+        tbodyNode.childNodes.forEach((building: any) => {
+            if (building.nodeName === "tr") {
+                buildingPaths.push(this.extractBuildingMetaInfo(building));
             }
-        }
-        for (let i of buildingPaths) {
-            Log.trace(i);
-        }
+        });
         return buildingPaths;
     }
 
-    private findTbody(node: any): any {
-        return this.findNode(node, "class", "views-table cols-5 table").childNodes[3];
+    private extractBuildingMetaInfo(buildingNode: any): any[] {
+        let building: any = {
+            fullName: "",
+            shortName: "",
+            buildingPath: ""
+        };
+        // get path
+        let pathNode = buildingNode.childNodes[5];
+        building.buildingPath = this.getAttr(pathNode.childNodes[1].attrs, "href").substring(2);
+
+        // get shortname
+        let sNameNode = buildingNode.childNodes[3];
+        building.shortName = sNameNode.childNodes[0].value.trim();
+
+        // get fullname
+        let fNameNode = pathNode.childNodes[1];
+        building.fullName = fNameNode.childNodes[0].value.trim();
+
+        let addressNode = buildingNode.childNodes[7];
+        building.address = addressNode.childNodes[0].value.trim();
+
+        return building;
+
     }
 
-    private findNodeWithName(node: any, nodeName: string, attrKey: string, attrValue: string): any {
-        if (typeof(node.attrs) !== "undefined") {
-            for (let attr of node.attrs) {
-                if (attr.name === attrKey && attr.value === attrValue && node.name === nodeName) {
-                    return node;
-                }
-            }
-        }
-        if (typeof(node.childNodes) !== "undefined") {
-            if (node.childNodes.length > 0) {
-                for (let child of node.childNodes) {
-                    if (this.findNodeWithName(child, nodeName, attrKey, attrValue) !== null) {
-                        return this.findNodeWithName(child, nodeName, attrKey, attrValue);
-                    }
+    private findNode(node: any, nodeName: string): any {
+        let nodeFound: any = null;
+        if (node.nodeName === nodeName) {
+            return node;
+        } else if (node.childNodes !== undefined) {
+            for (let childNode of node.childNodes) {
+                nodeFound = this.findNode(childNode, nodeName);
+                if (nodeFound !== null) {
+                    return nodeFound;
                 }
             }
         }
         return null;
     }
 
-    private findNode(node: any, attrName: string, attrValue: string): any {
-        if (typeof(node.attrs) !== "undefined") {
-            for (let attr of node.attrs) {
-                if (attr.name === attrName && attr.value === attrValue) {
-                    return node;
-                }
-            }
-        }
-        if (typeof(node.childNodes) !== "undefined") {
-            if (node.childNodes.length > 0) {
-                for (let child of node.childNodes) {
-                    if (this.findNode(child, attrName, attrValue) !== null) {
-                        return this.findNode(child, attrName, attrValue);
-                    }
-                }
-            }
-        }
-        return null;
+    private getAttr(attrs: any[], attrName: string): string {
+        let attribute = attrs.find((attr) => {
+            return attr.name === attrName;
+        });
+        return attribute.value;
     }
 
-    private getAttr(node: any, attrName: string): string {
-        if (typeof (node.attrs) !== "undefined") {
-            for (let attr of node.attrs) {
-                if (attr.name === attrName && attr.value !== null) {
-                    return attr.value;
-                }
-            }
-        }
-        if (typeof (node.childNodes) !== "undefined") {
-            if (node.childNodes.length > 0) {
-                for (let child of node.childNodes) {
-                    if (this.getAttr(child, attrName) !== null) {
-                        return this.getAttr(child, attrName);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private iterateThroughFiles(cont: JSZip, buildingPaths: string[], id: string,
+    private iterateThroughFiles(cont: JSZip, buildings: any[], id: string,
                                 kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            let promisearr: Array<Promise<IRoom[]>> = [];
+            let promiseRooms: Array<Promise<IRoom[]>> = [];
+            let promiseFiles: Array<Promise<string>> = [];
             let dataSet: IDataSetRooms = {
                 id: "",
                 numRows: 0,
                 kind: InsightDatasetKind.Rooms,
                 data: []
             };
-            for (let path of buildingPaths) { // PROBLEM HERE
-                let file = cont.file(path);
-                if (file !== null) {
-                    file.async("text") // cont.file(path) is null, causing an Type error to be thrown
-                        .then((info) => {
-                            promisearr.push(this.parseHtml(info)); // !!!!!
-                        });
-                }
+            for (let building of buildings) { // PROBLEM HERE
+                promiseFiles.push(cont.file(building.buildingPath).async("text"));
             }
-            Promise.all(promisearr)
-                .then((rooms) => {
-                    let numRows: number = 0;
-                    for (let room of rooms) {
-                        if (room.length > 0) {
-                            numRows = numRows + room.length;
-                            dataSet.data = dataSet.data.concat(room);
-                        }
-                    }
+
+            Promise.all(promiseFiles)
+                .then((htmlFiles) => {
+                    return this.parseHtmls(htmlFiles, buildings);
+                })
+                .then((allRooms) => {
                     dataSet.id = id;
-                    dataSet.kind = kind;
-                    dataSet.numRows = numRows;
+                    dataSet.numRows = allRooms.length;
+                    dataSet.data = allRooms;
                     resolve(dataSet);
                 })
                 .catch((err) => {
@@ -167,71 +144,78 @@ export default class AddDataSetRooms {
         });
     }
 
-    private parseHtml(roominfo: string): Promise<IRoom[]> {
+    private parseHtmls(htmlFiles: string[], buildings: any[]): Promise<IRoom[]> {
         return new Promise((resolve, reject) => {
-            let roomsHolder: { result: any[] };
-            roomsHolder = {
-                result: []
+            let promiseRooms: Array<Promise<IRoom[]>> = [];
+            let allRooms: IRoom[] = [];
+            let i;
+            for (i = 0; i < htmlFiles.length; i++) {
+                promiseRooms.push(this.parseHtml(htmlFiles[i], buildings[i]));
+            }
+            Promise.all(promiseRooms)
+                .then((roomss) => {
+                    for (let rooms of roomss) {
+                        if (rooms.length > 0) {
+                            allRooms = allRooms.concat(rooms);
+                        }
+                    }
+                    resolve(allRooms);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    private parseHtml(roominfo: string, building: any): Promise<IRoom[]> {
+        return new Promise((resolve, reject) => {
+            let rooms: IRoom[] = [];
+            let room: IRoom = {
+                fullname: "",
+                shortname: "",
+                number: "",
+                name: "",
+                address: "",
+                lat: null,
+                lon: null,
+                seats: -Infinity,
+                type: "",
+                furniture: "",
+                href: ""
             };
             try {
-                // todo
-                let roomHolder: { cont: any[] };
-                roomHolder = {
-                    cont: []
-                };
-
                 const parse5 = require("parse5");
                 const doc = parse5.parse(roominfo);
+                let promiseArr: Array<Promise<IRoom>> = [];
 
-                // fill-in roomHolder
-                let fullname = this.findNodeWithName(doc, "div", "id", "building-info")
-                    .childNodes[1].childNodes[0].childNodes[0].name;
-                Log.trace("!!!!!!!!!!!!!" + fullname);
-
-                if (doc !== null && typeof (doc.childNodes) !== "undefined"
-                    && doc.childNodes.length > 0) {
-                    for (let child of doc.childNodes) {
-                        // todo
-                        roomHolder.cont.push("!!!");
-                    }
-                    roomsHolder.result.push(roomHolder.cont);
+                let tbodyNode = this.findNode(doc, "tbody");
+                if (tbodyNode === null || tbodyNode === undefined) {
+                    resolve(rooms);
                 }
+
+                for (let roomNode of tbodyNode.childNodes) {
+                    if (roomNode.nodeName === "tr") {
+                        promiseArr.push(this.parseRoom(roomNode, building));
+                    }
+                }
+
+                Promise.all(promiseArr)
+                    .then((promisedRooms) => {
+                        promisedRooms.forEach((promisedRoom) => {
+                            if (this.checkValidRoom(promisedRoom)) {
+                                rooms.push(promisedRoom);
+                            }
+                        });
+                        resolve(rooms);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+
             } catch (err) {
                 // skip rooms with invalid values
+                reject(err); // dont think we need this hmm boasdfall
             }
-            let rooms: IRoom[] = [];
-            for (let room of roomsHolder.result) {
-                let mRoom: IRoom = {
-                    fullname: "",
-                    shortname: "",
-                    number: "",
-                    name: "",
-                    address: "",
-                    lat: 0,
-                    lon: 0,
-                    seats: 0,
-                    type: "",
-                    furniture: "",
-                    href: ""
-                };
-                if (this.checkValidRoom(room)) {
-                    mRoom.fullname = room[0];
-                    mRoom.shortname = room[1];
-                    mRoom.number = room[3];
-                    mRoom.name = room[4];
-                    mRoom.address = room[5];
-                    mRoom.lat = room[6];
-                    mRoom.lon = room[7];
-                    mRoom.seats = room[8];
-                    mRoom.type = room[9];
-                    mRoom.furniture = room[10];
-                    mRoom.href = room[11];
-                } else {
-                    continue;
-                }
-                rooms.push(mRoom);
-            }
-            resolve(rooms); // !!!!!
         });
     }
 
@@ -261,6 +245,63 @@ export default class AddDataSetRooms {
         } else {
             return true;
         }
+    }
+
+    private parseRoom(roomNode: any, building: any): Promise<IRoom> {
+        return new Promise<IRoom>((resolve, reject) => {
+            try {
+                let room: IRoom = {
+                    fullname: "",
+                    shortname: "",
+                    number: "",
+                    name: "",
+                    address: "",
+                    lat: -Infinity,
+                    lon: -Infinity,
+                    seats: -Infinity,
+                    type: "",
+                    furniture: "",
+                    href: ""
+                };
+                room.address = building.address;
+                room.fullname = building.fullName;
+                room.shortname = building.shortName;
+                // parse number
+                let numberNode = roomNode.childNodes[1];
+                room.number = numberNode.childNodes[1].childNodes[0].value.trim();
+                // parse seats
+                let seatNode = roomNode.childNodes[3];
+                room.seats = Number(seatNode.childNodes[0].value.trim());
+                // parse furniture
+                let furnitureNode = roomNode.childNodes[5];
+                room.furniture = furnitureNode.childNodes[0].value.trim();
+                // parse type
+                let typeNode = roomNode.childNodes[7];
+                room.type = typeNode.childNodes[0].value.trim();
+                // parse href
+                let hrefNode = roomNode.childNodes[9];
+                room.href = this.getAttr(hrefNode.childNodes[1].attrs, "href");
+
+                room.name = building.shortName + "_" + room.number;
+                room.lat = 1;
+                room.lon = 1;
+                // let geoLocator = new GetGeoLocation();
+                // geoLocator.getGeoLocation(room.address)
+                //     .then((latLon) => {
+                //         room.lat = latLon[0];
+                //         room.lon = latLon[1];
+                //         resolve(room);
+                //     })
+                //     .catch((err) => {
+                //         room.lat = null;
+                //         room.lon = null;
+                //         resolve(room);
+                //     });
+                resolve(room);
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 
     private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
