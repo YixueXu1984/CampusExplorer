@@ -1,5 +1,5 @@
 {
-    "title": "The key of apply is from a different dataset",
+    "title": "A valid sum room sets query.",
     "query": {
         "WHERE": {
             "AND": [{
@@ -8,31 +8,29 @@
                 }
             }, {
                 "GT": {
-                    "rooms_seats": 300
+                    "rooms_seats": 200
                 }
             }]
         },
         "OPTIONS": {
             "COLUMNS": [
                 "rooms_shortname",
-                "maxSeats"
+                "sumSeats"
             ],
             "ORDER": {
                 "dir": "DOWN",
-                "keys": ["maxSeats"]
+                "keys": ["sumSeats"]
             }
         },
         "TRANSFORMATIONS": {
             "GROUP": ["rooms_shortname"],
             "APPLY": [{
-                "maxSeats": {
-                    "MAX": "rooms_seats"
+                "sumSeats": {
+                    "SUM": "rooms_seats"
                 }
             }]
         }
     },
-    "isQueryValid": false,
+    "isQueryValid": true,
 
-    "result": []
-}
-
+"result":[{"rooms_shortname":"SRC","sumSeats":897},{"rooms_shortname":"LSC","sumSeats":700},{"rooms_shortname":"OSBO","sumSeats":442},{"rooms_shortname":"HEBB","sumSeats":375},{"rooms_shortname":"ANGU","sumSeats":260},{"rooms_shortname":"PHRM","sumSeats":236},{"rooms_shortname":"LSK","sumSeats":205}]}

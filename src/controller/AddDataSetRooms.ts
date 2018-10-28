@@ -285,18 +285,18 @@ export default class AddDataSetRooms {
                 room.name = building.shortName + "_" + room.number;
                 room.lat = 1;
                 room.lon = 1;
-                // let geoLocator = new GetGeoLocation();
-                // geoLocator.getGeoLocation(room.address)
-                //     .then((latLon) => {
-                //         room.lat = latLon[0];
-                //         room.lon = latLon[1];
-                //         resolve(room);
-                //     })
-                //     .catch((err) => {
-                //         room.lat = null;
-                //         room.lon = null;
-                //         resolve(room);
-                //     });
+                let geoLocator = new GetGeoLocation();
+                geoLocator.getGeoLocation(room.address)
+                    .then((latLon) => {
+                        room.lat = latLon[0];
+                        room.lon = latLon[1];
+                        resolve(room);
+                    })
+                    .catch((err) => {
+                        room.lat = null;
+                        room.lon = null;
+                        resolve(room);
+                    });
                 resolve(room);
             } catch (err) {
                 reject(err);
