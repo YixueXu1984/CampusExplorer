@@ -19,7 +19,7 @@ export default class RemoveDataset {
                 for (index = 0; index < dataSets.length; index++) {
                     if (dataSets[index].id === id) {
                         fs.unlink("data/" + id + ".json", (err) => {
-                            if (err) { throw err; }
+                            // if (err) { throw err; }
                             // Log.trace("removed dataset: " + id);
                         });
                         dataSets.splice(index);

@@ -9,7 +9,7 @@
         "OPTIONS": {
             "COLUMNS": [
                 "courses_title",
-                "sum"
+                "overallavg"
             ]
         },
         "TRANSFORMATIONS": {
@@ -18,7 +18,7 @@
             ],
             "APPLY": [
                 {
-                    "sum": {
+                    "overallavg": {
                         "SUM": "courses_avg"
                     }
                 }

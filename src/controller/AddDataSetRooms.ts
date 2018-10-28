@@ -281,9 +281,6 @@ export default class AddDataSetRooms {
                 room.href = this.getAttr(hrefNode.childNodes[1].attrs, "href");
 
                 room.name = building.shortName + "_" + room.number;
-                // room.lat = 1;
-                // room.lon = 1;
-                // resolve(room);
                 let geoLocator = new GetGeoLocation();
                 geoLocator.getGeoLocation(room.address)
                     .then((latLon) => {

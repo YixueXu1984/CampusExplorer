@@ -25,15 +25,12 @@ export default class GetGeoLocation  {
                 let data = "";
                 res.on("data", (chunk: any) => data += chunk);
                 res.on("end", () => {
-                    try {
                         let parsedData = JSON.parse(data);
                         let lat = parsedData.lat;
                         let lon = parsedData.lon;
                         let response = [lat, lon];
                         resolve(response);
-                    } catch (err) {
-                        reject (new InsightError("Error returning geolocation"));
-                    }
+
                 });
             }
             });
