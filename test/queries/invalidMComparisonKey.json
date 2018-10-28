@@ -1,0 +1,19 @@
+{
+    "title": "query an invalid MComparison key",
+    "query": {
+        "WHERE": {
+            "LT": {
+                "invalid_courses_dept":90
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

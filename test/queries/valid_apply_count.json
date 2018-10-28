@@ -1,5 +1,5 @@
 {
-    "title": "Valid apply COUNT calculation",
+    "title": "Wrong Transformations key",
     "query": {
         "WHERE": {
             "GT": {
@@ -9,7 +9,7 @@
         "OPTIONS": {
             "COLUMNS": [
                 "courses_title",
-                "sum"
+                "count"
             ]
         },
         "TRANSFORMATIONS": {
@@ -18,7 +18,7 @@
             ],
             "APPLY": [
                 {
-                    "sum": {
+                    "count": {
                         "COUNT": "courses_avg"
                     }
                 }

@@ -1,0 +1,19 @@
+{
+    "title": "Invalid Query with Invalid Order Key",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg":97
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "invalid_order_key"
+        }
+    },
+    "isQueryValid": false,
+    "result": "todo"
+}

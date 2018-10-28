@@ -1,0 +1,27 @@
+{
+    "title": "Is non exist instruc",
+    "query": {
+        "WHERE": {
+            "IS": {
+                "courses_instructor": "qejrlk"
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg",
+                "courses_instructor",
+                "courses_title",
+                "courses_pass",
+                "courses_fail",
+                "courses_audit",
+                "courses_uuid"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+
+    "result": []
+}

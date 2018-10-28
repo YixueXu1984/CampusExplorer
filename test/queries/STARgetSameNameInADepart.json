@@ -1,0 +1,199 @@
+{
+    "title": "Sample partial name different instructor in same department",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                },
+                {
+                    "IS": {
+                        "courses_instructor": "*ron*"
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_instructor",
+                "courses_dept",
+                "courses_avg",
+                "courses_uuid"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result": [
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 70.88,
+            "courses_uuid": "49851"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 71.09,
+            "courses_uuid": "1251"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 72.89,
+            "courses_uuid": "83391"
+        },
+        {
+            "courses_instructor": "rees, tyrone",
+            "courses_dept": "cpsc",
+            "courses_avg": 73.18,
+            "courses_uuid": "72352"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 75.91,
+            "courses_uuid": "72385"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 77.3,
+            "courses_uuid": "46720"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 78.22,
+            "courses_uuid": "61148"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 78.28,
+            "courses_uuid": "62412"
+        },
+        {
+            "courses_instructor": "dawson, jessica;maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 80.24,
+            "courses_uuid": "49919"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 80.31,
+            "courses_uuid": "83457"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 80.85,
+            "courses_uuid": "49918"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 81.64,
+            "courses_uuid": "62478"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 82.07,
+            "courses_uuid": "62476"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 82.28,
+            "courses_uuid": "61241"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 82.44,
+            "courses_uuid": "49855"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 82.65,
+            "courses_uuid": "72469"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 84.25,
+            "courses_uuid": "1362"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 84.75,
+            "courses_uuid": "61202"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 85.17,
+            "courses_uuid": "50001"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 85.35,
+            "courses_uuid": "46803"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 85.9,
+            "courses_uuid": "83507"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 86,
+            "courses_uuid": "62419"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 86.5,
+            "courses_uuid": "49999"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 86.71,
+            "courses_uuid": "83537"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 87.2,
+            "courses_uuid": "62460"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 87.67,
+            "courses_uuid": "61239"
+        },
+        {
+            "courses_instructor": "garcia, ronald",
+            "courses_dept": "cpsc",
+            "courses_avg": 88,
+            "courses_uuid": "49970"
+        },
+        {
+            "courses_instructor": "maclean, karon",
+            "courses_dept": "cpsc",
+            "courses_avg": 89.75,
+            "courses_uuid": "72467"
+        }
+    ]
+}

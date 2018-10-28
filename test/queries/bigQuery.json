@@ -1,0 +1,75 @@
+{  "title": "big query 1",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "GT": {
+                        "courses_avg": 90
+                    }
+                },
+                {
+                    "LT": {
+                        "courses_fail": 2
+                    }
+                },
+                {
+                    "EQ": {
+                        "courses_audit": 3
+                    }
+                },
+                {
+                    "IS": {
+                        "courses_dept": "cnps"
+                    }
+                },
+                {
+                    "NOT":{
+                        "IS":{
+                            "courses_instructor": ""
+                        }
+                    }
+                },
+
+                {
+                    "IS":{
+                        "courses_title": "cross-cltr cnsl"
+                    }
+                },
+                {
+                    "IS":{
+                        "courses_uuid": "70490"
+                    }
+                }
+
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg",
+                "courses_instructor",
+                "courses_title",
+                "courses_pass",
+                "courses_fail",
+                "courses_audit",
+                "courses_uuid"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result": [
+        {
+            "courses_dept": "cnps",
+            "courses_id": "594",
+            "courses_avg": 93.7,
+            "courses_instructor": "ishiyama, fumio ishu",
+            "courses_title": "cross-cltr cnsl",
+            "courses_pass": 10,
+            "courses_fail": 0,
+            "courses_audit": 3,
+            "courses_uuid": "70490"
+        }
+    ]
+}

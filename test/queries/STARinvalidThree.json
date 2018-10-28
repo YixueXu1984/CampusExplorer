@@ -1,0 +1,30 @@
+{
+    "title": "*** IS case",
+    "query": {
+        "WHERE": {
+            "AND":[
+                {
+                    "IS": {
+                        "courses_dept":"***"
+                    }
+                }
+            ,
+                {
+                    "GT": {
+                        "courses_avg":92
+                    }}]
+
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+    "result": "invalid wildcard"
+}
+
