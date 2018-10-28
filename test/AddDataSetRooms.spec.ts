@@ -7,7 +7,7 @@ import {InsightDataset, InsightDatasetKind, InsightError} from "../src/controlle
 describe("AddDataSetRooms", () => {
     const datasetsToLoad: { [id: string]: string } = {
         rooms: "./test/data/rooms.zip",
-        // specificRooms: "./test/data/specificRooms.zip",
+        roomsWith4RoomsANSO: "./test/data/roomsWith4RoomsANSO.zip",
     };
 
     let insightFacade: InsightFacade;
@@ -77,7 +77,7 @@ describe("AddDataSetRooms", () => {
         }
     });
 
-    it("Should have a dataset of courses after add, test listDatasets()", async function () {
+    it("Should have a dataset of rooms after add, test listDatasets()", async function () {
         const name: string = "rooms";
         let expectedDataset: InsightDataset = {
             id: "rooms",
@@ -109,7 +109,7 @@ describe("AddDataSetRooms", () => {
         }
     });
 
-    it("Should still have only one dataset of courses after add, test listDatasets()", async function () {
+    it("Should still have only one dataset of courses after adding duplicate, test listDatasets()", async function () {
         const name: string = "rooms";
         let expectedDataset: InsightDataset = {
             id: name,
@@ -128,7 +128,7 @@ describe("AddDataSetRooms", () => {
         }
     });
 
-    it("Should remove the courses dataset", async () => {
+    it("Should remove the rooms dataset", async () => {
         const id: string = "rooms";
         let response: string;
 
@@ -150,6 +150,75 @@ describe("AddDataSetRooms", () => {
             response = err;
         } finally {
             expect(response).to.deep.equal([]);
+        }
+    });
+
+    it("Should add a specific dataset: roomsWith4RoomsANSO", async () => {
+        const id: string = "roomsWith4RoomsANSO";
+        let response: string[];
+
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal([id]);
+        }
+    });
+
+    it("Should have a dataset of roomsWith4RoomsANSO after add, test listDatasets()", async function () {
+        const id: string = "roomsWith4RoomsANSO";
+        let expectedDataset: InsightDataset = {
+            id: "roomsWith4RoomsANSO",
+            kind: InsightDatasetKind.Rooms,
+            numRows: 4
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(expected);
+        }
+    });
+
+    it("Should add a valid dataset: rooms", async () => {
+        const id: string = "rooms";
+        let response: string[];
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal([id]);
+        }
+    });
+
+    it("list 2 datasets", async () => {
+        let response: InsightDataset[];
+        let expectedResponse: InsightDataset[];
+        expectedResponse = [];
+        expectedResponse[0] = {
+            id: "roomsWith4RoomsANSO",
+            kind: InsightDatasetKind.Rooms,
+            numRows: 4,
+        };
+
+        expectedResponse[1] = {
+            id: "rooms",
+            kind: InsightDatasetKind.Rooms,
+            numRows: 364,
+        };
+
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(expectedResponse);
         }
     });
 });
