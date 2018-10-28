@@ -9,7 +9,7 @@
         "OPTIONS": {
             "COLUMNS": [
                 "courses_title",
-                "count"
+                "sum"
             ]
         },
         "TRANSFORMATIONS": {
@@ -18,7 +18,7 @@
             ],
             "APPLY": [
                 {
-                    "count": {
+                    "sum": {
                         "COUNT": "courses_avg"
                     }
                 }
