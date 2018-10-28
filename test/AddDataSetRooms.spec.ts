@@ -221,4 +221,75 @@ describe("AddDataSetRooms", () => {
             expect(response).to.deep.equal(expectedResponse);
         }
     });
+
+    it("Should throw error for adding rooms folder without index", async () => {
+        const id: string = "roomsWithoutIndex";
+        let response: string[];
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.be.instanceOf(InsightError);
+        }
+    });
+
+    it("Should remove the rooms dataset", async () => {
+        const id: string = "rooms";
+        let response: string;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(id);
+            expect(insightFacade.dataSets.length).to.deep.equal(0);
+        }
+    });
+
+    it("Should remove the roomsWith4RoomsANSO dataset", async () => {
+        const id: string = "roomsWith4RoomsANSO";
+        let response: string;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(id);
+            expect(insightFacade.dataSets.length).to.deep.equal(0);
+        }
+    });
+
+    it("Should add a valid dataset with 1 invalid building html: roomsInvalidANSOBadFormat", async () => {
+        const id: string = "roomsInvalidANSOBadFormat";
+        let response: string[];
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal([id]);
+        }
+    });
+
+    it("Should have a dataset of rooms after add, test listDatasets()", async function () {
+        let expectedDataset: InsightDataset = {
+            id: "roomsInvalidANSOBadFormat",
+            kind: InsightDatasetKind.Rooms,
+            numRows: 360            // 4 datasets in ANSO is excluded due to bad html format
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(expected);
+        }
+    });
+
 });
