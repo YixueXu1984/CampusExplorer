@@ -1,0 +1,14 @@
+
+{
+    "title": "Missing Options",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 97
+            }
+        }
+
+    },
+    "isQueryValid": false,
+    "result": "Invalid Query Format"
+}

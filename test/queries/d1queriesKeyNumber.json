@@ -1,0 +1,25 @@
+{
+    "title": "Key is a number",
+    "query": {
+        "WHERE": {
+            "GT":{
+
+
+                    "courses_avg": 98
+
+
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                333,
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": false,
+
+    "result": "Invalid Query Format"
+}
+
