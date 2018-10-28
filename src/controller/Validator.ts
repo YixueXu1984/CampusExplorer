@@ -161,9 +161,12 @@ export default class Validator {
             switch (applyToken) {
                 case "COUNT":
                     return Object.values(MCOMP_KEYS_COURSES).includes(key)
-                        || Object.values(SCOMP_KEYS_COURSES).includes(key);
+                        || Object.values(SCOMP_KEYS_COURSES).includes(key)
+                        || Object.values(MCOMP_KEYS_ROOMS).includes(key)
+                        || Object.values(SCOMP_KEYS_ROOMS).includes(key);
                 default:
-                    return Object.values(MCOMP_KEYS_COURSES).includes(key);
+                    return Object.values(MCOMP_KEYS_COURSES).includes(key)
+                        || Object.values(MCOMP_KEYS_ROOMS).includes(key);
             }
         }
     }
