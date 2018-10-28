@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "The key of apply is from a different dataset",
     "query": {
         "WHERE": {
             "GT": {
@@ -19,7 +19,7 @@
             "APPLY": [
                 {
                     "overallAvg": {
-                        "AVG": "courses_avg"
+                        "AVG": "rooms_avg"
                     }
                 }
             ]

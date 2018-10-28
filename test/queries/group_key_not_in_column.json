@@ -1,5 +1,5 @@
 {
-    "title": "Group key is not in columns, not a valid query",
+    "title": "Wrong Transformations key",
     "query": {
         "WHERE": {
             "GT": {

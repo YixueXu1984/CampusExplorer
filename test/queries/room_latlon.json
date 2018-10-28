@@ -1,0 +1,28 @@
+{
+    "title": "The key of apply is from a different dataset",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "rooms_fullname": "**"
+                    }
+                },
+                {
+                    "GT": {
+                        "rooms_lat": 49.269
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_fullname",
+                "rooms_lat",
+                "rooms_lon"
+            ]
+        }
+    },
+    "isQueryValid": true,
+
+"result":[{"rooms_fullname":"Allard Hall (LAW)","rooms_lat":49.2699,"rooms_lon":-123.25318},{"rooms_fullname":"Allard Hall (LAW)","rooms_lat":49.2699,"rooms_lon":-123.25318},{"rooms_fullname":"Allard Hall (LAW)","rooms_lat":49.2699,"rooms_lon":-123.25318},{"rooms_fullname":"Allard Hall (LAW)","rooms_lat":49.2699,"rooms_lon":-123.25318},{"rooms_fullname":"Allard Hall (LAW)","rooms_lat":49.2699,"rooms_lon":-123.25318},{"rooms_fullname":"Anthropology and Sociology","rooms_lat":49.26958,"rooms_lon":-123.25741},{"rooms_fullname":"Anthropology and Sociology","rooms_lat":49.26958,"rooms_lon":-123.25741},{"rooms_fullname":"Anthropology and Sociology","rooms_lat":49.26958,"rooms_lon":-123.25741},{"rooms_fullname":"Anthropology and Sociology","rooms_lat":49.26958,"rooms_lon":-123.25741},{"rooms_fullname":"Iona Building","rooms_lat":49.27106,"rooms_lon":-123.25042},{"rooms_fullname":"Iona Building","rooms_lat":49.27106,"rooms_lon":-123.25042}]}

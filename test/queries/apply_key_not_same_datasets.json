@@ -1,5 +1,5 @@
 {
-    "title": "The key of apply is from a different dataset",
+    "title": "Wrong Transformations key",
     "query": {
         "WHERE": {
             "GT": {

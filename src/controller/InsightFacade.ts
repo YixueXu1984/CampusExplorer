@@ -6,8 +6,8 @@ import RemoveDataset from "./RemoveDataset";
 import PerformQuery from "./PerformQuery";
 import * as fs from "fs";
 import AddDataSetRooms from "./AddDataSetRooms";
-import {ICourseSection} from "../model/CourseSection";
-import GetGeoLocation from "./GetGeoLocation";
+import {IDataSetRooms} from "../model/DataSetRooms";
+import {IDataSetCourseSections} from "../model/DataSetCourseSections";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -76,9 +76,6 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        // TODO: add function GROUP
-        // TODO: add function APPLY
-        // TODO: add function SORT
         return new Promise((resolve, reject) => {
             let performQuery = new PerformQuery();
             performQuery.performQuery(query, this.dataSets)
@@ -113,22 +110,24 @@ export default class InsightFacade implements IInsightFacade {
 
     private loadDataSet(): Promise<IDataSet[]> {
         // update to room edition
+        // TODO: fix this
         return new Promise<IDataSet[]>((resolve, reject) => {
             fs.access("data/", (err) => {
                 if (err) {
-                    fs.mkdir("data/", (error) => {
-                        if (err) {
-                            reject(error);
-                        }
-                        this.readDir()
-                            .then((dataSets) => {
-                                return resolve(dataSets);
-                            })
-                            .catch((error2) => {
-                                return reject(error2);
-                            });
-
-                    });
+                    reject(err);
+                    // fs.mkdir("data/", (error) => {
+                    //     if (err) {
+                    //         reject(error);
+                    //     }
+                    //     this.readDir()
+                    //         .then((dataSets) => {
+                    //             return resolve(dataSets);
+                    //         })
+                    //         .catch((error2) => {
+                    //             return reject(error2);
+                    //         });
+                    //
+                    // });
                 } else {
                     this.readDir()
                         .then((dataSets) => {
@@ -177,16 +176,16 @@ export default class InsightFacade implements IInsightFacade {
                         throw err;
                     }
                     let dataSet: IDataSet = JSON.parse(data);
+                    if (dataSet.kind === InsightDatasetKind.Courses) {
+                        resolve(dataSet as IDataSetCourseSections);
+                    } else {
+                        resolve(dataSet as IDataSetRooms);
+                    }
                     resolve(dataSet);
                 } catch (err) {
                     reject(err);
                 }
             });
         });
-    }
-
-    public getGeoLocation(location: string): Promise<number[]> {
-        let results =  new GetGeoLocation();
-        return results.getGeoLocation(location);
     }
 }

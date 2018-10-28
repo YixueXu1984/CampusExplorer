@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "null group key",
     "query": {
         "WHERE": {
             "GT": {
@@ -13,9 +13,7 @@
             ]
         },
         "TRANSFORMATIONS": {
-            "GROUP": [
-                "courses_title"
-            ],
+            "GROUP": null,
             "APPLY": [
                 {
                     "overallAvg": {

@@ -1,5 +1,5 @@
 {
-    "title": "null group key",
+    "title": "Transformations missing Group",
     "query": {
         "WHERE": {
             "GT": {

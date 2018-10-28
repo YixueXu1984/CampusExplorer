@@ -1,5 +1,5 @@
 {
-    "title": "Wrong Transformations key",
+    "title": "Valid apply AVG calculation",
     "query": {
         "WHERE": {
             "GT": {
@@ -9,7 +9,7 @@
         "OPTIONS": {
             "COLUMNS": [
                 "courses_title",
-                "overallavg"
+                "minavg"
             ]
         },
         "TRANSFORMATIONS": {
@@ -18,7 +18,7 @@
             ],
             "APPLY": [
                 {
-                    "overallavg": {
+                    "minavg": {
                         "AVG": "courses_avg"
                     }
                 }

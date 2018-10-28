@@ -84,7 +84,11 @@ export default class AddDataSetCourses {
                 mSection.uuid = String(section.id);
                 mSection.instructor = String(section.Professor);
                 mSection.audit = Number(section.Audit);
-                mSection.year = Number(section.Year);
+                if (section.Year === "overall") {
+                 mSection.year = 1900;
+                } else {
+                    mSection.year = Number(section.Year);
+                }
                 mSection.id = String(section.Course);
                 mSection.pass = Number(section.Pass);
                 mSection.fail = Number(section.Fail);
@@ -140,6 +144,9 @@ export default class AddDataSetCourses {
 
     private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
+            if (!fs.existsSync("data/")) {
+                fs.mkdirSync("data/");
+            }
             fs.writeFile("data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
                 if (err) {
                    return reject(err);

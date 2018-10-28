@@ -1,0 +1,36 @@
+{
+    "title": "The key of apply is from a different dataset",
+    "query": {
+        "WHERE": {
+            "AND": [{
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            }, {
+                "GT": {
+                    "rooms_seats": 300
+                }
+            }]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname",
+                "maxSeats"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["maxSeats"]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": ["rooms_shortname"],
+            "APPLY": [{
+                "maxSeats": {
+                    "MAX": "rooms_seats"
+                }
+            }]
+        }
+    },
+    "isQueryValid": false,
+
+"result":[{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/CIRS-1250","rooms_seats":426},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/ESB-1013","rooms_seats":350},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/HEBB-100","rooms_seats":375},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/LSC-1001","rooms_seats":350},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/LSC-1002","rooms_seats":350},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/OSBO-A","rooms_seats":442},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/WESB-100","rooms_seats":325},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/WOOD-2","rooms_seats":503}]}
