@@ -1,0 +1,28 @@
+{
+    "title": "A valid room query.",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "rooms_furniture": "*"
+                    }
+                },
+                {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname"
+            ]
+        }
+    },
+    "isQueryValid": true,
+
+    "result":[{"rooms_shortname":"CIRS"},{"rooms_shortname":"ESB"},{"rooms_shortname":"HEBB"},{"rooms_shortname":"LSC"},{"rooms_shortname":"LSC"},{"rooms_shortname":"OSBO"},{"rooms_shortname":"WESB"},{"rooms_shortname":"WOOD"}]
+}
+

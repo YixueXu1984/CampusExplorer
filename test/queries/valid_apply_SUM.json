@@ -1,5 +1,5 @@
 {
-    "title": "Valid apply SUM calculation",
+    "title": "Wrong Transformations key",
     "query": {
         "WHERE": {
             "GT": {

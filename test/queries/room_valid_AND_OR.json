@@ -1,0 +1,30 @@
+{
+    "title": "A valid query with filter AND and OR",
+    "query": {
+        "WHERE": {
+            "AND": [{
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            },               {"OR": [{
+                "IS": {
+                    "rooms_shortname": "MCML"
+                }
+            }, {
+                "GT": {
+                    "rooms_seats": 300
+                }
+            }
+
+            ]}]},
+
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname",
+                "rooms_seats"
+            ]
+        }
+    },
+    "isQueryValid": true,
+
+    "result":[{"rooms_shortname":"HEBB","rooms_seats":375},{"rooms_shortname":"LSC","rooms_seats":350},{"rooms_shortname":"LSC","rooms_seats":350},{"rooms_shortname":"MCML","rooms_seats":47},{"rooms_shortname":"MCML","rooms_seats":72},{"rooms_shortname":"MCML","rooms_seats":32},{"rooms_shortname":"MCML","rooms_seats":32},{"rooms_shortname":"MCML","rooms_seats":24},{"rooms_shortname":"MCML","rooms_seats":6},{"rooms_shortname":"MCML","rooms_seats":6},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"MCML","rooms_seats":8},{"rooms_shortname":"OSBO","rooms_seats":442}]}

@@ -11,7 +11,7 @@
                 "courses_dept",
                 "courses_avg"
             ],
-            "ORDER": "courses_avg"
+            "ORDER": "invalid_order_key"
         }
     },
     "isQueryValid": false,

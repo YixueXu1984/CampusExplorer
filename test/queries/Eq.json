@@ -3,6 +3,7 @@
     "query": {
         "WHERE": {
             "EQ":{
+                "courses_fail": 50,
                 "courses_fail": 50
             }
 

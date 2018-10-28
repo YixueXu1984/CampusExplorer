@@ -1,0 +1,31 @@
+{
+    "title": "Valid apply MAX calculation",
+    "query": {
+        "WHERE": {
+            "AND": [{
+                "GT": {
+                    "courses_avg": 85
+                }
+            },               {"AND": [{
+                "IS": {
+                    "courses_id": "313"
+                }
+            }, {
+                "IS": {
+                    "courses_dept": "*"
+                }
+            }
+
+            ]}]},
+
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ]
+        }
+    },
+    "isQueryValid": true,
+
+    "result":[{"courses_dept":"germ","courses_id":"313","courses_avg":86.32},{"courses_dept":"germ","courses_id":"313","courses_avg":86.32},{"courses_dept":"germ","courses_id":"313","courses_avg":90},{"courses_dept":"germ","courses_id":"313","courses_avg":90},{"courses_dept":"musc","courses_id":"313","courses_avg":85.45},{"courses_dept":"musc","courses_id":"313","courses_avg":85.45}]}
