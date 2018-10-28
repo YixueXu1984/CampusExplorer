@@ -9,6 +9,7 @@ import {IDataSetRooms} from "../model/DataSetRooms";
 import {stringify} from "querystring";
 import {ICourseSection} from "../model/CourseSection";
 import GetGeoLocation from "./GetGeoLocation";
+import {IBuilding} from "../model/IBuilding";
 
 export default class AddDataSetRooms {
     constructor() {
@@ -17,43 +18,52 @@ export default class AddDataSetRooms {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            if (id === null || id === undefined) {
-                reject("invalid id");
-            } else if (content === null || content === undefined) {
-                reject("invalid content");
-            } else if (kind !== InsightDatasetKind.Rooms) {
-                reject("invalid kind");
-            }
-            let zip = new JSZip();
-            let zipFileProm = zip.loadAsync(content, {base64: true});
-            let indexProm = zipFileProm.then((zipFile) => {
-                return zipFile.file("index.htm").async("text");
-            });
-            let buildingsProm = indexProm.then((index) => {
-                return this.getBuildingsPaths(index);
-            });
-
-            Promise.all([zipFileProm, indexProm, buildingsProm])
-                .then((promiseResults) => {
-                    return this.iterateThroughFiles(promiseResults[0], promiseResults[2], id, kind);
-                })
-                .then((dataSet) => {
-                    return this.cacheDataSet(dataSet);
-                })
-                .then((dataSet) => {
-                    resolve(dataSet);
-                })
-                .catch((err) => {
-                    reject(err);
+            try {
+                if (id === null || id === undefined) {
+                    reject("invalid id");
+                } else if (content === null || content === undefined) {
+                    reject("invalid content");
+                } else if (kind !== InsightDatasetKind.Rooms) {
+                    reject("invalid kind");
+                }
+                let zip = new JSZip();
+                let zipFileProm = zip.loadAsync(content, {base64: true});
+                let indexProm = zipFileProm.then((zipFile) => {
+                    return zipFile.file("index.htm").async("text");
                 });
+                let buildingsProm = indexProm.then((index) => {
+                    return this.getBuildingsFilePaths(index);
+                });
+
+                Promise.all([zipFileProm, indexProm, buildingsProm])
+                    .then((promiseResults) => {
+                        return this.iterateThroughFiles(promiseResults[0], promiseResults[2], id, kind);
+                    })
+                    .then((dataSet) => {
+                        return this.cacheDataSet(dataSet);
+                    })
+                    .then((dataSet) => {
+                        resolve(dataSet);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            } catch (err) {
+                reject(err);
+            }
         });
     }
 
-    private getBuildingsPaths(cont: string): any[] {
+    private getBuildingsFilePaths(cont: string): any[] {
         // an interface would be nice here
         let buildingPaths: any[] = [];
         const parse5 = require("parse5");
-        const root = parse5.parse(cont); // , {treeAdapter: parse5.treeAdapters.default}
+        let root: any;
+        try {
+            root = parse5.parse(cont);
+        } catch (err) {
+            throw new Error("invalid html format");
+        }// , {treeAdapter: parse5.treeAdapters.default}
         let tbodyNode = this.findNode(root, "tbody");
         if (tbodyNode === null) {
             throw new Error("failed to find tBody in index.html");
@@ -66,15 +76,16 @@ export default class AddDataSetRooms {
         return buildingPaths;
     }
 
-    private extractBuildingMetaInfo(buildingNode: any): any[] {
-        let building: any = {
+    private extractBuildingMetaInfo(buildingNode: any): IBuilding {
+        let building: IBuilding = {
             fullName: "",
             shortName: "",
-            buildingPath: ""
+            address: "",
+            filePath: ""
         };
         // get path
         let pathNode = buildingNode.childNodes[5];
-        building.buildingPath = this.getAttr(pathNode.childNodes[1].attrs, "href").substring(2);
+        building.filePath = this.getAttr(pathNode.childNodes[1].attrs, "href").substring(2);
 
         // get shortname
         let sNameNode = buildingNode.childNodes[3];
@@ -113,10 +124,9 @@ export default class AddDataSetRooms {
         return attribute.value;
     }
 
-    private iterateThroughFiles(cont: JSZip, buildings: any[], id: string,
+    private iterateThroughFiles(cont: JSZip, buildings: IBuilding[], id: string,
                                 kind: InsightDatasetKind): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
-            let promiseRooms: Array<Promise<IRoom[]>> = [];
             let promiseFiles: Array<Promise<string>> = [];
             let dataSet: IDataSetRooms = {
                 id: "",
@@ -124,8 +134,8 @@ export default class AddDataSetRooms {
                 kind: InsightDatasetKind.Rooms,
                 data: []
             };
-            for (let building of buildings) { // PROBLEM HERE
-                promiseFiles.push(cont.file(building.buildingPath).async("text"));
+            for (let building of buildings) {
+                promiseFiles.push(cont.file(building.filePath).async("text"));
             }
 
             Promise.all(promiseFiles)
@@ -144,7 +154,7 @@ export default class AddDataSetRooms {
         });
     }
 
-    private parseHtmls(htmlFiles: string[], buildings: any[]): Promise<IRoom[]> {
+    private parseHtmls(htmlFiles: string[], buildings: IBuilding[]): Promise<IRoom[]> {
         return new Promise((resolve, reject) => {
             let promiseRooms: Array<Promise<IRoom[]>> = [];
             let allRooms: IRoom[] = [];
@@ -167,22 +177,9 @@ export default class AddDataSetRooms {
         });
     }
 
-    private parseHtml(roominfo: string, building: any): Promise<IRoom[]> {
+    private parseHtml(roominfo: string, building: IBuilding): Promise<IRoom[]> {
         return new Promise((resolve, reject) => {
             let rooms: IRoom[] = [];
-            let room: IRoom = {
-                fullname: "",
-                shortname: "",
-                number: "",
-                name: "",
-                address: "",
-                lat: null,
-                lon: null,
-                seats: -Infinity,
-                type: "",
-                furniture: "",
-                href: ""
-            };
             try {
                 const parse5 = require("parse5");
                 const doc = parse5.parse(roominfo);
@@ -247,8 +244,9 @@ export default class AddDataSetRooms {
         }
     }
 
-    private parseRoom(roomNode: any, building: any): Promise<IRoom> {
+    private parseRoom(roomNode: any, building: IBuilding): Promise<IRoom> {
         return new Promise<IRoom>((resolve, reject) => {
+            // TODO: too much hardcoding ???
             try {
                 let room: IRoom = {
                     fullname: "",
@@ -285,6 +283,7 @@ export default class AddDataSetRooms {
                 room.name = building.shortName + "_" + room.number;
                 room.lat = 1;
                 room.lon = 1;
+                resolve(room);
                 // let geoLocator = new GetGeoLocation();
                 // geoLocator.getGeoLocation(room.address)
                 //     .then((latLon) => {
@@ -297,7 +296,6 @@ export default class AddDataSetRooms {
                 //         room.lon = null;
                 //         resolve(room);
                 //     });
-                resolve(room);
             } catch (err) {
                 reject(err);
             }
@@ -306,6 +304,9 @@ export default class AddDataSetRooms {
 
     private cacheDataSet(dataSet: IDataSet): Promise<IDataSet> {
         return new Promise((resolve, reject) => {
+            if (!fs.existsSync("data/")) {
+                fs.mkdirSync("data/");
+            }
             fs.writeFile("data/" + dataSet.id + ".json", JSON.stringify(dataSet), (err) => {
                 if (err) {
                     return reject(err);
