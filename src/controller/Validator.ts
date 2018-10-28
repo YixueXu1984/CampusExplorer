@@ -169,7 +169,7 @@ export default class Validator {
     }
 
     public validateDir(dir: string): boolean {
-        return dir === "UP" || dir === "down";
+        return dir === "UP" || dir === "DOWN";
     }
 
     public validateKeyStructure(idKey: string): boolean {
