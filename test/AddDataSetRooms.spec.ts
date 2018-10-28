@@ -54,16 +54,16 @@ describe("AddDataSetRooms", () => {
         Log.test(`AfterTest: ${this.currentTest.title}`);
     });
 
-    // it("Should have no dataset before add, test listDatasets()", async function () {
-    //     let response: InsightDataset[];
-    //     try {
-    //         response = await insightFacade.listDatasets();
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal([]);
-    //     }
-    // });
+    it("Should have no dataset before add, test listDatasets()", async function () {
+        let response: InsightDataset[];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal([]);
+        }
+    });
 
     it("Should add a valid dataset: rooms", async () => {
         const id: string = "rooms";
@@ -77,79 +77,79 @@ describe("AddDataSetRooms", () => {
         }
     });
 
-    // it("Should have a dataset of courses after add, test listDatasets()", async function () {
-    //     const name: string = "rooms";
-    //     let expectedDataset: InsightDataset = {
-    //         id: "rooms",
-    //         kind: InsightDatasetKind.Rooms,
-    //         numRows: 64612  // !!!!
-    //     };
-    //     let expected: InsightDataset[] = [];
-    //     expected.push(expectedDataset);
-    //     let response: InsightDataset[] = [];
-    //     try {
-    //         response = await insightFacade.listDatasets();
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal(expected);
-    //     }
-    // });
-    //
-    // it("Should not add a existing dataset", async () => {
-    //     const id: string = "rooms";
-    //     let response: string[];
-    //
-    //     try {
-    //         response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.be.instanceOf(InsightError);
-    //     }
-    // });
-    //
-    // it("Should still have only one dataset of courses after add, test listDatasets()", async function () {
-    //     const name: string = "rooms";
-    //     let expectedDataset: InsightDataset = {
-    //         id: name,
-    //         kind: InsightDatasetKind.Rooms,
-    //         numRows: 64612 // !!!!
-    //     };
-    //     let expected: InsightDataset[] = [];
-    //     expected.push(expectedDataset);
-    //     let response: InsightDataset[] = [];
-    //     try {
-    //         response = await insightFacade.listDatasets();
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal(expected);
-    //     }
-    // });
-    //
-    // it("Should remove the courses dataset", async () => {
-    //     const id: string = "rooms";
-    //     let response: string;
-    //
-    //     try {
-    //         response = await insightFacade.removeDataset(id);
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal(id);
-    //         expect(insightFacade.dataSets.length).to.deep.equal(0);
-    //     }
-    // });
-    //
-    // it("Should have no dataset after remove, test listDatasets()", async function () {
-    //     let response: InsightDataset[];
-    //     try {
-    //         response = await insightFacade.listDatasets();
-    //     } catch (err) {
-    //         response = err;
-    //     } finally {
-    //         expect(response).to.deep.equal([]);
-    //     }
-    // });
+    it("Should have a dataset of courses after add, test listDatasets()", async function () {
+        const name: string = "rooms";
+        let expectedDataset: InsightDataset = {
+            id: "rooms",
+            kind: InsightDatasetKind.Rooms,
+            numRows: 364
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(expected);
+        }
+    });
+
+    it("Should not add a existing dataset", async () => {
+        const id: string = "rooms";
+        let response: string[];
+
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.be.instanceOf(InsightError);
+        }
+    });
+
+    it("Should still have only one dataset of courses after add, test listDatasets()", async function () {
+        const name: string = "rooms";
+        let expectedDataset: InsightDataset = {
+            id: name,
+            kind: InsightDatasetKind.Rooms,
+            numRows: 364
+        };
+        let expected: InsightDataset[] = [];
+        expected.push(expectedDataset);
+        let response: InsightDataset[] = [];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(expected);
+        }
+    });
+
+    it("Should remove the courses dataset", async () => {
+        const id: string = "rooms";
+        let response: string;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal(id);
+            expect(insightFacade.dataSets.length).to.deep.equal(0);
+        }
+    });
+
+    it("Should have no dataset after remove, test listDatasets()", async function () {
+        let response: InsightDataset[];
+        try {
+            response = await insightFacade.listDatasets();
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.deep.equal([]);
+        }
+    });
 });
