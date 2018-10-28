@@ -223,27 +223,17 @@ export default class AddDataSetRooms {
     }
 
     private checkValidRoom(room: any): boolean {
-        if (room.fullname === null || room.fullname === undefined) {
-            return false;
-        } else if (room.shortname === null || room.shortname === undefined) {
-            return false;
-        } else if (room.number === null || room.number === undefined) {
-            return false;
-        } else if (room.name === null || room.name === undefined) {
-            return false;
-        } else if (room.address === null || room.address === undefined) {
-            return false;
-        } else if (room.lat === null || room.lat === undefined) {
-            return false;
-        } else if (room.lon === null || room.lon === undefined) {
-            return false;
-        } else if (room.seats === null || room.seats === undefined) {
-            return false;
-        } else if (room.type === null || room.type === undefined) {
-            return false;
-        } else if (room.furniture === null || room.furniture === undefined) {
-            return false;
-        } else if (room.href === null || room.href === undefined) {
+        if (room.fullname === null || room.fullname === undefined ||
+        room.shortname === null || room.shortname === undefined ||
+        room.number === null || room.number === undefined ||
+        room.name === null || room.name === undefined ||
+        room.address === null || room.address === undefined ||
+        room.lat === null || room.lat === undefined ||
+        room.lon === null || room.lon === undefined ||
+        room.seats === null || room.seats === undefined ||
+        room.type === null || room.type === undefined ||
+        room.furniture === null || room.furniture === undefined ||
+        room.href === null || room.href === undefined) {
             return false;
         } else {
             return true;

@@ -608,7 +608,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         } catch (err) {
             response = err;
         } finally {
-            expect(response).to.be.deep.equal(id);
+            expect(response).to.be.deep.equal([id]);
         }
     });
 
