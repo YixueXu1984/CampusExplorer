@@ -135,7 +135,9 @@ export default class AddDataSetRooms {
                 data: []
             };
             for (let building of buildings) {
-                promiseFiles.push(cont.file(building.filePath).async("text"));
+                if (building.filePath !== "") {
+                    promiseFiles.push(cont.file(building.filePath).async("text"));
+                }
             }
 
             Promise.all(promiseFiles)
@@ -145,6 +147,10 @@ export default class AddDataSetRooms {
                 .then((allRooms) => {
                     dataSet.id = id;
                     dataSet.numRows = allRooms.length;
+                    if (dataSet.numRows === 0) {
+                        // this dataSet has no rooms
+                        throw new Error("dataSet has no rooms");
+                    }
                     dataSet.data = allRooms;
                     resolve(dataSet);
                 })
@@ -166,7 +172,7 @@ export default class AddDataSetRooms {
                 .then((roomss) => {
                     for (let rooms of roomss) {
                         if (rooms.length > 0) {
-                            allRooms = allRooms.concat(rooms);
+                            allRooms = allRooms.concat(rooms); // add the rooms of this building to allRooms
                         }
                     }
                     resolve(allRooms);
@@ -200,7 +206,7 @@ export default class AddDataSetRooms {
                     .then((promisedRooms) => {
                         promisedRooms.forEach((promisedRoom) => {
                             if (this.checkValidRoom(promisedRoom)) {
-                                rooms.push(promisedRoom);
+                                rooms.push(promisedRoom); // only push valid room to rooms
                             }
                         });
                         resolve(rooms);

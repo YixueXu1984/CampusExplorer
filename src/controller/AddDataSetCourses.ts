@@ -84,7 +84,7 @@ export default class AddDataSetCourses {
                 mSection.uuid = String(section.id);
                 mSection.instructor = String(section.Professor);
                 mSection.audit = Number(section.Audit);
-                if (section.Year === "overall") {
+                if (section.Section === "overall") {
                  mSection.year = 1900;
                 } else {
                     mSection.year = Number(section.Year);

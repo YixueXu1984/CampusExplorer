@@ -1,0 +1,178 @@
+{
+    "title": "SUM test",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "rooms_seats": 70
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_fullname",
+                "overallAvg"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": [
+                    "overallAvg",
+                    "rooms_fullname"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_fullname"
+            ],
+            "APPLY": [
+                {
+                    "overallAvg": {
+                        "SUM": "rooms_seats"
+                    }
+                }
+            ]
+        }
+    },
+    "isQueryValid": true,
+    "result":[
+        {
+            "rooms_fullname": "Buchanan",
+            "overallAvg": 1415
+        },
+        {
+            "rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+            "overallAvg": 1132
+        },
+        {
+            "rooms_fullname": "Chemistry",
+            "overallAvg": 913
+        },
+        {
+            "rooms_fullname": "Student Recreation Centre",
+            "overallAvg": 897
+        },
+        {
+            "rooms_fullname": "Life Sciences Centre",
+            "overallAvg": 825
+        },
+        {
+            "rooms_fullname": "West Mall Swing Space",
+            "overallAvg": 755
+        },
+        {
+            "rooms_fullname": "Earth Sciences Building",
+            "overallAvg": 580
+        },
+        {
+            "rooms_fullname": "Hennings",
+            "overallAvg": 562
+        },
+        {
+            "rooms_fullname": "Pharmaceutical Sciences Building",
+            "overallAvg": 475
+        },
+        {
+            "rooms_fullname": "Leonard S. Klinck (also known as CSCI)",
+            "overallAvg": 463
+        },
+        {
+            "rooms_fullname": "Robert F. Osborne Centre",
+            "overallAvg": 442
+        },
+        {
+            "rooms_fullname": "Wesbrook",
+            "overallAvg": 427
+        },
+        {
+            "rooms_fullname": "Centre for Interactive  Research on Sustainability",
+            "overallAvg": 426
+        },
+        {
+            "rooms_fullname": "Geography",
+            "overallAvg": 397
+        },
+        {
+            "rooms_fullname": "Hebb",
+            "overallAvg": 375
+        },
+        {
+            "rooms_fullname": "Hugh Dempster Pavilion",
+            "overallAvg": 360
+        },
+        {
+            "rooms_fullname": "Forest Sciences Centre",
+            "overallAvg": 349
+        },
+        {
+            "rooms_fullname": "MacMillan",
+            "overallAvg": 346
+        },
+        {
+            "rooms_fullname": "MacLeod",
+            "overallAvg": 343
+        },
+        {
+            "rooms_fullname": "Henry Angus",
+            "overallAvg": 340
+        },
+        {
+            "rooms_fullname": "Biological Sciences",
+            "overallAvg": 304
+        },
+        {
+            "rooms_fullname": "Chemical and Biological Engineering Building",
+            "overallAvg": 294
+        },
+        {
+            "rooms_fullname": "Neville Scarfe",
+            "overallAvg": 280
+        },
+        {
+            "rooms_fullname": "Irving K Barber Learning Centre",
+            "overallAvg": 266
+        },
+        {
+            "rooms_fullname": "Mathematics",
+            "overallAvg": 224
+        },
+        {
+            "rooms_fullname": "Orchard Commons",
+            "overallAvg": 216
+        },
+        {
+            "rooms_fullname": "Frederic Lasserre",
+            "overallAvg": 174
+        },
+        {
+            "rooms_fullname": "Friedman Building",
+            "overallAvg": 160
+        },
+        {
+            "rooms_fullname": "Aquatic Ecosystems Research Laboratory",
+            "overallAvg": 144
+        },
+        {
+            "rooms_fullname": "Mathematics Annex",
+            "overallAvg": 106
+        },
+        {
+            "rooms_fullname": "Iona Building",
+            "overallAvg": 100
+        },
+        {
+            "rooms_fullname": "Civil and Mechanical Engineering",
+            "overallAvg": 100
+        },
+        {
+            "rooms_fullname": "Food, Nutrition and Health",
+            "overallAvg": 99
+        },
+        {
+            "rooms_fullname": "Allard Hall (LAW)",
+            "overallAvg": 94
+        },
+        {
+            "rooms_fullname": "Anthropology and Sociology",
+            "overallAvg": 90
+        }
+    ]
+}

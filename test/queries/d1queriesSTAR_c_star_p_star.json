@@ -1,19 +1,19 @@
 {
-    "title": "notdatasetorder",
+    "title": "c*s* IS case",
     "query": {
         "WHERE": {
-            "AND": [
+            "AND":[
                 {
                     "IS": {
-                        "courses_dept": "cpsc"
-                    }
-                },
-                {
-                    "GT": {
-                        "courses_avg": 94
+                        "courses_dept":"c*s*"
                     }
                 }
-            ]
+            ,
+                {
+                    "GT": {
+                        "courses_avg":92
+                    }}]
+
         },
         "OPTIONS": {
             "COLUMNS": [
@@ -21,9 +21,9 @@
                 "courses_id",
                 "courses_avg"
             ],
-            "ORDER": "invalid_order_key"
+            "ORDER": "courses_avg"
         }
     },
     "isQueryValid": false,
-    "result": "invalid order key"
+    "result": "c*s* IS cas"
 }
