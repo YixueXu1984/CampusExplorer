@@ -240,6 +240,24 @@ export default class AddDataSetRooms {
         }
     }
 
+    private findNodeWithName(node: any, nodeName: string, attrKey: string, attrValue: string): any {
+        let nodeFound: any = null;
+        if (node.name === nodeName && node.attrs !== undefined) {
+            for (let attr of node.attrs) {
+                if (attr.name === attrKey && attr.value === attrValue) {
+                    return node;
+                }
+            }
+        } else if (node.childNodes !== undefined) {
+            for (let child of node.childNodes) {
+                nodeFound = this.findNodeWithName(child, nodeName, attrKey, attrValue);
+                if (nodeFound !== null) {
+                    return nodeFound;
+                }
+            }
+        }
+    }
+
     private parseRoom(roomNode: any, building: IBuilding): Promise<IRoom> {
         return new Promise<IRoom>((resolve, reject) => {
             // TODO: too much hardcoding ???
@@ -260,22 +278,51 @@ export default class AddDataSetRooms {
                 room.address = building.address;
                 room.fullname = building.fullName;
                 room.shortname = building.shortName;
-                // parse number
-                let numberNode = roomNode.childNodes[1];
-                room.number = numberNode.childNodes[1].childNodes[0].value.trim();
-                // parse seats
-                let seatNode = roomNode.childNodes[3];
-                room.seats = Number(seatNode.childNodes[0].value.trim());
+                // let numberNode = roomNode.childNodes[1];
+                // let seatNode = roomNode.childNodes[3];
+                // let furnitureNode = roomNode.childNodes[5];
+                // let typeNode = roomNode.childNodes[7];
+                // let hrefNode = roomNode.childNodes[9];
+                // room.number = numberNode.childNodes[1].childNodes[0].trim();
+                // room.seats = Number(seatNode.childNodes[1].childNodes[0].trim());
+                // room.furniture = furnitureNode.childNodes[1].childNodes[0].trim();
+                // room.type = typeNode.childNodes[1].childNodes[0].trim();
+                // room.href = this.getAttr(hrefNode.childNodes[1].attrs, "href");
+                let numberNode = this.findNodeWithName(roomNode, "td", "class",
+                    "views-field views-field-field-room-number");
+                if (numberNode !== null  && numberNode !== undefined) {
+                    room.number = numberNode.childNodes[1].childNodes[0].trim();
+                    Log.trace(room.number);
+                }
+                let seatNode = this.findNodeWithName(roomNode, "td", "class",
+            "views-field views-field-field-room-capacity");
+                if (seatNode !== null && seatNode !== undefined) {
+                    room.seats = Number(seatNode.childNodes[1].childNodes[0].trim());
+                    Log.trace(JSON.stringify(room.seats));
+                }
                 // parse furniture
-                let furnitureNode = roomNode.childNodes[5];
-                room.furniture = furnitureNode.childNodes[0].value.trim();
-                // parse type
-                let typeNode = roomNode.childNodes[7];
-                room.type = typeNode.childNodes[0].value.trim();
-                // parse href
-                let hrefNode = roomNode.childNodes[9];
-                room.href = this.getAttr(hrefNode.childNodes[1].attrs, "href");
 
+                let furnitureNode = this.findNodeWithName(roomNode, "td", "class",
+            "views-field views-field-field-room-furniture");
+                if (furnitureNode !== null && furnitureNode !== undefined) {
+                    room.furniture = furnitureNode.childNodes[1].childNodes[0].trim();
+                    Log.trace(room.furniture);
+                }
+                // parse type
+
+                let typeNode = this.findNodeWithName(roomNode, "td", "class",
+            "views-field views-field-field-room-type");
+                if (typeNode !== null  && typeNode !== undefined) {
+                    room.type = typeNode.childNodes[1].childNodes[0].trim();
+                    Log.trace(room.type);
+                }
+                // parse href
+                let hrefNode = this.findNodeWithName(roomNode, "td", "class",
+            "views-field views-field-nothing");
+                if (hrefNode !== null && hrefNode !== undefined) {
+                    room.href = this.getAttr(hrefNode.childNodes[1].attrs, "href");
+                    Log.trace(room.href);
+                }
                 room.name = building.shortName + "_" + room.number;
                 // room.lat = 1;
                 // room.lon = 1;
