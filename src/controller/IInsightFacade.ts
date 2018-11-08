@@ -3,6 +3,10 @@
  * A class called InsightFacade, this should be in a file called InsightFacade.ts.
  * You should not change this interface at all or the test suite will not work.
  */
+export interface IResponse {
+    code: number;
+    body: string[] | string;
+}
 
 export enum InsightDatasetKind {
     Courses = "courses",
