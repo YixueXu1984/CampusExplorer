@@ -14,6 +14,7 @@ export default class Server {
 
     private port: number;
     private rest: restify.Server;
+    private static facade: InsightFacade;
 
     constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
@@ -131,8 +132,29 @@ export default class Server {
         });
     }
 
+    // Self-implemented
+    public static getInstanceInsightFacade(): InsightFacade {
+        if (Server.facade === null || Server.facade === undefined) {
+            Server.facade = new InsightFacade();
+        }
+        return Server.facade;
+    }
+
+    private static getDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+        if (!Server.isValidReq(req)) {
+            return next(new Error("Invalid request format"));
+        }
+        let facade = Server.getInstanceInsightFacade();
+        facade.listDatasets().then(function (response) {
+            res.json(response.code, response.body);
+        }).catch(function (err) {
+            res.json(err.code, err.body);
+        });
+        return next();
+    }
+
     private static putDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
-        if (!req.body || !req.body.name || !req.body.id) {
+        if (!Server.isValidReq(req)) {
             return next(new Error("Invalid request format"));
         }
         let id = req.params.id;
@@ -140,11 +162,10 @@ export default class Server {
         let body = new Buffer(req.params.body).toString("base64");
         Server.getInstanceInsightFacade().addDataset(id, body, kind)
             .then((result) => {
-                // todo: write to response
-                // res.json(code, body)
+                res.json(result.code, result.body);
             })
             .catch((err) => {
-                // todo: write error to response
+                res.json(err.code, err.body);
             });
         return next();
     }
@@ -157,12 +178,11 @@ export default class Server {
         // todo
     }
 
-    private static getDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
-        // todo
-    }
-
-    public static getInstanceInsightFacade(): InsightFacade {
-        // todo
-        return null;
+    private static isValidReq(req: restify.Request): boolean {
+        if (!req.body || !req.body.name || !req.body.id) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

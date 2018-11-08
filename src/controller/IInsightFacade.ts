@@ -3,10 +3,7 @@
  * A class called InsightFacade, this should be in a file called InsightFacade.ts.
  * You should not change this interface at all or the test suite will not work.
  */
-export interface IResponse {
-    code: number;
-    body: string[] | string;
-}
+import {IResponse} from "../model/Response";
 
 export enum InsightDatasetKind {
     Courses = "courses",
@@ -58,7 +55,7 @@ export interface IInsightFacade {
      * Ultimately, a dataset must be added or loaded from disk before queries can
      * be successfully answered.
      */
-    addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]>;
+    addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IResponse>;
 
     /**
      * Remove a dataset from UBCInsight.
@@ -100,5 +97,5 @@ export interface IInsightFacade {
      * @return Promise <InsightDataset[]>
      * The promise should fulfill an array of currently added InsightDatasets, and will only fulfill.
      */
-    listDatasets(): Promise<InsightDataset[]>;
+    listDatasets(): Promise<IResponse>;
 }
