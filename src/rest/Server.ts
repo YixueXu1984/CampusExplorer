@@ -5,6 +5,7 @@
 import fs = require("fs");
 import restify = require("restify");
 import Log from "../Util";
+import InsightFacade from "../controller/InsightFacade";
 
 /**
  * This configures the REST endpoints for the server.
@@ -130,4 +131,38 @@ export default class Server {
         });
     }
 
+    private static putDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
+        if (!req.body || !req.body.name || !req.body.id) {
+            return next(new Error("Invalid request format"));
+        }
+        let id = req.params.id;
+        let kind = req.params.kind;
+        let body = new Buffer(req.params.body).toString("base64");
+        Server.getInstanceInsightFacade().addDataset(id, body, kind)
+            .then((result) => {
+                // todo: write to response
+                // res.json(code, body)
+            })
+            .catch((err) => {
+                // todo: write error to response
+            });
+        return next();
+    }
+
+    private static deleteDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
+        // todo
+    }
+
+    private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
+        // todo
+    }
+
+    private static getDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+        // todo
+    }
+
+    public static getInstanceInsightFacade(): InsightFacade {
+        // todo
+        return null;
+    }
 }
