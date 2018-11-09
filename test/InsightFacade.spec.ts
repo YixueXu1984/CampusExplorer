@@ -6,7 +6,6 @@ import Log from "../src/Util";
 import TestUtil from "./TestUtil";
 import GetGeoLocation from "../src/controller/GetGeoLocation";
 import {error} from "util";
-import {IResponse} from "../src/model/Response";
 
 // This should match the JSON schema described in test/query.schema.json
 // except 'filename' which is injIeected when the file is read.

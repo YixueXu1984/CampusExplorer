@@ -8,7 +8,6 @@ import * as fs from "fs";
 import AddDataSetRooms from "./AddDataSetRooms";
 import {IDataSetRooms} from "../model/DataSetRooms";
 import {IDataSetCourseSections} from "../model/DataSetCourseSections";
-import {IResponse} from "../model/Response";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -30,12 +29,11 @@ export default class InsightFacade implements IInsightFacade {
             });
     }
 
-    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<IResponse> {
+    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise((resolve, reject) => {
             this.dataSets.forEach((dataSet) => {
                 if (dataSet.id === id) {
-                    let response: IResponse = {code: 400, body: "Fail to add a duplicate dataset"};
-                    reject(response);
+                    reject("Fail to add a duplicate dataset");
                 }
             });
             if (kind === InsightDatasetKind.Courses) {
@@ -47,13 +45,11 @@ export default class InsightFacade implements IInsightFacade {
                         this.dataSets.forEach((currDataSet) => {
                             dataSetsId.push(currDataSet.id);
                         });
-                        let response: IResponse = {code: 200, body: dataSetsId};
-                        resolve(response);
+                        resolve(dataSetsId);
                     })
                     .catch((err) => {
                         Log.trace(err);
-                        let response: IResponse = {code: 400, body: "Fail to add dataset Course"};
-                        reject(response);
+                        reject(err);
                     });
             } else if (kind === InsightDatasetKind.Rooms) { // added case for Room
                 let addDataSet: AddDataSetRooms = new AddDataSetRooms();
@@ -64,13 +60,11 @@ export default class InsightFacade implements IInsightFacade {
                         this.dataSets.forEach((currDataSet) => {
                             dataSetsId.push(currDataSet.id);
                         });
-                        let response: IResponse = {code: 200, body: dataSetsId};
-                        resolve(response);
+                        resolve(dataSetsId);
                     })
                     .catch((err) => {
                         Log.trace(err);
-                        let response: IResponse = {code: 400, body: "Fail to add dataset Room"};
-                        reject(response);
+                        reject(err);
                     });
             }
         });
@@ -79,7 +73,6 @@ export default class InsightFacade implements IInsightFacade {
     public removeDataset(id: string): Promise<string> {
         let removeDataSet = new RemoveDataset();
         return removeDataSet.removeDataset(id, this.dataSets);
-        // return Promise.reject("Not implemented.");
     }
 
     public performQuery(query: any): Promise<any[]> {
@@ -95,13 +88,12 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
-    public listDatasets(): Promise<IResponse> {
+    public listDatasets(): Promise<InsightDataset[]> {
         let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
             results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
-        let response: IResponse = {code: 200, body: results};
-        return Promise.resolve(response);
+        return Promise.resolve(results);
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {

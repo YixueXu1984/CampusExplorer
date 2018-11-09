@@ -148,9 +148,9 @@ export default class Server {
         }
         let facade = Server.getInstanceInsightFacade();
         facade.listDatasets().then(function (response) {
-            res.json(response.code, response.body);
+            res.json(200, response);
         }).catch(function (err) {
-            res.json(err.code, err.body);
+            res.json(400, err);
         });
         return next();
     }
@@ -164,10 +164,10 @@ export default class Server {
         let body = new Buffer(req.params.body).toString("base64");
         Server.getInstanceInsightFacade().addDataset(id, body, kind)
             .then((result) => {
-                res.json(200, result.body);
+                res.json(200, result);
             })
             .catch((err) => {
-                res.json(400, err.body);
+                res.json(400, err);
             });
         return next();
     }
