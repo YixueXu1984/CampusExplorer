@@ -26,7 +26,7 @@ export default class InsightFacade implements IInsightFacade {
                 this.dataSets = dataSets;
             })
             .catch((err) => {
-                Log.error("failed to load cached datasets" + String(err));
+                Log.error("failed to load cached datasets: " + String(err));
             });
     }
 
@@ -34,7 +34,8 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((resolve, reject) => {
             this.dataSets.forEach((dataSet) => {
                 if (dataSet.id === id) {
-                    return reject(new InsightError("Trying to add an id that already exits"));
+                    let response: IResponse = {code: 400, body: "Fail to add a duplicate dataset"};
+                    reject(response);
                 }
             });
             if (kind === InsightDatasetKind.Courses) {
@@ -68,7 +69,7 @@ export default class InsightFacade implements IInsightFacade {
                     })
                     .catch((err) => {
                         Log.trace(err);
-                        let response: IResponse = {code: 200, body: "Fail to add dataset Room"};
+                        let response: IResponse = {code: 400, body: "Fail to add dataset Room"};
                         reject(response);
                     });
             }
@@ -119,7 +120,7 @@ export default class InsightFacade implements IInsightFacade {
         // update to room edition
         // TODO: fix this
         return new Promise<IDataSet[]>((resolve, reject) => {
-            fs.access("data/", (err) => {
+            fs.access("./data", (err) => {
                 if (err) {
                     reject(err);
                     // fs.mkdir("data/", (error) => {
@@ -155,22 +156,28 @@ export default class InsightFacade implements IInsightFacade {
             fs.readdir("data/", (err: Error, files: string[]) => {
                 if (err) {
                     reject(err);
-                }
+                } else {
+                    if (!files.length) {
+                        resolve([]);
+                        Log.trace("Data is empty");
+                    } else {
+                        Log.trace("Data is not empty");
+                        for (let file of files) {
+                            promiseArr.push(this.readFiles(file));
+                        }
 
-                for (let file of files) {
-                    promiseArr.push(this.readFiles(file));
+                        Promise.all(promiseArr)
+                            .then((dataSetArray) => {
+                                dataSetArray.forEach((dataSet) => {
+                                    dataSets.push(dataSet);
+                                });
+                                resolve(dataSets);
+                            })
+                            .catch((error) => {
+                                return reject(error);
+                            });
+                    }
                 }
-
-                Promise.all(promiseArr)
-                    .then((dataSetArray) => {
-                        dataSetArray.forEach((dataSet) => {
-                            dataSets.push(dataSet);
-                        });
-                        resolve(dataSets);
-                    })
-                    .catch((error) => {
-                        return reject(error);
-                    });
             });
         });
     }

@@ -64,6 +64,8 @@ export default class Server {
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
                 that.rest.get("/echo/:msg", Server.echo);
+                that.rest.put("/dataset/:id/:kind", Server.putDataset);
+                that.rest.get("/datasets", Server.getDataset);
 
                 // NOTE: your endpoints should go here
 
@@ -162,10 +164,10 @@ export default class Server {
         let body = new Buffer(req.params.body).toString("base64");
         Server.getInstanceInsightFacade().addDataset(id, body, kind)
             .then((result) => {
-                res.json(result.code, result.body);
+                res.json(200, result.body);
             })
             .catch((err) => {
-                res.json(err.code, err.body);
+                res.json(400, err.body);
             });
         return next();
     }

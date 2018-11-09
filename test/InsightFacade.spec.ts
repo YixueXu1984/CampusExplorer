@@ -6,6 +6,7 @@ import Log from "../src/Util";
 import TestUtil from "./TestUtil";
 import GetGeoLocation from "../src/controller/GetGeoLocation";
 import {error} from "util";
+import {IResponse} from "../src/model/Response";
 
 // This should match the JSON schema described in test/query.schema.json
 // except 'filename' which is injIeected when the file is read.
@@ -16,7 +17,7 @@ export interface ITestQuery {
     result: string | string[];
     filename: string;  // This is injected when reading the file
 }
-//
+
 // describe("InsightFacade Add/Remove Dataset", function () {
 //     // Reference any datasets you've added to test/data here and they will
 //     // automatically be loaded in the Before All hook.
@@ -86,26 +87,28 @@ export interface ITestQuery {
 //     // Test addDataset() & listDatasets()
 //     // Basic addDataset(), listDatasets() tests
 //     it("Should have no dataset before add, test listDatasets()", async function () {
-//         let response: InsightDataset[];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([]);
+//             expect(response.body).to.deep.equal([]);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 //
 //     it("Should add a valid dataset: courses", async () => {
 //         const id: string = "courses";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([id]);
+//             expect(response.body).to.deep.equal([id]);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 //
@@ -118,26 +121,27 @@ export interface ITestQuery {
 //         };
 //         let expected: InsightDataset[] = [];
 //         expected.push(expectedDataset);
-//         let response: InsightDataset[] = [];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal(expected);
+//             expect(response.body).to.deep.equal(expected);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 //
 //     it("Should not add a existing dataset", async () => {
 //         const id: string = "courses";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
@@ -150,13 +154,14 @@ export interface ITestQuery {
 //         };
 //         let expected: InsightDataset[] = [];
 //         expected.push(expectedDataset);
-//         let response: InsightDataset[] = [];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal(expected);
+//             expect(response.code).to.equal(200);
+//             expect(response.body).to.deep.equal(expected);
 //         }
 //     });
 //
@@ -175,26 +180,28 @@ export interface ITestQuery {
 //     });
 //
 //     it("Should have no dataset after remove, test listDatasets()", async function () {
-//         let response: InsightDataset[];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([]);
+//             expect(response.body).to.deep.equal([]);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 //
 //     it("Should add a specific dataset", async () => {
 //         const id: string = "specificCourses";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([id]);
+//             expect(response.code).to.equal(200);
+//             expect(response.body).to.deep.equal([id]);
 //         }
 //     });
 //
@@ -207,13 +214,14 @@ export interface ITestQuery {
 //         };
 //         let expected: InsightDataset[] = [];
 //         expected.push(expectedDataset);
-//         let response: InsightDataset[] = [];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal(expected);
+//             expect(response.code).to.equal(200);
+//             expect(response.body).to.deep.equal(expected);
 //         }
 //     });
 //
@@ -226,38 +234,40 @@ export interface ITestQuery {
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal(id);
+//             expect(response).to.equal(id);
 //         }
 //     });
 //
 //     it("Should have no dataset after delete, test listDatasets()", async function () {
-//         let response: InsightDataset[];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([]);
+//             expect(response.code).to.equal(200);
+//             expect(response.body).to.deep.equal([]);
 //         }
 //     });
 //
 //     it("Should add a courses dataset", async () => {
 //         const id: string = "courses";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([id]);
+//             expect(response.code).to.equal(400);
+//             expect(response.body).to.deep.equal([id]);
 //         }
 //     });
 //
 //     it("list 3 datasets", async () => {
 //         const id2: string = "courses2";
 //         const id3: string = "courses3";
-//         let response: InsightDataset[];
+//         let response: IResponse;
 //         let expectedResponse: InsightDataset[];
 //         expectedResponse = [];
 //         expectedResponse[0] = {
@@ -285,228 +295,229 @@ export interface ITestQuery {
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal(expectedResponse);
+//             expect(response.body).to.deep.equal(expectedResponse);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 //
 //     it("Should throw error for adding empty zip file", async () => {
 //         const id: string = "emptyZip";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding empty folder", async () => {
 //         const id: string = "emptyFolder";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding a zip with only cat picture inside (invalid file type)", async () => {
 //         const id: string = "zipWithOnlyACatPicInside";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding a zip with invalid Json file format)", async () => {
 //         const id: string = "invalidJsonFormat";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding a zip of sections/classes without any section)", async () => {
 //         const id: string = "emptySection";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding an empty Json file)", async () => {
 //         const id: string = "emptyJsonFile";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for applying invalid file path)", async () => {
 //         const id: string = "invalidPath";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for null file name)", async () => {
 //         const id: string = null;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for undefined file name)", async () => {
 //         const id: string = undefined;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding null dataset)", async () => {
 //         const id: string = "courses";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, null, InsightDatasetKind.Courses);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for adding undefined dataset)", async () => {
 //         const id: string = "courses";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, undefined, InsightDatasetKind.Courses);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for using undefined file name and adding undefined dataset)", async () => {
 //         const id: string = undefined;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, undefined, InsightDatasetKind.Courses);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for using null file name and adding null dataset)", async () => {
 //         const id: string = null;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, null, InsightDatasetKind.Courses);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for using null file name and adding undefined dataset)", async () => {
 //         const id: string = null;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, undefined, InsightDatasetKind.Courses);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for using undefined file name and adding null dataset)", async () => {
 //         const id: string = undefined;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, null, InsightDatasetKind.Courses);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for using undefined file type and adding null type data)", async () => {
 //         const id: string = undefined;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, datasets[id], null);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
 //     it("Should throw error for using undefined file type and adding undefined type data)", async () => {
 //         const id: string = undefined;
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
-//             response = await insightFacade.addDataset(id, datasets[id], undefined);
+//             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
@@ -524,13 +535,14 @@ export interface ITestQuery {
 //     });
 //
 //     it("Should have no dataset after removeDataSet()", async function () {
-//         let response: InsightDataset[];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.listDatasets();
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([]);
+//             expect(response.body).to.deep.equal([]);
+//             expect(response.code).to.deep.equal(400);
 //         }
 //     });
 //
@@ -575,14 +587,14 @@ export interface ITestQuery {
 //
 //     it("Should throw error for adding wrong kind of dataset", async () => {
 //         const id: string = "courses3";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.instanceOf(InsightError);
+//             expect(response.code).to.equal(400);
 //         }
 //     });
 //
@@ -601,14 +613,15 @@ export interface ITestQuery {
 //
 //     it("should added valid dataset 'courses3' to datasets", async () => {
 //         const id: string = "courses3";
-//         let response: string[];
+//         let response: IResponse;
 //
 //         try {
 //             response = await insightFacade.addDataset("courses3", datasets[id], InsightDatasetKind.Courses);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.be.deep.equal([id]);
+//             expect(response.body).to.be.deep.equal([id]);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 //
@@ -640,20 +653,21 @@ export interface ITestQuery {
 //
 //     it("Should add a valid dataset: rooms", async () => {
 //         const id: string = "rooms";
-//         let response: string[];
+//         let response: IResponse;
 //         try {
 //             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
 //         } catch (err) {
 //             response = err;
 //         } finally {
-//             expect(response).to.deep.equal([id]);
+//             expect(response.body).to.deep.equal([id]);
+//             expect(response.code).to.equal(200);
 //         }
 //     });
 // });
-//
-//     // This test suite dynamically generates tests from the JSON files in test/queries.
-//     // You should not need to modify it; instead, add additional files to the queries directory.
-//
+
+    // This test suite dynamically generates tests from the JSON files in test/queries.
+    // You should not need to modify it; instead, add additional files to the queries directory.
+
 // describe("InsightFacade PerformQuery", () => {
 //     const datasetsToQuery: { [id: string]: string } = {
 //         courses: "./test/data/courses.zip",
@@ -706,7 +720,7 @@ export interface ITestQuery {
 //             //     );
 //             // }
 //             responsePromises.push(
-//                 insightFacade.addDataset("courses", datasets["courses"], InsightDatasetKind.Courses));
+//                 insightFacade.addDataset("courses", datasets["courses"], InsightDatasetKind.Courses).);
 //             responsePromises.push(
 //                 insightFacade.addDataset("rooms", datasets["rooms"], InsightDatasetKind.Rooms));
 //
