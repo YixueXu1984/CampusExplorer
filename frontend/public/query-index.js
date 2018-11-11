@@ -9,3 +9,6 @@
  */
 
 // TODO: implement!
+document.getElementById("submit-button").onclick = function() {
+    CampusExplorer.buildQuery();
+};
