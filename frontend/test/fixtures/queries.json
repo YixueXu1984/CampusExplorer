@@ -10,7 +10,205 @@
                 "courses_dept",
                 "courses_id"
             ],
-            "ORDER": "courses_id"
+            "ORDER":{"dir":"UP","orderBy":["courses_id"]}
+        }
+    },
+    "query2": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_avg": 98
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id"
+            ],
+            "ORDER":{"dir":"UP","orderBy":["courses_id"]}
+        }
+    },
+    "query3": {
+        "WHERE": {
+            "OR": [
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_avg": 98
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id"
+            ],
+            "ORDER":{"dir":"UP","orderBy":["courses_id"]}
+        }
+    },
+    "query4": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_avg": 98
+                    }
+                },
+                {
+                    "NOT": {
+                        "LT": {
+                            "courses_avg": 70
+                        }
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id"
+            ],
+            "ORDER":{"dir":"UP","orderBy":["courses_id"]}
+        }
+    },
+    "query5": {
+        "WHERE": {
+            "AND": [
+                {
+                    "NOT": {
+                        "IS": {
+                            "courses_dept": "cpsc"
+                        }
+                    }
+                },
+                {
+                    "NOT": {
+                        "GT": {
+                            "courses_avg": 98
+                        }
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id"
+            ],
+            "ORDER":{"dir":"UP","orderBy":["courses_id"]}
+        }
+    },
+    "query6": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 98
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_title",
+                "courses_instructor",
+                "overallAvg",
+                "maxScore"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": [
+                    "courses_avg"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "courses_title",
+                "courses_instructor"
+            ],
+            "APPLY": [
+                {
+                    "overallAvg": {
+                        "AVG": "courses_avg"
+                    }
+                },
+                {
+                    "maxScore": {
+                        "MAX": "courses_avg"
+                    }
+                }
+            ]
+        }
+    },
+    "query7": {
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_avg": 98
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": [
+                    "courses_dept",
+                    "courses_avg"
+                ]
+            }
+        }
+    },
+    "query8": {
+        "WHERE": {
+            "AND": [
+                {
+                    "NOT": {
+                        "NOT": {
+                            "IS": {
+                                "courses_dept": "cpsc"
+                            }
+                        }
+                    }
+                },
+                {
+                    "NOT": {
+                        "NOT": {
+                            "GT": {
+                                "courses_avg": 98
+                            }
+                        }
+                    }
+                }
+            ]
         }
     }
 }
+
+

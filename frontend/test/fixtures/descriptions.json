@@ -1,3 +1,10 @@
 {
-    "query1": "simple query IS comparison for department with two columns and old order syntax"
+    "query1": "simple query IS comparison for department with two columns and old order syntax",
+    "query2": "simple and case",
+    "query3": "simple or case",
+    "query4": "simple not and case using not checkbox",
+    "query5": "all case not and, using not any button",
+    "query6": "multiple apply and multiple group by case",
+    "query7": "multiple order/descending case",
+    "query8": "Not not case"
 }

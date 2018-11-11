@@ -7,21 +7,22 @@
  */
 CampusExplorer.buildQuery = function () {
     let query = {};
-    query["WHERE:"] = extractConditions();
+    let dataSetId = "courses";
+    query["WHERE"] = extractConditions(dataSetId);
     query["OPTIONS"] = {};
-    query.OPTIONS["COLUMNS:"] = extractColumns();
-    extractOrder();
+    query.OPTIONS["COLUMNS"] = extractColumns(dataSetId);
+    query.OPTIONS["ORDER"] = extractOrder(dataSetId);
     extractGroups();
     extractTransformations();
     return query;
 };
 
-function extractConditions() {
+function extractConditions(dataSetId) {
     let conditions = document.getElementsByClassName("condition");
     let builtConditions = [];
 
     for (let i = 0; i < conditions.length; i++) {
-        builtConditions.push(extractCondition(conditions[i]));
+        builtConditions.push(extractCondition(conditions[i], dataSetId));
     }
 
     if(builtConditions.length > 1) {
@@ -58,22 +59,47 @@ function wrapInNot(builtConditions) {
     return {AND: negatedBuiltConditions};
 }
 
-function extractColumns() {
+function extractColumns(dataSetId) {
     let builtColumns = [];
     let columns = document.getElementsByClassName("columns")[0].getElementsByClassName("control-group")[0].children;
 
     for(let i = 0; i < columns.length; i++) {
         let columnCheckBox = columns.item(i).children[0];
         if (columnCheckBox.checked) {
-            builtColumns.push(columnCheckBox.value);
+            builtColumns.push(dataSetId + "_" + columnCheckBox.value);
         }
     }
 
     return builtColumns;
 }
 
-function extractOrder() {
-    return null;
+function extractOrder(dataSetId) {
+    let builtOrders = {
+        dir: "",
+        orderBy: []
+    };
+
+    let orderByFields = document.getElementsByClassName("control order fields")[0].firstElementChild.children;
+    let orderDirection = document.getElementById("courses-order");
+
+    for(let i = 0; i < orderByFields.length; i++) {
+        if(orderByFields.item(i).selected) {
+            builtOrders.orderBy.push(dataSetId + "_" + orderByFields.item(i).value);
+        }
+    }
+
+    if (builtOrders.length === 0) {
+        return null;
+    }
+
+    if (orderDirection.checked) {
+        builtOrders.dir = "DOWN";
+    } else {
+        builtOrders.dir = "UP";
+    }
+
+
+    return builtOrders;
 }
 
 function extractGroups() {
@@ -84,7 +110,7 @@ function extractTransformations() {
     return null;
 }
 
-function extractCondition(conditionElement) {
+function extractCondition(conditionElement, dataSetId) {
     let condition = {};
     let not = extractNot(conditionElement.getElementsByClassName("control not"));
     let key = extractKey(conditionElement.getElementsByClassName("control fields"));
@@ -92,15 +118,13 @@ function extractCondition(conditionElement) {
     let input = extractInput(conditionElement.getElementsByClassName("control term"));
 
     let keyInput = {};
-    keyInput[key] = input;
+    keyInput[dataSetId+ "_" + key] = input;
     condition[operator] = keyInput;
 
     if (not === true) {
-        let notCondition = {
+        return {
             NOT: condition
         };
-
-        return notCondition;
     } else {
         return condition;
     }
