@@ -1,5 +1,5 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
+import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError, InsightResponse} from "./IInsightFacade";
 import AddDataSetCourses from "./AddDataSetCourses";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
@@ -70,30 +70,30 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
-    public removeDataset(id: string): Promise<string> {
+    public removeDataset(id: string): Promise<InsightResponse> {
         let removeDataSet = new RemoveDataset();
         return removeDataSet.removeDataset(id, this.dataSets);
     }
 
-    public performQuery(query: any): Promise<any[]> {
+    public performQuery(query: any): Promise<InsightResponse> {
         return new Promise((resolve, reject) => {
             let performQuery = new PerformQuery();
             performQuery.performQuery(query, this.dataSets)
                 .then((result) => {
-                    resolve(result);
+                    resolve({code: 200, body: result});
                 })
                 .catch((err) => {
-                    reject(new InsightError(err));
+                    reject({code: 400, body: {error: "perform query failed"}});
                 });
         });
     }
 
-    public listDatasets(): Promise<InsightDataset[]> {
+    public listDatasets(): Promise<InsightResponse> {
         let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
             results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
-        return Promise.resolve(results);
+        return Promise.resolve({code: 200, body: results});
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
@@ -194,4 +194,5 @@ export default class InsightFacade implements IInsightFacade {
             });
         });
     }
+
 }

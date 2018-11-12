@@ -6,6 +6,7 @@ import fs = require("fs");
 import restify = require("restify");
 import Log from "../Util";
 import InsightFacade from "../controller/InsightFacade";
+import {error} from "util";
 
 /**
  * This configures the REST endpoints for the server.
@@ -174,6 +175,14 @@ export default class Server {
 
     private static deleteDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
         // todo
+        Log.trace("deleting dataset...");
+        let id = req.params.id;
+        Server.getInstanceInsightFacade().removeDataset(id).then(function (result) {
+                res.json(result.code, result.body);
+            }).catch(function (err) {
+            res.json(err.code, err.body);
+        });
+        return next();
     }
 
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
