@@ -7,16 +7,17 @@
  */
 CampusExplorer.buildQuery = function () {
     let query = {};
+    let formDocument = document.getElementsByClassName("tab-panel active")[0];
     let dataSetId = document.getElementsByClassName("nav-item tab active")[0].getAttribute("data-type");
-    query["WHERE"] = extractConditions(dataSetId);
-    let columns = extractColumns(dataSetId);
+    query["WHERE"] = extractConditions(dataSetId, formDocument);
+    let columns = extractColumns(dataSetId, formDocument);
     if (columns.length > 0) {
         query["OPTIONS"] = {};
         query.OPTIONS["COLUMNS"] = columns;
-        query.OPTIONS["ORDER"] = extractOrder(dataSetId);
+        query.OPTIONS["ORDER"] = extractOrder(dataSetId, formDocument);
     }
-    let groups = extractGroups(dataSetId);
-    let applys = extractTransformations(dataSetId);
+    let groups = extractGroups(dataSetId, formDocument);
+    let applys = extractTransformations(dataSetId, formDocument);
     if (groups.length > 0) {
         query["TRANSFORMATIONS"] = {};
         query.TRANSFORMATIONS["GROUP"] = groups;
@@ -25,9 +26,9 @@ CampusExplorer.buildQuery = function () {
     return query;
 };
 
-function extractConditions(dataSetId) {
+function extractConditions(dataSetId, formDocument) {
 
-        let conditions = document.getElementsByClassName("conditions-container")[0].children;
+        let conditions = formDocument.getElementsByClassName("conditions-container")[0].children;
         let builtConditions = [];
 
         for (let i = 0; i < conditions.length; i++) {
@@ -36,11 +37,11 @@ function extractConditions(dataSetId) {
 
         if (builtConditions.length > 1) {
 
-            if (document.getElementById(dataSetId + "-conditiontype-all").checked) {
+            if (formDocument.getElementsByClassName("control conditions-all-radio")[0].children[0].checked) {
                 builtConditions = wrapInAnd(builtConditions);
-            } else if (document.getElementById(dataSetId + "-conditiontype-any").checked) {
+            } else if (formDocument.getElementsByClassName("control conditions-any-radio")[0].children[0].checked) {
                 builtConditions = wrapInOr(builtConditions);
-            } else if (document.getElementById(dataSetId + "-conditiontype-none").checked) {
+            } else if (formDocument.getElementsByClassName("control conditions-none-radio")[0].children[0].checked) {
                 builtConditions = wrapInNot(builtConditions);
             }
 
@@ -69,9 +70,9 @@ function wrapInNot(builtConditions) {
     return {AND: negatedBuiltConditions};
 }
 
-function extractColumns(dataSetId) {
+function extractColumns(dataSetId, formDocument) {
         let builtColumns = [];
-        let columns = document.getElementsByClassName("columns")[0].getElementsByClassName("control-group")[0].children;
+        let columns = formDocument.getElementsByClassName("columns")[0].getElementsByClassName("control-group")[0].children;
 
         for (let i = 0; i < columns.length; i++) {
             let columnCheckBox = columns.item(i).children[0];
@@ -85,18 +86,22 @@ function extractColumns(dataSetId) {
         return builtColumns;
 }
 
-function extractOrder(dataSetId) {
+function extractOrder(dataSetId, formDocument) {
         let builtOrders = {
             dir: "",
             keys: []
         };
 
-        let orderByFields = document.getElementsByClassName("control order fields")[0].firstElementChild.children;
-        let orderDirection = document.getElementById(dataSetId + "-order");
+        let order
+        let orderByFields = formDocument.getElementsByClassName("control order fields")[0].firstElementChild.children;
+        let orderDirection = formDocument.getElementsByClassName("control descending")[0].children[0];
 
         for (let i = 0; i < orderByFields.length; i++) {
-            if (orderByFields.item(i).selected) {
-                builtOrders.keys.push(dataSetId + "_" + orderByFields.item(i).value);
+            let orderByFieldsValue = orderByFields.item(i);
+            if (orderByFieldsValue.selected && orderByFieldsValue.className === "transformation") {
+                builtOrders.keys.push(orderByFieldsValue.value);
+            } else if (orderByFieldsValue.selected) {
+                builtOrders.keys.push(dataSetId + "_" + orderByFieldsValue.value);
             }
         }
 
@@ -114,9 +119,9 @@ function extractOrder(dataSetId) {
         return builtOrders;
 }
 
-function extractGroups(dataSetId) {
+function extractGroups(dataSetId, formDocument) {
         let groups = [];
-        let groupForm = document.getElementsByClassName("form-group groups")[0];
+        let groupForm = formDocument.getElementsByClassName("form-group groups")[0];
         let groupSelections = groupForm.getElementsByClassName("control-group")[0].children;
 
         for (let i = 0; i < groupSelections.length; i++) {
@@ -129,9 +134,9 @@ function extractGroups(dataSetId) {
         return groups;
 }
 
-function extractTransformations(dataSetId) {
+function extractTransformations(dataSetId, formDocument) {
         let apply = [];
-        let transformations = document.getElementsByClassName("transformations-container")[0].children;
+        let transformations = formDocument.getElementsByClassName("transformations-container")[0].children;
         for (let i = 0; i < transformations.length; i++) {
             let applyName = extractApplyName(transformations[i]);
             let applyFunction = extractApplyFunction(transformations[i]);
