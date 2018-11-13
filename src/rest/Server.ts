@@ -177,7 +177,8 @@ export default class Server {
         // todo
         Log.trace("deleting dataset...");
         let id = req.params.id;
-        Server.getInstanceInsightFacade().removeDataset(id).then(function (result) {
+        Server.getInstanceInsightFacade().removeDataset(id)
+            .then(function (result) {
                 res.json(result.code, result.body);
             }).catch(function (err) {
             res.json(err.code, err.body);
@@ -186,6 +187,17 @@ export default class Server {
     }
 
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
+        try {
+            return Server.getInstanceInsightFacade().performQuery(req.params)
+                .then(function (result) {
+                    res.json(result.code, result.body);
+                }).catch(function (err) {
+                    res.json(err.code, err.body);
+                });
+        } catch (e) {
+            res.send(400, "error");
+        }
+        return next();
         // todo
     }
 
