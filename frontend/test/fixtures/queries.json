@@ -247,6 +247,38 @@
                 ]
             }
         }
+    },
+
+    "query9": {
+        "WHERE": {
+            "AND": [{
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            }, {
+                "GT": {
+                    "rooms_seats": 100
+                }
+            }]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname",
+                "countSeats"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["countSeats"]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": ["rooms_shortname"],
+            "APPLY": [{
+                "countSeats": {
+                    "AVG": "rooms_seats"
+                }
+            }]
+        }
     }
 }
 

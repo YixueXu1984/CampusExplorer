@@ -36,11 +36,11 @@ function extractConditions(dataSetId) {
 
         if (builtConditions.length > 1) {
 
-            if (document.getElementById("courses-conditiontype-all").checked) {
+            if (document.getElementById(dataSetId + "-conditiontype-all").checked) {
                 builtConditions = wrapInAnd(builtConditions);
-            } else if (document.getElementById("courses-conditiontype-any").checked) {
+            } else if (document.getElementById(dataSetId + "-conditiontype-any").checked) {
                 builtConditions = wrapInOr(builtConditions);
-            } else if (document.getElementById("courses-conditiontype-none").checked) {
+            } else if (document.getElementById(dataSetId + "-conditiontype-none").checked) {
                 builtConditions = wrapInNot(builtConditions);
             }
 
@@ -92,7 +92,7 @@ function extractOrder(dataSetId) {
         };
 
         let orderByFields = document.getElementsByClassName("control order fields")[0].firstElementChild.children;
-        let orderDirection = document.getElementById("courses-order");
+        let orderDirection = document.getElementById(dataSetId + "-order");
 
         for (let i = 0; i < orderByFields.length; i++) {
             if (orderByFields.item(i).selected) {

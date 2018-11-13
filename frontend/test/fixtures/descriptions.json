@@ -6,5 +6,6 @@
     "query5": "all case not and, using not any button",
     "query6": "multiple apply and multiple group by case",
     "query7": "multiple order/descending case",
-    "query8": "Not not case"
+    "query8": "Not not case",
+    "query9": "Rooms case"
 }
