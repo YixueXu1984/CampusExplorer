@@ -7,7 +7,7 @@
  */
 CampusExplorer.buildQuery = function () {
     let query = {};
-    let dataSetId = "courses";
+    let dataSetId = document.getElementsByClassName("nav-item tab active")[0].getAttribute("data-type");
     query["WHERE"] = extractConditions(dataSetId);
     let columns = extractColumns(dataSetId);
     if (columns.length > 0) {
