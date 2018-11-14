@@ -98,5 +98,41 @@ describe("Facade D3", function () {
             Log.trace("GET failed");
         }
     });
+
+    it("remove dataset", function () {
+        try {
+            return chai.request(URL)
+                .del("/dataset/" + "courses")
+                .then(function (res: any) {
+                    Log.trace("removing dataset:");
+                    expect(res.status).to.be.equal(200);
+                    const expectedBody = "courses";
+                    expect(res.body).to.deep.equal({result: expectedBody});
+                })
+                .catch(function (err) {
+                    Log.trace(err);
+                });
+        } catch (err) {
+            Log.trace("DELETE failed");
+        }
+
+    });
+
+    it("perform query", function () {
+        try {
+            return chai.request(URL)
+                .post("/query * this is a stub *")
+                .then(function (res: any) {
+                    Log.trace("performing query");
+                    expect(res.status).to.be.equal(200);
+                    const expectedBody = ["aaa"];
+                    expect(res.body).to.deep.equal({result: expectedBody});
+                }).catch(function (err) {
+                    Log.trace(err);
+                });
+        } catch (err) {
+            Log.trace("POST failed");
+        }
+    });
     // The other endpoints work similarly. You should be able to find all instructions at the chai-http documentation
 });
