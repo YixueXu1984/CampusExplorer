@@ -180,29 +180,33 @@ export default class Server {
         // todo
         Log.trace("deleting dataset...");
         let id = req.params.id;
-        Server.getInstanceInsightFacade().removeDataset(id)
-            .then(function (result) {
-                res.json(200, result);
-            }).catch(function (err) {
+        try {
+            Server.getInstanceInsightFacade().removeDataset(id)
+                .then(function (result) {
+                    res.json(200, result);
+                }).catch(function (err) {
                 if (err.isPrototypeOf(NotFoundError)) {
                     res.json(404, err);
-                }  else if (err.isPrototypeOf(InsightError)) {
+                } else if (err.isPrototypeOf(InsightError)) {
                     res.json(400, err);
                 }
-        });
+            });
+        } catch (err) {
+            res.send(400, "unexpected error caught when DELETE datasets");
+        }
         return next();
     }
 
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         try {
-            return Server.getInstanceInsightFacade().performQuery(req.params)
+            Server.getInstanceInsightFacade().performQuery(req.params)
                 .then(function (result) {
                     res.json(200, result);
                 }).catch(function (err) {
                     res.json(400, err);
                 });
         } catch (e) {
-            res.send(400, "error");
+            res.send(400, "unexpected error caught when POST query");
         }
         return next();
     }
