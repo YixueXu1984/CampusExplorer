@@ -59,13 +59,15 @@ describe("Facade D3", function () {
     });
 
     // TODO: read your courses and rooms datasets here once!
+    let courses = fs.readFileSync("/test/data/courses.zip");
+    let rooms = fs.readFileSync("./test/data/rooms.zip");
 
     // Hint on how to test PUT requests
     it("PUT test for courses dataset", function () {
         try {
             return chai.request(URL)
                 .put("/dataset/courses/courses")
-                .attach("body", fs.readFileSync("./test/data/courses.zip"), "courses.zip")
+                .attach("body", courses, "courses.zip")
                 .then(function (res: any) {
                     // some logging here please!
                     Log.trace("PUT executed");
@@ -99,40 +101,40 @@ describe("Facade D3", function () {
         }
     });
 
-    it("remove dataset", function () {
-        try {
-            return chai.request(URL)
-                .del("/dataset/" + "courses")
-                .then(function (res: any) {
-                    Log.trace("removing dataset:");
-                    expect(res.status).to.be.equal(200);
-                    const expectedBody = "courses";
-                    expect(res.body).to.deep.equal({result: expectedBody});
-                })
-                .catch(function (err) {
-                    Log.trace(err);
-                });
-        } catch (err) {
-            Log.trace("DELETE failed");
-        }
-
-    });
-
-    it("perform query", function () {
-        try {
-            return chai.request(URL)
-                .post("/query * this is a stub *")
-                .then(function (res: any) {
-                    Log.trace("performing query");
-                    expect(res.status).to.be.equal(200);
-                    const expectedBody = ["aaa"];
-                    expect(res.body).to.deep.equal({result: expectedBody});
-                }).catch(function (err) {
-                    Log.trace(err);
-                });
-        } catch (err) {
-            Log.trace("POST failed");
-        }
-    });
+    // it("remove dataset", function () {
+    //     try {
+    //         return chai.request(URL)
+    //             .del("/dataset/" + "courses")
+    //             .then(function (res: any) {
+    //                 Log.trace("removing dataset:");
+    //                 expect(res.status).to.be.equal(200);
+    //                 const expectedBody = "courses";
+    //                 expect(res.body).to.deep.equal({result: expectedBody});
+    //             })
+    //             .catch(function (err) {
+    //                 Log.trace(err);
+    //             });
+    //     } catch (err) {
+    //         Log.trace("DELETE failed");
+    //     }
+    //
+    // });
+    //
+    // it("perform query", function () {
+    //     try {
+    //         return chai.request(URL)
+    //             .post("/query * this is a stub *")
+    //             .then(function (res: any) {
+    //                 Log.trace("performing query");
+    //                 expect(res.status).to.be.equal(200);
+    //                 const expectedBody = ["aaa"];
+    //                 expect(res.body).to.deep.equal({result: expectedBody});
+    //             }).catch(function (err) {
+    //                 Log.trace(err);
+    //             });
+    //     } catch (err) {
+    //         Log.trace("POST failed");
+    //     }
+    // });
     // The other endpoints work similarly. You should be able to find all instructions at the chai-http documentation
 });
