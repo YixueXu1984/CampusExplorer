@@ -33,7 +33,7 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise((resolve, reject) => {
             this.dataSets.forEach((dataSet) => {
                 if (dataSet.id === id) {
-                    reject("Fail to add a duplicate dataset");
+                    return reject(new InsightError("Trying to add an id that already exits"));
                 }
             });
             if (kind === InsightDatasetKind.Courses) {
@@ -48,8 +48,7 @@ export default class InsightFacade implements IInsightFacade {
                         resolve(dataSetsId);
                     })
                     .catch((err) => {
-                        Log.trace(err);
-                        reject(err);
+                        reject(new InsightError(err));
                     });
             } else if (kind === InsightDatasetKind.Rooms) { // added case for Room
                 let addDataSet: AddDataSetRooms = new AddDataSetRooms();
@@ -63,8 +62,7 @@ export default class InsightFacade implements IInsightFacade {
                         resolve(dataSetsId);
                     })
                     .catch((err) => {
-                        Log.trace(err);
-                        reject(err);
+                        reject(new InsightError(err));
                     });
             }
         });
@@ -112,6 +110,10 @@ export default class InsightFacade implements IInsightFacade {
         // update to room edition
         // TODO: fix this
         return new Promise<IDataSet[]>((resolve, reject) => {
+            if (!fs.existsSync("./data")) {
+                fs.mkdirSync("./data");
+                return resolve([]);
+            }
             fs.access("./data", (err) => {
                 if (err) {
                     reject(err);
