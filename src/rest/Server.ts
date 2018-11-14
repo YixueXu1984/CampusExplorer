@@ -7,6 +7,7 @@ import restify = require("restify");
 import Log from "../Util";
 import InsightFacade from "../controller/InsightFacade";
 import {error} from "util";
+import {InsightError, NotFoundError} from "../controller/IInsightFacade";
 
 /**
  * This configures the REST endpoints for the server.
@@ -69,6 +70,8 @@ export default class Server {
                 that.rest.get("/datasets", Server.getDataset);
 
                 // NOTE: your endpoints should go here
+                that.rest.post("/query", restify.bodyParser(), Server.postQuery);
+                that.rest.del("/dataset/:id", Server.deleteDataset);
 
                 // This must be the last endpoint!
                 that.rest.get("/.*", Server.getStatic);
@@ -179,9 +182,13 @@ export default class Server {
         let id = req.params.id;
         Server.getInstanceInsightFacade().removeDataset(id)
             .then(function (result) {
-                res.json(result.code, result.body);
+                res.json(200, result);
             }).catch(function (err) {
-            res.json(err.code, err.body);
+                if (err.isPrototypeOf(NotFoundError)) {
+                    res.json(404, err);
+                }  else if (err.isPrototypeOf(InsightError)) {
+                    res.json(400, err);
+                }
         });
         return next();
     }
@@ -190,15 +197,14 @@ export default class Server {
         try {
             return Server.getInstanceInsightFacade().performQuery(req.params)
                 .then(function (result) {
-                    res.json(result.code, result.body);
+                    res.json(200, result);
                 }).catch(function (err) {
-                    res.json(err.code, err.body);
+                    res.json(400, err);
                 });
         } catch (e) {
             res.send(400, "error");
         }
         return next();
-        // todo
     }
 
     private static isValidReq(req: restify.Request): boolean {

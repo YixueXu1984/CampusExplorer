@@ -78,7 +78,7 @@ export interface IInsightFacade {
      * This will delete both disk and memory caches for the dataset for the id meaning
      * that subsequent queries for that id should fail unless a new addDataset happens first.
      */
-    removeDataset(id: string): Promise<InsightResponse>;
+    removeDataset(id: string): Promise<string>;
 
     /**
      * Perform a query on UBCInsight.
@@ -93,7 +93,7 @@ export interface IInsightFacade {
      * The promise should fulfill with an array of results.
      * The promise should reject with an InsightError describing the error.
      */
-    performQuery(query: any): Promise<InsightResponse>;
+    performQuery(query: any): Promise<any[]>;
 
     /**
      * List all currently added datasets, their types, and number of rows.
@@ -101,5 +101,5 @@ export interface IInsightFacade {
      * @return Promise <InsightDataset[]>
      * The promise should fulfill an array of currently added InsightDatasets, and will only fulfill.
      */
-    listDatasets(): Promise<InsightResponse>;
+    listDatasets(): Promise<InsightDataset[]>;
 }

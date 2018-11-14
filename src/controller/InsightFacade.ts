@@ -68,30 +68,30 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
-    public removeDataset(id: string): Promise<InsightResponse> {
+    public removeDataset(id: string): Promise<string> {
         let removeDataSet = new RemoveDataset();
         return removeDataSet.removeDataset(id, this.dataSets);
     }
 
-    public performQuery(query: any): Promise<InsightResponse> {
+    public performQuery(query: any): Promise<any[]> {
         return new Promise((resolve, reject) => {
             let performQuery = new PerformQuery();
             performQuery.performQuery(query, this.dataSets)
                 .then((result) => {
-                    resolve({code: 200, body: result});
+                    resolve(result);
                 })
                 .catch((err) => {
-                    reject({code: 400, body: {error: "perform query failed"}});
+                    reject(new InsightError("Error when performing query"));
                 });
         });
     }
 
-    public listDatasets(): Promise<InsightResponse> {
+    public listDatasets(): Promise<InsightDataset[]> {
         let results: InsightDataset[] = [];
         this.dataSets.forEach((currDataSet) => {
             results.push(this.createDataset(currDataSet.id, currDataSet.kind, currDataSet.numRows));
         });
-        return Promise.resolve({code: 200, body: results});
+        return Promise.resolve(results);
     }
 
     public createDataset(name: string, type: InsightDatasetKind, num: number): InsightDataset {
