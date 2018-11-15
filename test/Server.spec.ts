@@ -89,7 +89,7 @@ describe("Facade D3", function () {
     it("PUT test for courses02 dataset", function () {
         try {
             return chai.request(URL)
-                .put("/dataset/courses2/courses2")
+                .put("/dataset/courses2/courses")
                 .attach("body", courses2, "courses2.zip")
                 .then(function (res: any) {
                     // some logging here please!
@@ -116,7 +116,7 @@ describe("Facade D3", function () {
                 .then(function (res: any) {
                     Log.trace("PUT room executing");
                     expect(res.status).to.be.equal(200);
-                    const expectedBody = ["courses", "rooms"];
+                    const expectedBody = ["courses", "courses2", "rooms"];
                     expect(res.body).to.deep.equal({result: expectedBody});
                 }).catch(function (err) {
                     Log.trace(err);
@@ -153,7 +153,8 @@ describe("Facade D3", function () {
                     Log.trace("Dataset List");
                     expect(res.status).to.be.equal(200);
                     const expectedBody = [{id: "courses", kind: InsightDatasetKind.Courses, numRows: 64612}
-                        /*, {id: "rooms", kind: InsightDatasetKind.Rooms, numRows: 364}*/];
+                        , {id: "courses2", kind: InsightDatasetKind.Courses, numRows: 35}
+                        , {id: "rooms", kind: InsightDatasetKind.Rooms, numRows: 364}];
                     expect(res.body).to.deep.equal({result: expectedBody});
                 })
                 .catch(function (err) {
