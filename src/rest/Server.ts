@@ -193,7 +193,7 @@ export default class Server {
                 .then(function (response) {
                     res.json(200, {result: response});
                 }).catch(function (err) {
-                    if (err.type === (NotFoundError)) {
+                    if (err instanceof NotFoundError) {
                         res.json(404, {error: err.message});
                     } else  {
                         res.json(400, {error: err.message});
