@@ -131,7 +131,7 @@ describe("Facade D3", function () {
                     const expectedBody = ["aaa"];
                     expect(res.body).to.deep.equal({result: expectedBody});
                 }).catch(function (err) {
-                    Log.trace(err);
+                     Log.trace(err);
                 });
         } catch (err) {
             Log.trace("POST failed");

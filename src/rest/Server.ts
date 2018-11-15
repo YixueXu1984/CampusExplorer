@@ -155,10 +155,10 @@ export default class Server {
             facade.listDatasets().then(function (response) {
                 res.json(200, {result: response});
             }).catch(function (err) {
-                res.json(400, {error: "returning 400 error when listing dataset"});
+                res.json(400, {error: err.message});
             });
         } catch (err) {
-            res.send(400, {error: "error when getting dataset"});
+            res.send(400, {error: err.message});
         }
         return next();
     }
@@ -176,10 +176,10 @@ export default class Server {
                     res.json(200, {result: response});
                 })
                 .catch((err) => {
-                    res.json(400, {error: "insight error: xxx"});
+                    res.json(400, {error: err.message});
                 });
         } catch (err) {
-            res.send(400, "error when adding dataset");
+            res.send(400, {error: err.message});
         }
         return next();
     }
@@ -194,13 +194,13 @@ export default class Server {
                     res.json(200, {result: response});
                 }).catch(function (err) {
                 if (err.isPrototypeOf(NotFoundError)) {
-                    res.json(404, {error: "notfound error: xxx"});
+                    res.json(404, {error: err.message});
                 } else if (err.isPrototypeOf(InsightError)) {
-                    res.json(400, {error: "insight error: xxx"});
+                    res.json(400, {error: err.message});
                 }
             });
         } catch (err) {
-            res.send(400, "unexpected error caught when DELETE datasets");
+            res.send(400, {error: err.message});
         }
         return next();
     }
@@ -211,10 +211,10 @@ export default class Server {
                 .then(function (resoponse) {
                     res.json(200, {result: resoponse});
                 }).catch(function (err) {
-                    res.json(400, {error: "insight error: xxx"});
+                    res.json(400, {error: err.message});
                 });
         } catch (e) {
-            res.send(400, "unexpected error caught when POST query");
+            res.send(400, {error: e.message});
         }
         return next();
     }
