@@ -9,5 +9,6 @@
     "query8": "Not not case",
     "query9": "Rooms case",
     "query10": "Empty condition case",
-    "query11": "complex room case"
+    "query11": "complex room case",
+    "query12": "Rooms with lots of columns and ordering key"
 }

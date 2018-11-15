@@ -392,7 +392,7 @@
                 "rooms_type"
             ],
             "ORDER": {
-                "dir": "DOWN",
+                "dir": "UP",
                 "keys": [
                     "rooms_address",
                     "rooms_fullname",

@@ -8,7 +8,7 @@ CampusExplorer.sendQuery = function (query) {
     return new Promise(function (fulfill, reject) {
         let xhttp = new XMLHttpRequest();
         xhttp.onload = () => {
-            resolve(this.response);
+            fulfill(this.response);
         };
         xhttp.open("POST", "/query", true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
