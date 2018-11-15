@@ -11,11 +11,12 @@ CampusExplorer.buildQuery = function () {
     let dataSetId = document.getElementsByClassName("nav-item tab active")[0].getAttribute("data-type");
     query["WHERE"] = extractConditions(dataSetId, formDocument);
     let columns = extractColumns(dataSetId, formDocument);
-    if (columns.length > 0) {
         query["OPTIONS"] = {};
         query.OPTIONS["COLUMNS"] = columns;
-        query.OPTIONS["ORDER"] = extractOrder(dataSetId, formDocument);
-    }
+        let order = extractOrder(dataSetId, formDocument);
+        if(order.keys.length > 0) {
+            query.OPTIONS["ORDER"] = order;
+        }
     let groups = extractGroups(dataSetId, formDocument);
     let applys = extractTransformations(dataSetId, formDocument);
     if (groups.length > 0) {
@@ -47,8 +48,10 @@ function extractConditions(dataSetId, formDocument) {
 
             return builtConditions;
 
-        } else {
+        } else if(builtConditions.length === 1){
             return builtConditions[0];
+        } else {
+            return {};
         }
 
 }
@@ -92,7 +95,6 @@ function extractOrder(dataSetId, formDocument) {
             keys: []
         };
 
-        let order
         let orderByFields = formDocument.getElementsByClassName("control order fields")[0].firstElementChild.children;
         let orderDirection = formDocument.getElementsByClassName("control descending")[0].children[0];
 
@@ -105,16 +107,11 @@ function extractOrder(dataSetId, formDocument) {
             }
         }
 
-        if (builtOrders.length === 0) {
-            return null;
-        }
-
         if (orderDirection.checked) {
             builtOrders.dir = "DOWN";
         } else {
             builtOrders.dir = "UP";
         }
-
 
         return builtOrders;
 }

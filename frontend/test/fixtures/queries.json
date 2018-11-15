@@ -248,18 +248,20 @@
             }
         }
     },
-
     "query9": {
         "WHERE": {
-            "AND": [{
-                "IS": {
-                    "rooms_furniture": "*Tables*"
+            "AND": [
+                {
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                },
+                {
+                    "GT": {
+                        "rooms_seats": 100
+                    }
                 }
-            }, {
-                "GT": {
-                    "rooms_seats": 100
-                }
-            }]
+            ]
         },
         "OPTIONS": {
             "COLUMNS": [
@@ -268,16 +270,91 @@
             ],
             "ORDER": {
                 "dir": "DOWN",
-                "keys": ["countSeats"]
+                "keys": [
+                    "countSeats"
+                ]
             }
         },
         "TRANSFORMATIONS": {
-            "GROUP": ["rooms_shortname"],
-            "APPLY": [{
-                "countSeats": {
-                    "AVG": "rooms_seats"
+            "GROUP": [
+                "rooms_shortname"
+            ],
+            "APPLY": [
+                {
+                    "countSeats": {
+                        "AVG": "rooms_seats"
+                    }
                 }
-            }]
+            ]
+        }
+    },
+    "query10": {
+        "WHERE": {
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_name"
+            ]
+        }
+    },
+    "query11": {
+        "WHERE": {
+            "AND": [
+                {
+                    "GT": {
+                        "rooms_seats": 30
+                    }
+                },
+                {
+                    "NOT": {
+                        "IS": {
+                            "rooms_shortname": "CPSC"
+                        }
+                    }
+                },
+                {
+                    "LT": {
+                        "rooms_seats": 300
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_name",
+                "numSeats",
+                "maxSeats",
+                "minLat"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": [
+                    "maxSeats",
+                    "numSeats"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_name"
+            ],
+            "APPLY": [
+                {
+                    "numSeats": {
+                        "COUNT": "rooms_seats"
+                    }
+                },
+                {
+                    "maxSeats": {
+                        "MAX": "rooms_seats"
+                    }
+                },
+                {
+                    "minLat": {
+                        "MIN": "rooms_lat"
+                    }
+                }
+            ]
         }
     }
 }
