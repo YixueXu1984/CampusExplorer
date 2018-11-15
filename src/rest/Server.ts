@@ -65,7 +65,7 @@ export default class Server {
 
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
-                that.rest.get("/echo/:msg", Server.echo);
+                // that.rest.get("/echo/:msg", Server.echo);
                 that.rest.put("/dataset/:id/:kind", Server.putDataset);
                 that.rest.get("/datasets", Server.getDataset);
 
@@ -164,13 +164,10 @@ export default class Server {
     }
 
     private static putDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
-        // if (!Server.isValidReq(req)) {
-        //     return next(new Error("Invalid request format"));
-        // }
         try {
             let id = req.params.id;
             let kind = req.params.kind;
-            let body = new Buffer(req.params.body).toString("base64");
+            let body = req.params.body.toString("base64");
             Server.getInstanceInsightFacade().addDataset(id, body, kind)
                 .then((response) => {
                     res.json(200, {result: response});
