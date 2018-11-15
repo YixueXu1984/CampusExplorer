@@ -158,7 +158,7 @@ export default class Server {
                 res.json(400, {error: err.message});
             });
         } catch (err) {
-            res.send(400, {error: err.message});
+            res.json(400, {error: err.message});
         }
         return next();
     }
@@ -179,7 +179,7 @@ export default class Server {
                     res.json(400, {error: err.message});
                 });
         } catch (err) {
-            res.send(400, {error: err.message});
+            res.json(400, {error: err.message});
         }
         return next();
     }
@@ -200,7 +200,7 @@ export default class Server {
                 }
             });
         } catch (err) {
-            res.send(400, {error: err.message});
+            res.json(400, {error: err.message});
         }
         return next();
     }
@@ -214,7 +214,7 @@ export default class Server {
                     res.json(400, {error: err.message});
                 });
         } catch (e) {
-            res.send(400, {error: e.message});
+            res.json(400, {error: e.message});
         }
         return next();
     }
