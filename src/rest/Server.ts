@@ -65,7 +65,7 @@ export default class Server {
 
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
-                that.rest.get("/echo/:msg", Server.echo);
+                // that.rest.get("/echo/:msg", Server.echo);
                 that.rest.put("/dataset/:id/:kind", Server.putDataset);
                 that.rest.get("/datasets", Server.getDataset);
 
@@ -153,12 +153,12 @@ export default class Server {
         try {
             let facade = Server.getInstanceInsightFacade();
             facade.listDatasets().then(function (response) {
-                res.json(200, response);
+                res.json(200, {result: response});
             }).catch(function (err) {
-                res.json(400, err);
+                res.json(400, {error: "returning 400 error when listing dataset"});
             });
         } catch (err) {
-            res.send(400, "error when getting dataset");
+            res.send(400, {error: "error when getting dataset"});
         }
         return next();
     }
@@ -172,11 +172,11 @@ export default class Server {
             let kind = req.params.kind;
             let body = new Buffer(req.params.body).toString("base64");
             Server.getInstanceInsightFacade().addDataset(id, body, kind)
-                .then((result) => {
-                    res.json(200, {result});
+                .then((response) => {
+                    res.json(200, {result: response});
                 })
                 .catch((err) => {
-                    res.json(400, err);
+                    res.json(400, {error: "insight error: xxx"});
                 });
         } catch (err) {
             res.send(400, "error when adding dataset");
@@ -190,13 +190,13 @@ export default class Server {
         let id = req.params.id;
         try {
             Server.getInstanceInsightFacade().removeDataset(id)
-                .then(function (result) {
-                    res.json(200, {result});
+                .then(function (response) {
+                    res.json(200, {result: response});
                 }).catch(function (err) {
                 if (err.isPrototypeOf(NotFoundError)) {
-                    res.json(404, err);
+                    res.json(404, {error: "notfound error: xxx"});
                 } else if (err.isPrototypeOf(InsightError)) {
-                    res.json(400, err);
+                    res.json(400, {error: "insight error: xxx"});
                 }
             });
         } catch (err) {
@@ -208,10 +208,10 @@ export default class Server {
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         try {
             Server.getInstanceInsightFacade().performQuery(req.params)
-                .then(function (result) {
-                    res.json(200, result);
+                .then(function (resoponse) {
+                    res.json(200, {result: resoponse});
                 }).catch(function (err) {
-                    res.json(400, err);
+                    res.json(400, {error: "insight error: xxx"});
                 });
         } catch (e) {
             res.send(400, "unexpected error caught when POST query");
