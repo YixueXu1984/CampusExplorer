@@ -50,12 +50,12 @@ describe("Facade D3", function () {
 
     beforeEach(function () {
         // might want to add some process logging here to keep track of what"s going on
-        Log.trace("New test start:");
+        Log.trace("Test start:");
     });
 
     afterEach(function () {
         // might want to add some process logging here to keep track of what"s going on
-        Log.trace("New test executed \n");
+        Log.trace("Test executed \n");
     });
 
     // TODO: read your courses and rooms datasets here once!
@@ -71,33 +71,20 @@ describe("Facade D3", function () {
                 .then(function (res: any) {
                     // some logging here please!
                     Log.trace("PUT executed");
+                    Log.trace("Response:" + JSON.stringify(res));
                     expect(res.status).to.be.equal(200);
+                    expect(res.body.result).to.be.deep.equal(["courses"]);
                 })
                 .catch(function (err) {
                     // some logging here please!
                     Log.trace(err);
+                    expect.fail();
                 });
         } catch (err) {
             Log.trace("PUT failed");
+            Log.trace(err.toString());
+            expect.fail();
             // and some more logging here!
-        }
-    });
-
-    it("GET dataset", function () {
-        try {
-            return chai.request(URL)
-                .get("/datasets")
-                .then(function (res: any) {
-                    Log.trace("Dataset List");
-                    expect(res.status).to.be.equal(200);
-                    const expectedBody = [{id: "courses", kind: InsightDatasetKind.Courses, numRows: 64612}];
-                    expect(res.body).to.deep.equal({result: expectedBody});
-                })
-                .catch(function (err) {
-                    Log.trace(err);
-                });
-        } catch (err) {
-            Log.trace("GET failed");
         }
     });
 
@@ -113,11 +100,32 @@ describe("Facade D3", function () {
                 })
                 .catch(function (err) {
                     Log.trace(err);
+                    expect.fail();
                 });
         } catch (err) {
             Log.trace("DELETE failed");
+            expect.fail();
         }
+    });
 
+    it("GET dataset", function () {
+        try {
+            return chai.request(URL)
+                .get("/datasets")
+                .then(function (res: any) {
+                    Log.trace("Dataset List");
+                    expect(res.status).to.be.equal(200);
+                    const expectedBody = [{id: "courses", kind: InsightDatasetKind.Courses, numRows: 64612}];
+                    expect(res.body).to.deep.equal({result: expectedBody});
+                })
+                .catch(function (err) {
+                    Log.trace(err);
+                    expect.fail();
+                });
+        } catch (err) {
+            Log.trace("GET failed");
+            expect.fail();
+        }
     });
 
     it("perform query", function () {
@@ -128,8 +136,8 @@ describe("Facade D3", function () {
                 .then(function (res: any) {
                     Log.trace("performing query");
                     expect(res.status).to.be.equal(200);
-                    const expectedBody = ["aaa"];
-                    expect(res.body).to.deep.equal({result: expectedBody});
+                    // const expectedBody = ["aaa"];
+                    // expect(res.body).to.deep.equal({result: expectedBody});
                 }).catch(function (err) {
                      Log.trace(err);
                 });
@@ -139,3 +147,7 @@ describe("Facade D3", function () {
     });
     // The other endpoints work similarly. You should be able to find all instructions at the chai-http documentation
 });
+
+// describe("Facade D3: PerformQuery", function() {
+//     // todo
+// };
