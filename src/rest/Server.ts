@@ -65,12 +65,12 @@ export default class Server {
 
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
-               // that.rest.get("/echo/:msg", Server.echo);
+                that.rest.get("/echo/:msg", Server.echo);
                 that.rest.put("/dataset/:id/:kind", Server.putDataset);
                 that.rest.get("/datasets", Server.getDataset);
 
                 // NOTE: your endpoints should go here
-                that.rest.post("/query", restify.bodyParser(), Server.postQuery);
+                that.rest.post("/query", Server.postQuery);
                 that.rest.del("/dataset/:id", Server.deleteDataset);
 
                 // This must be the last endpoint!
@@ -147,32 +147,40 @@ export default class Server {
     }
 
     private static getDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
-        if (!Server.isValidReq(req)) {
-            return next(new Error("Invalid request format"));
+        // if (!Server.isValidReq(req)) {
+        //     return next(new Error("Invalid request format"));
+        // }
+        try {
+            let facade = Server.getInstanceInsightFacade();
+            facade.listDatasets().then(function (response) {
+                res.json(200, response);
+            }).catch(function (err) {
+                res.json(400, err);
+            });
+        } catch (err) {
+            res.send(400, "error when getting dataset");
         }
-        let facade = Server.getInstanceInsightFacade();
-        facade.listDatasets().then(function (response) {
-            res.json(200, response);
-        }).catch(function (err) {
-            res.json(400, err);
-        });
         return next();
     }
 
     private static putDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
-        if (!Server.isValidReq(req)) {
-            return next(new Error("Invalid request format"));
+        // if (!Server.isValidReq(req)) {
+        //     return next(new Error("Invalid request format"));
+        // }
+        try {
+            let id = req.params.id;
+            let kind = req.params.kind;
+            let body = new Buffer(req.params.body).toString("base64");
+            Server.getInstanceInsightFacade().addDataset(id, body, kind)
+                .then((result) => {
+                    res.json(200, {result});
+                })
+                .catch((err) => {
+                    res.json(400, {err});
+                });
+        } catch (err) {
+            res.send(400, "error when adding dataset");
         }
-        let id = req.params.id;
-        let kind = req.params.kind;
-        let body = new Buffer(req.params.body).toString("base64");
-        Server.getInstanceInsightFacade().addDataset(id, body, kind)
-            .then((result) => {
-                res.json(200, result);
-            })
-            .catch((err) => {
-                res.json(400, err);
-            });
         return next();
     }
 
@@ -183,12 +191,12 @@ export default class Server {
         try {
             Server.getInstanceInsightFacade().removeDataset(id)
                 .then(function (result) {
-                    res.json(200, result);
+                    res.json(200, {result});
                 }).catch(function (err) {
                 if (err.isPrototypeOf(NotFoundError)) {
-                    res.json(404, err);
+                    res.json(404, {err});
                 } else if (err.isPrototypeOf(InsightError)) {
-                    res.json(400, err);
+                    res.json(400, {err});
                 }
             });
         } catch (err) {
