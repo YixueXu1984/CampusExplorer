@@ -70,7 +70,7 @@ describe("Facade D3", function () {
                 .attach("body", courses, "courses.zip")
                 .then(function (res: any) {
                     // some logging here please!
-                    Log.trace("PUT executed");
+                    Log.trace("PUT courses executed");
                     expect(res.status).to.be.equal(200);
                 })
                 .catch(function (err) {
@@ -81,6 +81,41 @@ describe("Facade D3", function () {
             Log.trace("PUT failed");
             // and some more logging here!
         }
+    });
+
+    it("PUT test for dataset room", function () {
+        try {
+            return chai.request(URL)
+                .put("/dataset/rooms/rooms")
+                .attach("body", rooms, "rooms.zip")
+                .then(function (res: any) {
+                    Log.trace("PUT room executing");
+                    expect(res.status).to.be.equal(200);
+                }).catch(function (err) {
+                    Log.trace(err);
+                });
+        } catch (err) {
+                Log.trace("PUT room failed");
+        }
+    });
+
+    it("remove dataset room", function () {
+        try {
+            return chai.request(URL)
+                .del("/dataset/rooms")
+                .then(function (res: any) {
+                    Log.trace("removing dataset: rooms");
+                    expect(res.status).to.be.equal(200);
+                    const expectedBody = "rooms";
+                    expect(res.body).to.deep.equal({result: expectedBody});
+                })
+                .catch(function (err) {
+                    Log.trace(err);
+                });
+        } catch (err) {
+            Log.trace("DELETE failed");
+        }
+
     });
 
     it("GET dataset", function () {
@@ -106,12 +141,47 @@ describe("Facade D3", function () {
             return chai.request(URL)
                 .del("/dataset/courses")
                 .then(function (res: any) {
-                    Log.trace("removing dataset:");
+                    Log.trace("removing dataset: courses");
                     expect(res.status).to.be.equal(200);
                     const expectedBody = "courses";
                     expect(res.body).to.deep.equal({result: expectedBody});
                 })
                 .catch(function (err) {
+                    Log.trace(err);
+                });
+        } catch (err) {
+            Log.trace("DELETE failed");
+        }
+
+    });
+
+    it("PUT test for wrong type of dataset", function () {
+        try {
+            return chai.request(URL)
+                .put("/dataset/rooms/courses")
+                .attach("body", rooms, "rooms.zip")
+                .then(function (res: any) {
+                    Log.trace("PUT room executing");
+                    expect.fail();
+                }).catch(function (err) {
+                    expect(err.status).to.be.equal(400);
+                    Log.trace(err);
+                });
+        } catch (err) {
+            Log.trace("PUT room failed");
+        }
+    });
+
+    it("remove non-exist dataset", function () {
+        try {
+            return chai.request(URL)
+                .del("/dataset/mamamia")
+                .then(function (res: any) {
+                    Log.trace("removing dataset: mamaia");
+                    expect.fail();
+                })
+                .catch(function (err) {
+                    expect(err.status).to.be.equal(404);
                     Log.trace(err);
                 });
         } catch (err) {

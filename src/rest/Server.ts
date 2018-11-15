@@ -193,11 +193,11 @@ export default class Server {
                 .then(function (response) {
                     res.json(200, {result: response});
                 }).catch(function (err) {
-                if (err.isPrototypeOf(NotFoundError)) {
-                    res.json(404, {error: err.message});
-                } else if (err.isPrototypeOf(InsightError)) {
-                    res.json(400, {error: err.message});
-                }
+                    if (err.type === (NotFoundError)) {
+                        res.json(404, {error: err.message});
+                    } else  {
+                        res.json(400, {error: err.message});
+                    }
             });
         } catch (err) {
             res.send(500, "unexpected error caught when DELETE datasets");
