@@ -12,7 +12,7 @@
                 "overallAvg"
             ],
             "ORDER": {
-                "dir": "UP",
+                "dir": "DOWN",
                 "keys": [
                     "overallAvg",
                     "rooms_fullname"

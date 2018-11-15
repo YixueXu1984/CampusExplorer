@@ -1,5 +1,5 @@
 import Log from "../Util";
-import {InsightError, NotFoundError} from "./IInsightFacade";
+import {InsightError, InsightResponse, NotFoundError} from "./IInsightFacade";
 import {IDataSet} from "../model/DataSet";
 import * as fs from "fs";
 
@@ -12,8 +12,10 @@ export default class RemoveDataset {
         return new Promise<string>((resolve, reject) => {
             if (id === null || id === undefined ) {
                 reject(new InsightError("null/ undefined Id"));
+                    // {code: 400, body: {error: "null/undefined Id"}});
             } else if (!this.existDataset(id, dataSets)) {
                 reject(new NotFoundError("removing a dataset that DNE"));
+                    // {code: 404, body: {error: "removing a dataset that DNE"}});
             } else  {
                 let index: number;
                 for (index = 0; index < dataSets.length; index++) {

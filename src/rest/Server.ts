@@ -6,6 +6,8 @@ import fs = require("fs");
 import restify = require("restify");
 import Log from "../Util";
 import InsightFacade from "../controller/InsightFacade";
+import {error} from "util";
+import {InsightError, NotFoundError} from "../controller/IInsightFacade";
 
 /**
  * This configures the REST endpoints for the server.
@@ -14,6 +16,7 @@ export default class Server {
 
     private port: number;
     private rest: restify.Server;
+    private static facade: InsightFacade;
 
     constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
@@ -63,8 +66,12 @@ export default class Server {
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
                 that.rest.get("/echo/:msg", Server.echo);
+                that.rest.put("/dataset/:id/:kind", Server.putDataset);
+                that.rest.get("/datasets", Server.getDataset);
 
                 // NOTE: your endpoints should go here
+                that.rest.post("/query", Server.postQuery);
+                that.rest.del("/dataset/:id", Server.deleteDataset);
 
                 // This must be the last endpoint!
                 that.rest.get("/.*", Server.getStatic);
@@ -131,38 +138,92 @@ export default class Server {
         });
     }
 
-    private static putDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
-        if (!req.body || !req.body.name || !req.body.id) {
-            return next(new Error("Invalid request format"));
+    // Self-implemented
+    public static getInstanceInsightFacade(): InsightFacade {
+        if (Server.facade === null || Server.facade === undefined) {
+            Server.facade = new InsightFacade();
         }
-        let id = req.params.id;
-        let kind = req.params.kind;
-        let body = new Buffer(req.params.body).toString("base64");
-        Server.getInstanceInsightFacade().addDataset(id, body, kind)
-            .then((result) => {
-                // todo: write to response
-                // res.json(code, body)
-            })
-            .catch((err) => {
-                // todo: write error to response
+        return Server.facade;
+    }
+
+    private static getDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+        // if (!Server.isValidReq(req)) {
+        //     return next(new Error("Invalid request format"));
+        // }
+        try {
+            let facade = Server.getInstanceInsightFacade();
+            facade.listDatasets().then(function (response) {
+                res.json(200, {result: response});
+            }).catch(function (err) {
+                res.json(400, {error: err.message});
             });
+        } catch (err) {
+            res.send(500, "error when getting dataset");
+        }
+        return next();
+    }
+
+    private static putDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
+        // if (!Server.isValidReq(req)) {
+        //     return next(new Error("Invalid request format"));
+        // }
+        try {
+            let id = req.params.id;
+            let kind = req.params.kind;
+            let body = new Buffer(req.params.body).toString("base64");
+            Server.getInstanceInsightFacade().addDataset(id, body, kind)
+                .then((response) => {
+                    res.json(200, {result: response});
+                })
+                .catch((err) => {
+                    res.json(400, {error: err.message});
+                });
+        } catch (err) {
+            res.send(500, "error when adding dataset");
+        }
         return next();
     }
 
     private static deleteDataset (req: restify.Request, res: restify.Response, next: restify.Next) {
         // todo
+        Log.trace("deleting dataset...");
+        let id = req.params.id;
+        try {
+            Server.getInstanceInsightFacade().removeDataset(id)
+                .then(function (response) {
+                    res.json(200, {result: response});
+                }).catch(function (err) {
+                    if (err.type === (NotFoundError)) {
+                        res.json(404, {error: err.message});
+                    } else  {
+                        res.json(400, {error: err.message});
+                    }
+            });
+        } catch (err) {
+            res.send(500, "unexpected error caught when DELETE datasets");
+        }
+        return next();
     }
 
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
-        // todo
+        try {
+            Server.getInstanceInsightFacade().performQuery(req.params)
+                .then(function (response) {
+                    res.json(200, {result: response});
+                }).catch(function (err) {
+                    res.json(400, {error: err.message});
+                });
+        } catch (e) {
+            res.send(500, "unexpected error caught when POST query");
+        }
+        return next();
     }
 
-    private static getDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
-        // todo
-    }
-
-    public static getInstanceInsightFacade(): InsightFacade {
-        // todo
-        return null;
+    private static isValidReq(req: restify.Request): boolean {
+        if (!req.body || !req.body.name || !req.body.id) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
