@@ -181,6 +181,7 @@ describe("Facade D3", function () {
                     expect.fail();
                 })
                 .catch(function (err) {
+                    Log.trace("mamamia do not exist, error type: " + err.status);
                     expect(err.status).to.be.equal(404);
                     Log.trace(err);
                 });

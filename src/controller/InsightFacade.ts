@@ -1,5 +1,5 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError, InsightResponse} from "./IInsightFacade";
+import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import AddDataSetCourses from "./AddDataSetCourses";
 import {IDataSet} from "../model/DataSet";
 import RemoveDataset from "./RemoveDataset";
@@ -25,7 +25,7 @@ export default class InsightFacade implements IInsightFacade {
                 this.dataSets = dataSets;
             })
             .catch((err) => {
-                Log.error("failed to load cached datasets: " + String(err));
+                Log.error("failed to load cached datasets" + String(err));
             });
     }
 
@@ -71,6 +71,7 @@ export default class InsightFacade implements IInsightFacade {
     public removeDataset(id: string): Promise<string> {
         let removeDataSet = new RemoveDataset();
         return removeDataSet.removeDataset(id, this.dataSets);
+        // return Promise.reject("Not implemented.");
     }
 
     public performQuery(query: any): Promise<any[]> {
@@ -81,7 +82,7 @@ export default class InsightFacade implements IInsightFacade {
                     resolve(result);
                 })
                 .catch((err) => {
-                    reject(new InsightError("Error when performing query"));
+                    reject(new InsightError(err));
                 });
         });
     }
@@ -110,11 +111,7 @@ export default class InsightFacade implements IInsightFacade {
         // update to room edition
         // TODO: fix this
         return new Promise<IDataSet[]>((resolve, reject) => {
-            if (!fs.existsSync("./data")) {
-                fs.mkdirSync("./data");
-                return resolve([]);
-            }
-            fs.access("./data", (err) => {
+            fs.access("data/", (err) => {
                 if (err) {
                     reject(err);
                     // fs.mkdir("data/", (error) => {
@@ -150,28 +147,22 @@ export default class InsightFacade implements IInsightFacade {
             fs.readdir("data/", (err: Error, files: string[]) => {
                 if (err) {
                     reject(err);
-                } else {
-                    if (!files.length) {
-                        resolve([]);
-                        Log.trace("Data is empty");
-                    } else {
-                        Log.trace("Data is not empty");
-                        for (let file of files) {
-                            promiseArr.push(this.readFiles(file));
-                        }
-
-                        Promise.all(promiseArr)
-                            .then((dataSetArray) => {
-                                dataSetArray.forEach((dataSet) => {
-                                    dataSets.push(dataSet);
-                                });
-                                resolve(dataSets);
-                            })
-                            .catch((error) => {
-                                return reject(error);
-                            });
-                    }
                 }
+
+                for (let file of files) {
+                    promiseArr.push(this.readFiles(file));
+                }
+
+                Promise.all(promiseArr)
+                    .then((dataSetArray) => {
+                        dataSetArray.forEach((dataSet) => {
+                            dataSets.push(dataSet);
+                        });
+                        resolve(dataSets);
+                    })
+                    .catch((error) => {
+                        return reject(error);
+                    });
             });
         });
     }
@@ -196,5 +187,4 @@ export default class InsightFacade implements IInsightFacade {
             });
         });
     }
-
 }
