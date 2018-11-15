@@ -1,6 +1,8 @@
 {
     "title": "COUNT test",
-    "query": {
+    "query":
+
+    {
         "WHERE": {
             "GT": {
                 "rooms_seats": 70
@@ -32,6 +34,8 @@
             ]
         }
     },
+
+
     "isQueryValid": true,
     "result": [
         {

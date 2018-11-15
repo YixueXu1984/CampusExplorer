@@ -176,7 +176,7 @@ export default class Server {
                     res.json(200, {result});
                 })
                 .catch((err) => {
-                    res.json(400, {err});
+                    res.json(400, err);
                 });
         } catch (err) {
             res.send(400, "error when adding dataset");
@@ -194,9 +194,9 @@ export default class Server {
                     res.json(200, {result});
                 }).catch(function (err) {
                 if (err.isPrototypeOf(NotFoundError)) {
-                    res.json(404, {err});
+                    res.json(404, err);
                 } else if (err.isPrototypeOf(InsightError)) {
-                    res.json(400, {err});
+                    res.json(400, err);
                 }
             });
         } catch (err) {
