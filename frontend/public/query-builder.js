@@ -11,17 +11,28 @@ CampusExplorer.buildQuery = function () {
     let dataSetId = document.getElementsByClassName("nav-item tab active")[0].getAttribute("data-type");
     query["WHERE"] = extractConditions(dataSetId, formDocument);
     let columns = extractColumns(dataSetId, formDocument);
+    let order = extractOrder(dataSetId, formDocument);
+
+    if(columns.length > 0 || order.keys.length > 0) {
         query["OPTIONS"] = {};
+    }
+
+    if (columns.length > 0) {
         query.OPTIONS["COLUMNS"] = columns;
-        let order = extractOrder(dataSetId, formDocument);
-        if(order.keys.length > 0) {
-            query.OPTIONS["ORDER"] = order;
-        }
+    }
+    if (order.keys.length > 0) {
+        query.OPTIONS["ORDER"] = order;
+    }
     let groups = extractGroups(dataSetId, formDocument);
     let applys = extractTransformations(dataSetId, formDocument);
-    if (groups.length > 0) {
+    if (groups.length > 0 || applys.length > 0) {
         query["TRANSFORMATIONS"] = {};
+    }
+    if (groups.length > 0) {
         query.TRANSFORMATIONS["GROUP"] = groups;
+    }
+
+    if (applys.length > 0) {
         query.TRANSFORMATIONS["APPLY"] = applys;
     }
     return query;
@@ -29,30 +40,30 @@ CampusExplorer.buildQuery = function () {
 
 function extractConditions(dataSetId, formDocument) {
 
-        let conditions = formDocument.getElementsByClassName("conditions-container")[0].children;
-        let builtConditions = [];
+    let conditions = formDocument.getElementsByClassName("conditions-container")[0].children;
+    let builtConditions = [];
 
-        for (let i = 0; i < conditions.length; i++) {
-            builtConditions.push(extractCondition(conditions[i], dataSetId));
+    for (let i = 0; i < conditions.length; i++) {
+        builtConditions.push(extractCondition(conditions[i], dataSetId));
+    }
+
+    if (builtConditions.length > 1) {
+
+        if (formDocument.getElementsByClassName("control conditions-all-radio")[0].children[0].checked) {
+            builtConditions = wrapInAnd(builtConditions);
+        } else if (formDocument.getElementsByClassName("control conditions-any-radio")[0].children[0].checked) {
+            builtConditions = wrapInOr(builtConditions);
+        } else if (formDocument.getElementsByClassName("control conditions-none-radio")[0].children[0].checked) {
+            builtConditions = wrapInNot(builtConditions);
         }
 
-        if (builtConditions.length > 1) {
+        return builtConditions;
 
-            if (formDocument.getElementsByClassName("control conditions-all-radio")[0].children[0].checked) {
-                builtConditions = wrapInAnd(builtConditions);
-            } else if (formDocument.getElementsByClassName("control conditions-any-radio")[0].children[0].checked) {
-                builtConditions = wrapInOr(builtConditions);
-            } else if (formDocument.getElementsByClassName("control conditions-none-radio")[0].children[0].checked) {
-                builtConditions = wrapInNot(builtConditions);
-            }
-
-            return builtConditions;
-
-        } else if(builtConditions.length === 1){
-            return builtConditions[0];
-        } else {
-            return {};
-        }
+    } else if (builtConditions.length === 1) {
+        return builtConditions[0];
+    } else {
+        return {};
+    }
 
 }
 
@@ -74,79 +85,79 @@ function wrapInNot(builtConditions) {
 }
 
 function extractColumns(dataSetId, formDocument) {
-        let builtColumns = [];
-        let columns = formDocument.getElementsByClassName("columns")[0].getElementsByClassName("control-group")[0].children;
+    let builtColumns = [];
+    let columns = formDocument.getElementsByClassName("columns")[0].getElementsByClassName("control-group")[0].children;
 
-        for (let i = 0; i < columns.length; i++) {
-            let columnCheckBox = columns.item(i).children[0];
-            if (columnCheckBox.checked && columns.item(i).className === "control field") {
-                builtColumns.push(dataSetId + "_" + columnCheckBox.value);
-            } else if (columnCheckBox.checked) {
-                builtColumns.push(columnCheckBox.value);
-            }
+    for (let i = 0; i < columns.length; i++) {
+        let columnCheckBox = columns.item(i).children[0];
+        if (columnCheckBox.checked && columns.item(i).className === "control field") {
+            builtColumns.push(dataSetId + "_" + columnCheckBox.value);
+        } else if (columnCheckBox.checked) {
+            builtColumns.push(columnCheckBox.value);
         }
+    }
 
-        return builtColumns;
+    return builtColumns;
 }
 
 function extractOrder(dataSetId, formDocument) {
-        let builtOrders = {
-            dir: "",
-            keys: []
-        };
+    let builtOrders = {
+        dir: "",
+        keys: []
+    };
 
-        let orderByFields = formDocument.getElementsByClassName("control order fields")[0].firstElementChild.children;
-        let orderDirection = formDocument.getElementsByClassName("control descending")[0].children[0];
+    let orderByFields = formDocument.getElementsByClassName("control order fields")[0].firstElementChild.children;
+    let orderDirection = formDocument.getElementsByClassName("control descending")[0].children[0];
 
-        for (let i = 0; i < orderByFields.length; i++) {
-            let orderByFieldsValue = orderByFields.item(i);
-            if (orderByFieldsValue.selected && orderByFieldsValue.className === "transformation") {
-                builtOrders.keys.push(orderByFieldsValue.value);
-            } else if (orderByFieldsValue.selected) {
-                builtOrders.keys.push(dataSetId + "_" + orderByFieldsValue.value);
-            }
+    for (let i = 0; i < orderByFields.length; i++) {
+        let orderByFieldsValue = orderByFields.item(i);
+        if (orderByFieldsValue.selected && orderByFieldsValue.className === "transformation") {
+            builtOrders.keys.push(orderByFieldsValue.value);
+        } else if (orderByFieldsValue.selected) {
+            builtOrders.keys.push(dataSetId + "_" + orderByFieldsValue.value);
         }
+    }
 
-        if (orderDirection.checked) {
-            builtOrders.dir = "DOWN";
-        } else {
-            builtOrders.dir = "UP";
-        }
+    if (orderDirection.checked) {
+        builtOrders.dir = "DOWN";
+    } else {
+        builtOrders.dir = "UP";
+    }
 
-        return builtOrders;
+    return builtOrders;
 }
 
 function extractGroups(dataSetId, formDocument) {
-        let groups = [];
-        let groupForm = formDocument.getElementsByClassName("form-group groups")[0];
-        let groupSelections = groupForm.getElementsByClassName("control-group")[0].children;
+    let groups = [];
+    let groupForm = formDocument.getElementsByClassName("form-group groups")[0];
+    let groupSelections = groupForm.getElementsByClassName("control-group")[0].children;
 
-        for (let i = 0; i < groupSelections.length; i++) {
-            let groupCheckbox = groupSelections.item(i).children[0];
-            if (groupCheckbox.checked) {
-                groups.push(dataSetId + "_" + groupCheckbox.value);
-            }
+    for (let i = 0; i < groupSelections.length; i++) {
+        let groupCheckbox = groupSelections.item(i).children[0];
+        if (groupCheckbox.checked) {
+            groups.push(dataSetId + "_" + groupCheckbox.value);
         }
+    }
 
-        return groups;
+    return groups;
 }
 
 function extractTransformations(dataSetId, formDocument) {
-        let apply = [];
-        let transformations = formDocument.getElementsByClassName("transformations-container")[0].children;
-        for (let i = 0; i < transformations.length; i++) {
-            let applyName = extractApplyName(transformations[i]);
-            let applyFunction = extractApplyFunction(transformations[i]);
-            let applyColumn = extractApplyColumn(transformations[i]);
+    let apply = [];
+    let transformations = formDocument.getElementsByClassName("transformations-container")[0].children;
+    for (let i = 0; i < transformations.length; i++) {
+        let applyName = extractApplyName(transformations[i]);
+        let applyFunction = extractApplyFunction(transformations[i]);
+        let applyColumn = extractApplyColumn(transformations[i]);
 
-            let applyFunToCol = {};
-            applyFunToCol[applyFunction] = dataSetId + "_" + applyColumn;
-            let applyFunToColName = {};
-            applyFunToColName[applyName] = applyFunToCol
+        let applyFunToCol = {};
+        applyFunToCol[applyFunction] = dataSetId + "_" + applyColumn;
+        let applyFunToColName = {};
+        applyFunToColName[applyName] = applyFunToCol
 
-            apply.push(applyFunToColName);
-        }
-        return apply;
+        apply.push(applyFunToColName);
+    }
+    return apply;
 }
 
 function extractApplyName(transformation) {
