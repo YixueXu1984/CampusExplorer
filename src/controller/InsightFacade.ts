@@ -31,12 +31,9 @@ export default class InsightFacade implements IInsightFacade {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise((resolve, reject) => {
-            this.dataSets.forEach((dataSet) => {
-                if (dataSet.id === id) {
-                    return reject(new InsightError("Trying to add an id that already exits"));
-                }
-            });
-            if (kind === InsightDatasetKind.Courses) {
+            if (!this.validateDataset(id)) {
+                return reject(new InsightError("Duplicate dataset"));
+            } else if (kind === InsightDatasetKind.Courses) {
                 let addDataSet: AddDataSetCourses = new AddDataSetCourses();
                 let dataSetsId: string[] = [];
                 addDataSet.addDataset(id, content, kind)
@@ -188,5 +185,15 @@ export default class InsightFacade implements IInsightFacade {
                 }
             });
         });
+    }
+
+    private validateDataset(id: string): boolean {
+        let returnValue = true;
+        for (let dataset of this.dataSets) {
+            if (dataset.id === id) {
+                returnValue =  false;
+            }
+        }
+        return returnValue;
     }
 }

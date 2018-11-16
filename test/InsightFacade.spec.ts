@@ -612,6 +612,19 @@ describe("InsightFacade Add/Remove Dataset", function () {
         }
     });
 
+    it("should remove valid dataset 'courses3'", async () => {
+        const id: string = "courses3";
+        let response: string;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.be.deep.equal(id);
+        }
+    });
+
     it("should return valid geolocation for a valid address", async () => {
         let response: any;
 
