@@ -1,12 +1,12 @@
 import Server from "../src/rest/Server";
 import {expect} from "chai";
 import InsightFacade from "../src/controller/InsightFacade";
-import chai = require("chai");
-
-import chaiHttp = require("chai-http");
 import Log from "../src/Util";
 import * as fs from "fs";
 import {InsightDatasetKind} from "../src/controller/IInsightFacade";
+import chai = require("chai");
+
+import chaiHttp = require("chai-http");
 
 describe("Facade D3", function () {
 
@@ -61,6 +61,7 @@ describe("Facade D3", function () {
     // TODO: read your courses and rooms datasets here once!
     let courses = fs.readFileSync("./test/data/courses.zip");
     let rooms = fs.readFileSync("./test/data/rooms.zip");
+    let courses2 = fs.readFileSync("./test/data/courses2.zip");
 
     // Hint on how to test PUT requests
     it("PUT test for courses dataset", function () {
@@ -72,10 +73,34 @@ describe("Facade D3", function () {
                     // some logging here please!
                     Log.trace("PUT courses executed");
                     expect(res.status).to.be.equal(200);
+                    const expectedBody = ["courses"];
+                    expect(res.body).to.deep.equal({result: expectedBody});
                 })
                 .catch(function (err) {
                     // some logging here please!
                     Log.trace(err);
+                });
+        } catch (err) {
+            Log.trace("PUT failed");
+            // and some more logging here!
+        }
+    });
+
+    it("PUT test for courses02 dataset", function () {
+        try {
+            return chai.request(URL)
+                .put("/dataset/courses2/courses")
+                .attach("body", courses2, "courses2.zip")
+                .then(function (res: any) {
+                    // some logging here please!
+                    Log.trace("PUT courses executed: add courses2");
+                    expect(res.status).to.be.equal(200);
+                    const expectedBody = ["courses", "courses2"];
+                    expect(res.body).to.deep.equal({result: expectedBody});
+                })
+                .catch(function (err) {
+                    // some logging here please!
+                    Log.trace(err + " the error occurs here");
                 });
         } catch (err) {
             Log.trace("PUT failed");
@@ -91,6 +116,8 @@ describe("Facade D3", function () {
                 .then(function (res: any) {
                     Log.trace("PUT room executing");
                     expect(res.status).to.be.equal(200);
+                    const expectedBody = ["courses", "courses2", "rooms"];
+                    expect(res.body).to.deep.equal({result: expectedBody});
                 }).catch(function (err) {
                     Log.trace(err);
                 });
@@ -125,7 +152,9 @@ describe("Facade D3", function () {
                 .then(function (res: any) {
                     Log.trace("Dataset List");
                     expect(res.status).to.be.equal(200);
-                    const expectedBody = [{id: "courses", kind: InsightDatasetKind.Courses, numRows: 64612}];
+                    const expectedBody = [{id: "courses", kind: InsightDatasetKind.Courses, numRows: 64612}
+                        , {id: "courses2", kind: InsightDatasetKind.Courses, numRows: 35}
+                        , {id: "rooms", kind: InsightDatasetKind.Rooms, numRows: 364}];
                     expect(res.body).to.deep.equal({result: expectedBody});
                 })
                 .catch(function (err) {

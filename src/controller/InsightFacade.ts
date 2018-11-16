@@ -64,6 +64,8 @@ export default class InsightFacade implements IInsightFacade {
                     .catch((err) => {
                         reject(new InsightError(err));
                     });
+            } else {
+                reject(new InsightError("wrong kind of dataset"));
             }
         });
     }
