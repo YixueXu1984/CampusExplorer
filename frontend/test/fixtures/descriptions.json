@@ -10,5 +10,6 @@
     "query9": "Rooms case",
     "query10": "Empty condition case",
     "query11": "complex room case",
-    "query12": "Rooms with lots of columns and ordering key"
+    "query12": "Rooms with lots of columns and ordering key",
+    "query13": "ordering and selecting column using transformation key"
 }

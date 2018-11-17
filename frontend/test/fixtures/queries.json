@@ -28,7 +28,7 @@
                 },
                 {
                     "GT": {
-                        "courses_avg": 98
+                        "courses_avg": ""
                     }
                 }
             ]
@@ -407,6 +407,37 @@
                     "rooms_type"
                 ]
             }
+        }
+    },
+    "query13": {
+        "WHERE": {
+            "EQ": {
+                "rooms_shortname": "cpsc"
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "numSeats"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": [
+                    "numSeats"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_shortname"
+            ],
+
+            "APPLY": [
+                {
+                    "numSeats": {
+                        "COUNT": "rooms_seats"
+                    }
+                }
+            ]
         }
     }
 }

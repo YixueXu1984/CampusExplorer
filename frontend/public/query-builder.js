@@ -205,6 +205,9 @@ function extractKey(keyElement) {
 
 function extractInput(inputElement) {
     let inputValue = inputElement[0].firstElementChild.value;
+    if (inputValue.toString().trim() === '') {
+        return inputValue;
+    }
     if (isNaN(inputValue)) {
         return inputValue;
     } else {
