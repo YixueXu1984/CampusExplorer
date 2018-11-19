@@ -1,0 +1,32 @@
+{
+        "WHERE": {
+            "GT": {
+                "rooms_seats": 70
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_fullname",
+                "overallAvg"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": [
+                    "overallAvg",
+                    "rooms_fullname"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_fullname"
+            ],
+            "APPLY": [
+                {
+                    "overallAvg": {
+                        "COUNT": "rooms_seats"
+                    }
+                }
+            ]
+        }
+    }

@@ -9,14 +9,3 @@
  */
 
 // TODO: implement!
-document.getElementById("submit-button").onclick = function() {
-    let query = CampusExplorer.buildQuery();
-    CampusExplorer.sendQuery(query)
-        .then((result) => {
-            console.log(result);
-            CampusExplorer.renderResult(result);
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-};
